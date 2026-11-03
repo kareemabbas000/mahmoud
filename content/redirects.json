@@ -1,0 +1,425 @@
+{
+ "note": "Trailing-slash variants are covered by Next.js trailingSlash normalisation (308) before these 301s. \"/\" (old EN home) is handled by language negotiation.",
+ "rules": [
+  {
+   "source": "/ar",
+   "destination": "/ar",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/company-profile",
+   "destination": "/ar/about",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/company-profile",
+   "destination": "/en/about",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/our-services",
+   "destination": "/ar/services",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/our-services",
+   "destination": "/en/services",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/finance-auditing",
+   "destination": "/ar/services/external-audit",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/finance-auditing",
+   "destination": "/en/services/external-audit",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/accounting-services",
+   "destination": "/ar/services/accounting",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/accounting-services",
+   "destination": "/en/services/accounting",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/establishing-companies",
+   "destination": "/ar/services/company-formation",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/establishing-companies",
+   "destination": "/en/services/company-formation",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/feasibility-studies",
+   "destination": "/ar/services/feasibility-studies",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/feasibility-studies",
+   "destination": "/en/services/feasibility-studies",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/project-financing",
+   "destination": "/ar/services/project-finance",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/project-financing",
+   "destination": "/en/services/project-finance",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/tax-services",
+   "destination": "/ar/services/tax",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/tax-services",
+   "destination": "/en/services/tax",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/functional-structure",
+   "destination": "/ar/team",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/functional-structure",
+   "destination": "/en/team",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/mahmoud-al-sheikh",
+   "destination": "/ar/team/mahmoud-al-sheikh",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/mahmoud-al-sheikh",
+   "destination": "/en/team/mahmoud-al-sheikh",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/careers",
+   "destination": "/ar/careers",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/careers",
+   "destination": "/en/careers",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/our-clients",
+   "destination": "/ar/clients",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/our-clients",
+   "destination": "/en/clients",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/faqs",
+   "destination": "/ar/faq",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/faqs",
+   "destination": "/en/faq",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/gallery",
+   "destination": "/ar/gallery",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/gallery",
+   "destination": "/en/gallery",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/contact-us-2",
+   "destination": "/ar/contact",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/contact-us-2",
+   "destination": "/en/contact",
+   "permanent": true,
+   "note": "legacy page"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards-2-2-2-2-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards-2-2-2-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards-2-2-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards-2-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blog/page/2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-3",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-4",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-5",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-6",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover-7",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/counting-the-cost-of-delay-disruption-2",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/counting-the-cost-of-delay-disruption",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/our-team-style-01",
+   "destination": "/ar/team",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/our-team-style-02",
+   "destination": "/ar/team",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/tag/wordpress",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/the-recurring-debate-over-concurrent-delays",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/our-team-style-01",
+   "destination": "/en/team",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/our-team-style-02",
+   "destination": "/en/team",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/blog",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/ar/blog",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo content"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover:suffix(-[0-9-]+)?",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo posts (EN, with numbered variants)"
+  },
+  {
+   "source": "/ar/colombia-gets-a-business-makeover:suffix(-[0-9-]+)?",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo posts (AR, with numbered variants)"
+  },
+  {
+   "source": "/counting-the-cost-of-delay-disruption:suffix(-[0-9-]+)?",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo posts (EN, with numbered variants)"
+  },
+  {
+   "source": "/ar/counting-the-cost-of-delay-disruption:suffix(-[0-9-]+)?",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo posts (AR, with numbered variants)"
+  },
+  {
+   "source": "/the-recurring-debate-over-concurrent-delays:suffix(-[0-9-]+)?",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo posts (EN, with numbered variants)"
+  },
+  {
+   "source": "/ar/the-recurring-debate-over-concurrent-delays:suffix(-[0-9-]+)?",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo posts (AR, with numbered variants)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards:suffix(-[0-9-]+)?",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo posts (EN, with numbered variants)"
+  },
+  {
+   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards:suffix(-[0-9-]+)?",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "theme demo posts (AR, with numbered variants)"
+  },
+  {
+   "source": "/blog/page/:n",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "demo blog pagination"
+  },
+  {
+   "source": "/ar/blog/page/:n",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "demo blog pagination"
+  },
+  {
+   "source": "/tag/:t",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "WP tags"
+  },
+  {
+   "source": "/ar/tag/:t",
+   "destination": "/ar/insights",
+   "permanent": true,
+   "note": "WP tags"
+  },
+  {
+   "source": "/feed",
+   "destination": "/ar/insights/rss.xml",
+   "permanent": true,
+   "note": "WP feed"
+  },
+  {
+   "source": "/wp-content/uploads/2021/03/Mahmoud-Al-Sheikh-CV.pdf",
+   "destination": "/ar/team/mahmoud-al-sheikh",
+   "permanent": true,
+   "note": "personal CV no longer public"
+  },
+  {
+   "source": "/index.php/sitemap-crv-index.xml",
+   "destination": "/sitemap.xml",
+   "permanent": true,
+   "note": "old sitemap ref in robots.txt"
+  }
+ ]
+}
