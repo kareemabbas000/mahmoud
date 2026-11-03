@@ -61,6 +61,22 @@ export const pages: Page[] = [
         },
         layout: "grid",
       }),
+      b("process", {
+        eyebrow: { ar: "منهجية المراجعة", en: "How an audit runs" },
+        title: { ar: "من التخطيط إلى *تقرير مراقب الحسابات*", en: "From planning to the *auditor's report*" },
+        intro: {
+          ar: "نُجري المراجعة طبقًا لمعايير المراجعة المصرية والدولية، في مراحل واضحة يعرفها العميل مسبقًا.",
+          en: "Every audit follows Egyptian and International Standards on Auditing, in clear stages our clients know in advance.",
+        },
+        steps: [
+          { title: { ar: "التخطيط وفهم المنشأة", en: "Planning around the entity" }, text: { ar: "مراجعة اختبارية للسجلات والمستندات وفق إجراءات مخططة في ضوء ظروف المنشأة.", en: "Test examination of records and documents, following procedures planned around the entity's circumstances." } },
+          { title: { ar: "فحص السياسات والتقديرات", en: "Policies and estimates" }, text: { ar: "تقييم المبادئ والسياسات المحاسبية والمخصصات التي تحددها الإدارة بطريق التقدير.", en: "Evaluating accounting principles, policies and the provisions management sets by estimate." } },
+          { title: { ar: "المراجعة الدورية ونظم الرقابة", en: "Interim audit and controls" }, text: { ar: "فحص النظم المحاسبية ونظم الرقابة الداخلية واختبار سلامة تطبيقها خلال العام.", en: "Examining accounting systems and internal controls, and testing how soundly they are applied during the year." } },
+          { title: { ar: "خطاب الإدارة", en: "Management letter" }, text: { ar: "ملاحظاتنا الهامة وتوصياتنا لمعالجتها، بعد مناقشتها مع إدارة المنشأة.", en: "Our significant findings and recommendations, discussed with management first." } },
+          { title: { ar: "المراجعة النهائية", en: "Year-end audit" }, text: { ar: "مطابقة الحسابات الختامية، والتحقق من الأصول والالتزامات، وفحص قائمة الدخل والإفصاحات.", en: "Reconciling final accounts, verifying assets and liabilities, and examining the income statement and disclosures." } },
+          { title: { ar: "تقرير مراقب الحسابات", en: "The auditor's report" }, text: { ar: "تقرير مراقب الحسابات على القوائم المالية في نهاية السنة المالية.", en: "The statutory auditor's report on the financial statements at the end of the financial year." } },
+        ],
+      }),
       b("stats", {
         eyebrow: { ar: "لماذا SCO", en: "Why SCO" },
         title: { ar: "لماذا تختار المكتب الاستشاري المتخصص؟", en: "Why choose the Specialized Consulting Office?" },

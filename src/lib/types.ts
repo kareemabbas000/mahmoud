@@ -51,7 +51,7 @@ export type SiteSettings = {
     og_image: string | null;
     verification: { google?: string; bing?: string; yandex?: string };
   };
-  theme: { default_mode: "system" | "light" | "dark"; numerals_ar: Numerals };
+  theme: { default_mode: "system" | "light" | "dark"; numerals_ar: Numerals; preset: "ledger" | "gold"; hero_3d: boolean };
   header: {
     show_announcement: boolean;
     announcement: L;

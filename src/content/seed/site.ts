@@ -39,7 +39,7 @@ export const settings: SiteSettings = {
     og_image: null,
     verification: {},
   },
-  theme: { default_mode: "system", numerals_ar: "latn" },
+  theme: { default_mode: "system", numerals_ar: "latn", preset: "ledger", hero_3d: true },
   header: {
     show_announcement: false,
     announcement: { ar: "", en: "" },
@@ -65,8 +65,8 @@ export const settings: SiteSettings = {
   },
   floating: { whatsapp: true, call: true },
   stats: {
-    // Legacy values (AR home page). Hidden until SCO confirms them — see docs/OPEN_QUESTIONS.md A1.
-    visible: false,
+    // Figures published on the legacy Arabic home page (editable; EN page showed 5742 for services — OPEN_QUESTIONS A1).
+    visible: true,
     items: [
       { key: "years", value: null, auto_years: true, label: { ar: "عامًا من الخبرة", en: "years of practice" } },
       { key: "clients", value: 590, label: { ar: "عميل", en: "clients" } },
