@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Emph } from "./Section";
+import { HeroScene } from "./HeroScene";
 import { href as h, prettyPhone, waLink } from "@/lib/i18n";
 import type { BlockProps, LinkProp } from "./types";
 import type { L } from "@/lib/types";
@@ -53,10 +54,12 @@ export function Hero({ site, props }: BlockProps<P>) {
   const phone = settings.contact.phones[0];
   const second = props.secondary;
   return (
-    <section data-hero className="relative isolate overflow-hidden bg-deep text-deep-muted">
+    <section data-hero className="hero relative isolate overflow-hidden bg-deep text-deep-muted">
+      {settings.theme.hero_3d !== false && <HeroScene rtl={site.dir === "rtl"} />}
+      <span className="hero-frame" aria-hidden="true" />
       <div data-hero-grid className="ledger-grid absolute -inset-y-24 inset-x-0 -z-10" aria-hidden="true" />
       <div data-hero-glow aria-hidden="true" className="absolute -top-40 end-[-10%] -z-10 size-[40rem] rounded-full bg-[radial-gradient(closest-side,rgb(4_1_159/0.55),transparent)] blur-2xl" />
-      <div className="container-x grid min-h-[min(46rem,calc(100svh-7rem))] items-center gap-10 py-16 lg:grid-cols-12 lg:py-20">
+      <div className="hero-grid container-x grid min-h-[min(46rem,calc(100svh-7rem))] items-center gap-10 py-16 lg:grid-cols-12 lg:py-20">
         <div className="lg:col-span-7" data-hero-copy>
           {props.eyebrow && (
             <p className="eyebrow !text-orange" data-reveal>
@@ -107,7 +110,7 @@ export function Hero({ site, props }: BlockProps<P>) {
             </dl>
           )}
         </div>
-        <div className="relative hidden aspect-square w-full max-w-[34rem] justify-self-center sm:block lg:col-span-5">
+        <div className="hero-svg relative hidden aspect-square w-full max-w-[34rem] justify-self-center transition-opacity duration-1000 sm:block lg:col-span-5">
           <HeroVisual />
         </div>
       </div>

@@ -59,9 +59,9 @@ export default async function SiteLayout({ children, params }: { children: React
   const { t } = site;
 
   return (
-    <html lang={locale} dir={site.dir} className={fontVars} suppressHydrationWarning data-numerals={site.numerals}>
+    <html lang={locale} dir={site.dir} className={fontVars} suppressHydrationWarning data-numerals={site.numerals} data-preset={site.settings.theme.preset ?? "ledger"}>
       <head>
-        <ThemeScript defaultMode={site.settings.theme.default_mode} />
+        <ThemeScript defaultMode={site.settings.theme.default_mode} preset={site.settings.theme.preset} />
         <ConsentDefaults />
         <JsonLd data={organizationLd(site, primary)} />
       </head>

@@ -17,7 +17,7 @@ export function SectionHead({ site, refCode, head, link, align = "split", onDeep
   const intro = site.l(head.intro);
   if (!eyebrow && !title && !intro) return null;
   return (
-    <div className={`mb-12 md:mb-16 ${align === "split" ? "grid gap-6 lg:grid-cols-12" : "grid gap-5"}`}>
+    <div className={`sec-head mb-12 md:mb-16 ${align === "split" ? "grid gap-6 lg:grid-cols-12" : "grid gap-5"}`}>
       <div className={align === "split" ? "lg:col-span-4" : ""}>
         <div className="flex items-center gap-4">
           <span className={`wp-ref ${onDeep ? "!text-deep-muted" : ""}`}>{refCode}</span>

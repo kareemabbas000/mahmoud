@@ -9,11 +9,11 @@ import type { Site } from "@/lib/site";
 export function Mark({ size = 36, animate = false, onDeep = false }: { size?: number; animate?: boolean; onDeep?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="shrink-0">
-      <rect x="4" y="9" width="32" height="32" rx="3" fill="none" stroke={onDeep ? "#a9aeff" : "var(--blue)"} strokeWidth="5" />
+      <rect x="4" y="9" width="32" height="32" rx="3" fill="none" stroke={onDeep ? "var(--mark-frame-deep, #a9aeff)" : "var(--mark-frame, var(--blue))"} strokeWidth="5" />
       <path
         d="M11 25.5 18.5 33 44 6"
         fill="none"
-        stroke="var(--orange)"
+        stroke="var(--mark-tick, var(--orange))"
         strokeWidth="5.5"
         strokeLinecap="round"
         strokeLinejoin="round"

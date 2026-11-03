@@ -114,6 +114,26 @@ export function ScrollScenes() {
           gsap.fromTo(el, { clipPath: "inset(6% 8% 6% 8% round 24px)" }, { clipPath: "inset(0% 0% 0% 0% round 12px)", ease: "none", scrollTrigger: { trigger: el, start: "top 95%", end: "top 45%", scrub: 0.5 } });
         });
 
+        // Pinned horizontal journey (desktop only).
+        const mm = gsap.matchMedia();
+        mm.add("(min-width: 1024px)", () => {
+          gsap.utils.toArray<HTMLElement>("[data-hscroll]").forEach((sec) => {
+            const track = sec.querySelector<HTMLElement>("[data-hscroll-track]");
+            const progress = sec.querySelector<HTMLElement>("[data-hscroll-progress]");
+            if (!track) return;
+            const distance = () => Math.max(0, track.scrollWidth - innerWidth);
+            const tl = gsap.timeline({
+              scrollTrigger: { trigger: sec, start: () => `top ${document.querySelector("header")?.getBoundingClientRect().height ?? 0}px`, end: () => `+=${distance() + innerHeight * 0.4}`, pin: true, scrub: 0.7, invalidateOnRefresh: true, anticipatePin: 1 },
+            });
+            tl.to(track, { x: () => (rtl ? distance() : -distance()), ease: "none" }, 0);
+            if (progress) tl.fromTo(progress, { scaleX: 0 }, { scaleX: 1, ease: "none" }, 0);
+            const cards = track.querySelectorAll(":scope > li");
+            cards.forEach((card, i) => {
+              tl.fromTo(card, { opacity: 0.35, y: 30 }, { opacity: 1, y: 0, ease: "power2.out", duration: 0.2 }, Math.max(0, (i - 1) * 0.16));
+            });
+          });
+        });
+
         // Marquee follows scroll velocity.
         const tracks = gsap.utils.toArray<HTMLElement>(".marquee-track");
         if (tracks.length) {

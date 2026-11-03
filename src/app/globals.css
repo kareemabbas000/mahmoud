@@ -469,3 +469,108 @@
 
 /* Honeypot: invisible and unreachable for people, present for bots. Clipped in place (no off-screen offset that could widen RTL pages). */
 .hp-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }
+
+/* ───────────────────────── 3D hero hooks ───────────────────────── */
+.hero { --scene-primary: #3b3ff5; --scene-accent: #fc4e08; --scene-paper: #f7f8fc; }
+@media (min-width: 768px) {
+  [data-3d="on"] .hero-svg { opacity: 0; }
+}
+.hero-frame { display: none; }
+
+/* ═════════════════════════ PRESET: GOLD / PRIVATE OFFICE ═════════════════════════
+   Same SCO mark in champagne gold; ivory & onyx; centred editorial layout; sharp geometry.
+   Enabled from the panel (Settings → Theme → Preset) or previewed with ?preset=gold. */
+[data-preset="gold"] {
+  --paper: #f6f4ef;
+  --paper-2: #eeeae0;
+  --surface: #fffdf9;
+  --ink: #141310;
+  --text: #26241f;
+  --muted: #655e51;
+  --faint: #9a9282;
+  --rule: #e2dccd;
+  --rule-strong: #c9bfa8;
+  --blue: #141310;          /* primary actions in onyx */
+  --blue-2: #2b2924;
+  --blue-wash: #efe7d6;
+  --orange: #b08d57;        /* gold accent (decorative / large only) */
+  --orange-text: #7d5f2c;   /* gold for text, AA 5.4:1 */
+  --on-blue: #f6f4ef;
+  --on-orange: #141310;
+  --deep: #100f0c;
+  --deep-2: #1a1814;
+  --deep-ink: #f4efe4;
+  --deep-muted: #b9ae98;
+  --deep-rule: rgb(207 174 108 / 0.16);
+  --focus: #b08d57;
+  --mark-frame: #b08d57;
+  --mark-tick: #141310;
+  --mark-frame-deep: #cfae6c;
+}
+[data-preset="gold"][data-theme="dark"] {
+  --paper: #0c0b09;
+  --paper-2: #13110e;
+  --surface: #171511;
+  --ink: #f4efe4;
+  --text: #e6dfd0;
+  --muted: #b2a892;
+  --faint: #7d7566;
+  --rule: #2c2820;
+  --rule-strong: #4a4335;
+  --blue: #dcbf86;
+  --blue-2: #e8d09e;
+  --blue-wash: #241f16;
+  --orange: #cfae6c;
+  --orange-text: #dcbf86;
+  --on-blue: #0c0b09;
+  --on-orange: #0c0b09;
+  --deep: #070605;
+  --deep-2: #12100c;
+  --mark-frame: #cfae6c;
+  --mark-tick: #f4efe4;
+}
+[data-preset="gold"] .hero { --scene-primary: #cfae6c; --scene-accent: #f1dcaa; --scene-paper: #fbf7ee; }
+[data-preset="gold"] .tick-path { stroke: var(--orange); }
+
+/* Layout: centred editorial composition */
+[data-preset="gold"] .btn { border-radius: 2px; letter-spacing: 0.02em; }
+[data-preset="gold"]:lang(en) .btn { text-transform: uppercase; font-size: 0.8125rem; letter-spacing: 0.14em; }
+[data-preset="gold"] .btn-accent { background: var(--orange); color: var(--on-orange); }
+[data-preset="gold"] .input { border-radius: 2px; }
+[data-preset="gold"] .sec-head { display: flex; flex-direction: column; align-items: center; text-align: center; margin-inline: auto; max-width: 54rem; }
+[data-preset="gold"] .sec-head > * { width: 100%; }
+[data-preset="gold"] .sec-head .flex { justify-content: center; }
+[data-preset="gold"] .sec-head h2 { margin-inline: auto; max-width: 24ch; }
+[data-preset="gold"] .sec-head .lede { margin-inline: auto; }
+[data-preset="gold"] .eyebrow::after { content: ""; inline-size: 1.75rem; block-size: 1px; background: currentColor; }
+[data-preset="gold"] .rule-draw::after { background: var(--orange); }
+[data-preset="gold"] .display em { color: var(--orange); font-style: normal; }
+
+/* Hero: centred, framed by a gold hairline with corner marks */
+@media (min-width: 1024px) {
+  [data-preset="gold"] .hero-grid { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  [data-preset="gold"] .hero-grid > :first-child { grid-column: 1 / -1; max-width: 58rem; display: flex; flex-direction: column; align-items: center; }
+  [data-preset="gold"] .hero-grid .lede { margin-inline: auto; }
+  [data-preset="gold"] .hero-grid dl { margin-inline: auto; }
+  [data-preset="gold"] .hero-svg { position: absolute; inset-inline-end: 4%; top: 50%; transform: translateY(-50%); width: 26rem; opacity: 0.25; }
+  [data-preset="gold"] .hero-frame {
+    display: block; position: absolute; inset: 2rem; border: 1px solid rgb(207 174 108 / 0.35); pointer-events: none; z-index: 0;
+  }
+  [data-preset="gold"] .hero-frame::before, [data-preset="gold"] .hero-frame::after {
+    content: ""; position: absolute; inline-size: 2.5rem; block-size: 2.5rem; border: 2px solid #cfae6c;
+  }
+  [data-preset="gold"] .hero-frame::before { inset-block-start: -1px; inset-inline-start: -1px; border-inline-end: 0; border-block-end: 0; }
+  [data-preset="gold"] .hero-frame::after { inset-block-end: -1px; inset-inline-end: -1px; border-inline-start: 0; border-block-start: 0; }
+}
+[data-preset="gold"] .hero .d-hero { font-weight: 500; }
+
+/* Panels & cards get full gold-ruled frames instead of top rules */
+[data-preset="gold"] [data-stagger] > li.border-t { border: 1px solid var(--rule-strong); padding: 1.75rem; }
+[data-preset="gold"] .logo-tile { border-radius: 2px; }
+[data-preset="gold"] .rounded-md, [data-preset="gold"] .rounded-lg, [data-preset="gold"] .rounded-xl { border-radius: 3px; }
+[data-preset="gold"] [data-expand] { background: var(--deep); color: var(--deep-ink); box-shadow: inset 0 0 0 1px rgb(207 174 108 / 0.4); }
+[data-preset="gold"] .ledger-grid {
+  background-image: linear-gradient(var(--deep-rule) 1px, transparent 1px), linear-gradient(90deg, var(--deep-rule) 1px, transparent 1px);
+}
+[data-preset="gold"] [data-hero-glow] { background: radial-gradient(closest-side, rgb(176 141 87 / 0.35), transparent); }
+[data-preset="gold"] #scroll-progress { background: linear-gradient(90deg, #8a6a35, #f1dcaa, #8a6a35); }
