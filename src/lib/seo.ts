@@ -77,6 +77,20 @@ export function organizationLd(site: Site, branch: Branch | null) {
   };
 }
 
+/** WebSite node: names the site per language and ties it to the organization (sitelinks, brand knowledge panel). */
+export function websiteLd(site: Site) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${env.siteUrl}/#website`,
+    url: abs(`/${site.locale}`),
+    name: `${site.settings.brand.short_name} – ${site.l(site.settings.brand.name)}`,
+    alternateName: site.settings.brand.short_name,
+    inLanguage: site.locale,
+    publisher: { "@id": `${env.siteUrl}/#organization` },
+  };
+}
+
 export function breadcrumbLd(items: { name: string; url: string }[]) {
   return {
     "@context": "https://schema.org",

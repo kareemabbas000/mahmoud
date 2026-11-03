@@ -23,6 +23,23 @@ const aboutBody = {
   en: "The Specialized Consulting Office (SCO) was founded in 2005 by a distinguished team of accounting, audit and tax professionals, and quickly grew into a full-service firm. Today our work spans financial and management consulting, human resources, legal services and advice, and the formation of companies, private universities, schools and non-profit organisations (NGOs and foundations). We also lead financial and organisational restructuring, prepare corporate strategic plans and project-financing plans, and act in judicial receiverships and company liquidations.",
 };
 
+const auditProcess = {
+        eyebrow: { ar: "منهجية المراجعة", en: "How an audit runs" },
+        title: { ar: "من التخطيط إلى *تقرير مراقب الحسابات*", en: "From planning to the *auditor's report*" },
+        intro: {
+          ar: "نُجري المراجعة طبقًا لمعايير المراجعة المصرية والدولية، في مراحل واضحة يعرفها العميل مسبقًا.",
+          en: "Every audit follows Egyptian and International Standards on Auditing, in clear stages our clients know in advance.",
+        },
+        steps: [
+          { title: { ar: "التخطيط وفهم المنشأة", en: "Planning around the entity" }, text: { ar: "مراجعة اختبارية للسجلات والمستندات وفق إجراءات مخططة في ضوء ظروف المنشأة.", en: "Test examination of records and documents, following procedures planned around the entity's circumstances." } },
+          { title: { ar: "فحص السياسات والتقديرات", en: "Policies and estimates" }, text: { ar: "تقييم المبادئ والسياسات المحاسبية والمخصصات التي تحددها الإدارة بطريق التقدير.", en: "Evaluating accounting principles, policies and the provisions management sets by estimate." } },
+          { title: { ar: "المراجعة الدورية ونظم الرقابة", en: "Interim audit and controls" }, text: { ar: "فحص النظم المحاسبية ونظم الرقابة الداخلية واختبار سلامة تطبيقها خلال العام.", en: "Examining accounting systems and internal controls, and testing how soundly they are applied during the year." } },
+          { title: { ar: "خطاب الإدارة", en: "Management letter" }, text: { ar: "ملاحظاتنا الهامة وتوصياتنا لمعالجتها، بعد مناقشتها مع إدارة المنشأة.", en: "Our significant findings and recommendations, discussed with management first." } },
+          { title: { ar: "المراجعة النهائية", en: "Year-end audit" }, text: { ar: "مطابقة الحسابات الختامية، والتحقق من الأصول والالتزامات، وفحص قائمة الدخل والإفصاحات.", en: "Reconciling final accounts, verifying assets and liabilities, and examining the income statement and disclosures." } },
+          { title: { ar: "تقرير مراقب الحسابات", en: "The auditor's report" }, text: { ar: "تقرير مراقب الحسابات على القوائم المالية في نهاية السنة المالية.", en: "The statutory auditor's report on the financial statements at the end of the financial year." } },
+        ],
+      };
+
 export const pages: Page[] = [
   {
     slug: "",
@@ -64,22 +81,7 @@ export const pages: Page[] = [
         },
         layout: "grid",
       }),
-      b("process", {
-        eyebrow: { ar: "منهجية المراجعة", en: "How an audit runs" },
-        title: { ar: "من التخطيط إلى *تقرير مراقب الحسابات*", en: "From planning to the *auditor's report*" },
-        intro: {
-          ar: "نُجري المراجعة طبقًا لمعايير المراجعة المصرية والدولية، في مراحل واضحة يعرفها العميل مسبقًا.",
-          en: "Every audit follows Egyptian and International Standards on Auditing, in clear stages our clients know in advance.",
-        },
-        steps: [
-          { title: { ar: "التخطيط وفهم المنشأة", en: "Planning around the entity" }, text: { ar: "مراجعة اختبارية للسجلات والمستندات وفق إجراءات مخططة في ضوء ظروف المنشأة.", en: "Test examination of records and documents, following procedures planned around the entity's circumstances." } },
-          { title: { ar: "فحص السياسات والتقديرات", en: "Policies and estimates" }, text: { ar: "تقييم المبادئ والسياسات المحاسبية والمخصصات التي تحددها الإدارة بطريق التقدير.", en: "Evaluating accounting principles, policies and the provisions management sets by estimate." } },
-          { title: { ar: "المراجعة الدورية ونظم الرقابة", en: "Interim audit and controls" }, text: { ar: "فحص النظم المحاسبية ونظم الرقابة الداخلية واختبار سلامة تطبيقها خلال العام.", en: "Examining accounting systems and internal controls, and testing how soundly they are applied during the year." } },
-          { title: { ar: "خطاب الإدارة", en: "Management letter" }, text: { ar: "ملاحظاتنا الهامة وتوصياتنا لمعالجتها، بعد مناقشتها مع إدارة المنشأة.", en: "Our significant findings and recommendations, discussed with management first." } },
-          { title: { ar: "المراجعة النهائية", en: "Year-end audit" }, text: { ar: "مطابقة الحسابات الختامية، والتحقق من الأصول والالتزامات، وفحص قائمة الدخل والإفصاحات.", en: "Reconciling final accounts, verifying assets and liabilities, and examining the income statement and disclosures." } },
-          { title: { ar: "تقرير مراقب الحسابات", en: "The auditor's report" }, text: { ar: "تقرير مراقب الحسابات على القوائم المالية في نهاية السنة المالية.", en: "The statutory auditor's report on the financial statements at the end of the financial year." } },
-        ],
-      }),
+      b("process", { ...auditProcess, link: { label: { ar: "منهجية المراجعة بالتفصيل", en: "Our audit methodology" }, href: "/methodology" } }),
       b("stats", {
         eyebrow: { ar: "لماذا SCO", en: "Why SCO" },
         title: { ar: "لماذا تختار المكتب الاستشاري المتخصص؟", en: "Why choose the Specialized Consulting Office?" },
@@ -108,6 +110,7 @@ export const pages: Page[] = [
       b("credentials", {
         eyebrow: { ar: "القيد والعضويات", en: "Registrations & memberships" },
         title: { ar: "اعتمادات مهنية موثّقة", en: "Documented professional credentials" },
+        link: { label: { ar: "كل الاعتمادات والعضويات", en: "All credentials and memberships" }, href: "/credentials" },
       }),
       b("gallery", { eyebrow: { ar: "من أنشطتنا", en: "From our activities" }, title: { ar: "لقاءات وفعاليات وشراكات", en: "Meetings, events and partnerships" }, limit: 6, link: { label: { ar: "المعرض كاملًا", en: "Full gallery" }, href: "/gallery" } }),
       b("faq", {
@@ -212,6 +215,38 @@ We would welcome the opportunity to serve as your auditors and business advisers
       header({ ar: "الهيكل الوظيفي", en: "Our people" }, { ar: "فريق يقوده محاسبون قانونيون وخبراء ضرائب", en: "Led by chartered accountants and tax experts" }, { ar: "يُدار كل عميل من خلال فريق متخصص برئاسة شريك ومدير مراجعة.", en: "Every client is served by a dedicated team led by a partner and an audit manager." }),
       b("team", {}),
       b("credentials", { eyebrow: { ar: "القيد والعضويات", en: "Registrations & memberships" }, title: { ar: "اعتمادات مهنية موثّقة", en: "Documented professional credentials" } }),
+      cta(),
+    ],
+  },
+  {
+    slug: "methodology",
+    kind: "system",
+    published: true,
+    title: { ar: "منهجية المراجعة", en: "Audit methodology" },
+    seo: {
+      ar: { title: "منهجية المراجعة: من التخطيط إلى تقرير مراقب الحسابات", description: "مراحل المراجعة لدى المكتب الاستشاري المتخصص طبقًا لمعايير المراجعة المصرية والدولية: التخطيط، فحص السياسات، المراجعة الدورية، خطاب الإدارة، المراجعة النهائية، وتقرير مراقب الحسابات." },
+      en: { title: "Audit methodology: from planning to the auditor's report", description: "How SCO runs an audit under Egyptian and International Standards on Auditing: planning, policies and estimates, interim audit and controls, management letter, year-end audit and the auditor's report." },
+    },
+    blocks: [
+      header({ ar: "منهجية المراجعة", en: "Audit methodology" }, { ar: "مراحل واضحة يعرفها العميل مسبقًا", en: "Clear stages our clients know in advance" }, { ar: "نُجري المراجعة طبقًا لمعايير المراجعة المصرية والدولية، من التخطيط وفهم المنشأة حتى تقرير مراقب الحسابات على القوائم المالية.", en: "Every audit follows Egyptian and International Standards on Auditing, from planning around the entity to the auditor's report on the financial statements." }),
+      b("process", auditProcess),
+      b("services", { eyebrow: { ar: "خدماتنا", en: "What we do" }, title: { ar: "خدمات مرتبطة", en: "Related services" }, layout: "list" }),
+      cta(),
+    ],
+  },
+  {
+    slug: "credentials",
+    kind: "system",
+    published: true,
+    title: { ar: "الاعتمادات والعضويات", en: "Credentials" },
+    seo: {
+      ar: { title: "الاعتمادات المهنية والعضويات", description: "القيد بسجل المحاسبين والمراجعين وعضويات جمعية الضرائب المصرية والجمعية المصرية للمالية العامة والضرائب والجمعية المصرية لحوكمة الشركات." },
+      en: { title: "Professional credentials and memberships", description: "Registration in the Register of Accountants and Auditors and memberships of Egypt's tax, public-finance and corporate-governance associations." },
+    },
+    blocks: [
+      header({ ar: "القيد والعضويات", en: "Registrations & memberships" }, { ar: "اعتمادات مهنية موثّقة", en: "Documented professional credentials" }, { ar: "قيود وعضويات مهنية لقيادة المكتب، بأرقامها وتواريخها.", en: "The professional registrations and memberships held by SCO's leadership, with their numbers and dates." }),
+      b("credentials", {}),
+      b("team", { eyebrow: { ar: "القيادة", en: "Leadership" }, title: { ar: "خبرة يقودها محاسبون قانونيون وخبراء ضرائب", en: "Led by chartered accountants and tax experts" }, link: { label: { ar: "تعرّف على الفريق", en: "Meet the team" }, href: "/team" } }),
       cta(),
     ],
   },

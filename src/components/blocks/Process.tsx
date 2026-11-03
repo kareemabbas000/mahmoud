@@ -1,6 +1,8 @@
+import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
 import { Emph } from "./Section";
-import { num } from "@/lib/i18n";
-import type { BlockProps, HeadProps } from "./types";
+import { href as h, num } from "@/lib/i18n";
+import type { BlockProps, HeadProps, LinkProp } from "./types";
 import type { L } from "@/lib/types";
 
 /** Line icons for the six audit stages: plan, policies, controls, letter, year-end, report. */
@@ -13,7 +15,7 @@ const STEP_ICONS = [
   <g key="rep"><circle cx="16" cy="13" r="9" /><path d="m12 13 3 3 5-6" /><path d="M11 21.5 9 29l7-3 7 3-2-7.5" /></g>,
 ];
 
-type P = HeadProps & { steps?: { title: L; text: L }[] };
+type P = HeadProps & { steps?: { title: L; text: L }[]; link?: LinkProp };
 
 /**
  * The engagement journey as a sticky "deck" scene (desktop): the section is tall, its stage is
@@ -37,6 +39,12 @@ export function Process({ site, props }: BlockProps<P>) {
               <Emph text={site.l(props.title)} />
             </h2>
             {props.intro && <p className="mt-5 max-w-md text-deep-muted">{site.l(props.intro)}</p>}
+            {props.link && (
+              <Link href={h(props.link.href, site.locale)} className="link-arrow mt-5 text-sm !text-[#ffb08a]">
+                {site.l(props.link.label)}
+                <Icon name="arrow" size={16} className="arrow flip-rtl" />
+              </Link>
+            )}
             <div className="steps-count mt-10 hidden items-end gap-4 lg:flex" aria-hidden="true">
               <span data-step-counter className="tnum font-display text-7xl font-semibold leading-none text-orange">{n(1)}</span>
               <span className="tnum pb-2 font-display text-2xl text-deep-muted">/ {n(steps.length)}</span>

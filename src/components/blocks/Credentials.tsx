@@ -1,14 +1,14 @@
 import { Band, SectionHead } from "./Section";
 import { getCertificates } from "@/lib/data";
-import type { BlockProps, HeadProps } from "./types";
+import type { BlockProps, HeadProps, LinkProp } from "./types";
 
 /** Certificate-style cards with a self-drawing tick seal. No tables, no horizontal scroll. */
-export async function Credentials({ site, props }: BlockProps<HeadProps>) {
+export async function Credentials({ site, props }: BlockProps<HeadProps & { link?: LinkProp }>) {
   const certs = await getCertificates();
   if (!certs.length) return null;
   return (
     <Band tone="surface">
-      <SectionHead site={site} head={props} align="center" />
+      <SectionHead site={site} head={props} link={props.link} align="center" />
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-stagger>
         {certs.map((c, i) => (
           <li key={i} data-tilt className="cert-card relative flex gap-5 overflow-hidden rounded-[1.5rem] border border-rule bg-paper p-6">

@@ -16,7 +16,7 @@ import { getBranches, getEnabledLanguages, getTracking } from "@/lib/data";
 import { getSite } from "@/lib/site";
 import { href } from "@/lib/i18n";
 import { env } from "@/lib/env";
-import { organizationLd } from "@/lib/seo";
+import { organizationLd, websiteLd } from "@/lib/seo";
 
 export async function generateStaticParams() {
   return (await getEnabledLanguages()).map((l) => ({ locale: l.code }));
@@ -67,6 +67,7 @@ export default async function SiteLayout({ children, params }: { children: React
         <ThemeScript defaultMode={site.settings.theme.default_mode} preset={site.settings.theme.preset} />
         <ConsentDefaults />
         <JsonLd data={organizationLd(site, primary)} />
+        <JsonLd data={websiteLd(site)} />
       </head>
       <body className="min-h-dvh">
         <div className="aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>

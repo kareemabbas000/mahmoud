@@ -15,6 +15,9 @@ import type { Dict } from "@/lib/i18n";
  */
 const REVALIDATE = 3600;
 
+/** Each deployment gets its own cache keys, so content edited straight in the database shows after a redeploy. */
+const BUILD = process.env.VERCEL_DEPLOYMENT_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+
 function cached<T>(tag: string, fn: () => Promise<T | null>, fallback: () => T, keyParts: string[] = []) {
   return unstable_cache(
     async () => {
@@ -27,7 +30,7 @@ function cached<T>(tag: string, fn: () => Promise<T | null>, fallback: () => T, 
         return fallback();
       }
     },
-    ["sco", tag, ...keyParts],
+    ["sco", BUILD, tag, ...keyParts],
     { tags: ["content", tag], revalidate: REVALIDATE },
   )();
 }

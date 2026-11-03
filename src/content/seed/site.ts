@@ -143,6 +143,8 @@ export const menus: Menu[] = [
           { id: "f1", label: { ar: "من نحن", en: "About SCO" }, href: "/about" },
           { id: "f2", label: { ar: "فريق العمل", en: "Our team" }, href: "/team" },
           { id: "f3", label: { ar: "عملاؤنا", en: "Clients" }, href: "/clients" },
+          { id: "f6", label: { ar: "منهجية المراجعة", en: "Audit methodology" }, href: "/methodology" },
+          { id: "f7", label: { ar: "الاعتمادات والعضويات", en: "Credentials" }, href: "/credentials" },
           { id: "f4", label: { ar: "معرض الصور", en: "Gallery" }, href: "/gallery" },
           { id: "f5", label: { ar: "الوظائف", en: "Careers" }, href: "/careers" },
         ],

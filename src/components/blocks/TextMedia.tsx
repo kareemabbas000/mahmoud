@@ -36,7 +36,7 @@ export function TextMedia({ site, props }: BlockProps<P>) {
           )}
         </div>
         {props.image && (
-          <figure className={`relative lg:col-span-6 ${mediaFirst ? "lg:order-1" : ""}`} data-reveal>
+          <figure className={`relative lg:col-span-6 ${props.collage?.length ? "mb-20 mt-10 sm:my-0" : ""} ${mediaFirst ? "lg:order-1" : ""}`} data-reveal>
             <div aria-hidden="true" className="absolute -inset-3 hidden translate-x-4 translate-y-4 rounded-md border border-blue/30 sm:block rtl:-translate-x-4" />
             <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-paper-2" data-clip>
               {props.video_url ? (
@@ -51,10 +51,10 @@ export function TextMedia({ site, props }: BlockProps<P>) {
               <div
                 key={c.src}
                 data-parallax={i === 0 ? "0.22" : "0.35"}
-                className={`absolute hidden overflow-hidden rounded-md border-4 border-paper shadow-[0_30px_60px_-25px_rgb(11_16_51/0.55)] sm:block ${i === 0 ? "-bottom-14 -start-8 w-[38%] rotate-[-4deg]" : "-top-12 -end-6 w-[30%] rotate-[5deg]"}`}
+                className={`collage-card absolute z-[2] overflow-hidden rounded-xl border-[3px] border-white shadow-[0_24px_50px_-20px_rgb(11_16_51/0.55)] sm:rounded-md sm:border-4 ${i === 0 ? "-bottom-16 start-3 w-[32%] rotate-[-5deg] sm:-bottom-14 sm:-start-8 sm:w-[38%] sm:rotate-[-4deg]" : "-top-9 end-3 w-[30%] rotate-[5deg] sm:-top-12 sm:-end-6"}`}
               >
                 <div className="relative aspect-[4/5]">
-                  <Image src={c.src} alt={site.l(c.alt)} fill sizes="20vw" className="object-cover" />
+                  <Image src={c.src} alt={site.l(c.alt)} fill sizes="(min-width:640px) 20vw, 36vw" className="object-cover" />
                 </div>
               </div>
             ))}
