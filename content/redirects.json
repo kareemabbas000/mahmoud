@@ -1,12 +1,6 @@
 {
- "note": "Trailing-slash variants are covered by Next.js trailingSlash normalisation (308) before these 301s. \"/\" (old EN home) is handled by language negotiation.",
+ "note": "All rules are served as HTTP 301 (next.config.ts). Sources identical to their destination are omitted (the new Arabic URLs keep several legacy paths unchanged, e.g. /ar/gallery, /ar/careers).",
  "rules": [
-  {
-   "source": "/ar",
-   "destination": "/ar",
-   "permanent": true,
-   "note": "legacy page"
-  },
   {
    "source": "/ar/company-profile",
    "destination": "/ar/about",
@@ -128,12 +122,6 @@
    "note": "legacy page"
   },
   {
-   "source": "/ar/careers",
-   "destination": "/ar/careers",
-   "permanent": true,
-   "note": "legacy page"
-  },
-  {
    "source": "/careers",
    "destination": "/en/careers",
    "permanent": true,
@@ -160,12 +148,6 @@
   {
    "source": "/faqs",
    "destination": "/en/faq",
-   "permanent": true,
-   "note": "legacy page"
-  },
-  {
-   "source": "/ar/gallery",
-   "destination": "/ar/gallery",
    "permanent": true,
    "note": "legacy page"
   },
@@ -332,54 +314,6 @@
    "note": "theme demo content"
   },
   {
-   "source": "/colombia-gets-a-business-makeover:suffix(-[0-9-]+)?",
-   "destination": "/en/insights",
-   "permanent": true,
-   "note": "theme demo posts (EN, with numbered variants)"
-  },
-  {
-   "source": "/ar/colombia-gets-a-business-makeover:suffix(-[0-9-]+)?",
-   "destination": "/ar/insights",
-   "permanent": true,
-   "note": "theme demo posts (AR, with numbered variants)"
-  },
-  {
-   "source": "/counting-the-cost-of-delay-disruption:suffix(-[0-9-]+)?",
-   "destination": "/en/insights",
-   "permanent": true,
-   "note": "theme demo posts (EN, with numbered variants)"
-  },
-  {
-   "source": "/ar/counting-the-cost-of-delay-disruption:suffix(-[0-9-]+)?",
-   "destination": "/ar/insights",
-   "permanent": true,
-   "note": "theme demo posts (AR, with numbered variants)"
-  },
-  {
-   "source": "/the-recurring-debate-over-concurrent-delays:suffix(-[0-9-]+)?",
-   "destination": "/en/insights",
-   "permanent": true,
-   "note": "theme demo posts (EN, with numbered variants)"
-  },
-  {
-   "source": "/ar/the-recurring-debate-over-concurrent-delays:suffix(-[0-9-]+)?",
-   "destination": "/ar/insights",
-   "permanent": true,
-   "note": "theme demo posts (AR, with numbered variants)"
-  },
-  {
-   "source": "/blake-morgan-in-running-for-conveyancer-awards:suffix(-[0-9-]+)?",
-   "destination": "/en/insights",
-   "permanent": true,
-   "note": "theme demo posts (EN, with numbered variants)"
-  },
-  {
-   "source": "/ar/blake-morgan-in-running-for-conveyancer-awards:suffix(-[0-9-]+)?",
-   "destination": "/ar/insights",
-   "permanent": true,
-   "note": "theme demo posts (AR, with numbered variants)"
-  },
-  {
    "source": "/blog/page/:n",
    "destination": "/en/insights",
    "permanent": true,
@@ -420,6 +354,102 @@
    "destination": "/sitemap.xml",
    "permanent": true,
    "note": "old sitemap ref in robots.txt"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards-2-2-2-2-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards-2-2-2-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards-2-2-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards-2-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/blake-morgan-in-running-for-conveyancer-awards",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-3",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-4",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-5",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-6",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover-7",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/colombia-gets-a-business-makeover",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/counting-the-cost-of-delay-disruption-2",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/counting-the-cost-of-delay-disruption",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
+  },
+  {
+   "source": "/the-recurring-debate-over-concurrent-delays",
+   "destination": "/en/insights",
+   "permanent": true,
+   "note": "theme demo content (EN variant)"
   }
  ]
 }

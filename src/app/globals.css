@@ -1,0 +1,471 @@
+@import "tailwindcss";
+
+/* Dark mode follows the resolved data-theme on <html> (set before paint by the theme script). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ───────────────────────── Tokens ─────────────────────────
+   Concept: calm authority on an architectural ledger grid.
+   Blue = authority (headings, links, primary). Orange = the audit tick (one accent, used sparingly). */
+:root {
+  --paper: #f5f6fa;
+  --paper-2: #eceef5;
+  --surface: #ffffff;
+  --ink: #0b1033;
+  --text: #1a1f3d;
+  --muted: #525874;
+  --faint: #8a90ad;
+  --rule: #dadde9;
+  --rule-strong: #b9bed3;
+  --blue: #04019f;
+  --blue-2: #1a1cc4;
+  --blue-wash: #e8e9fb;
+  --orange: #fc4e08;
+  --orange-text: #c23a00;
+  --on-blue: #ffffff;
+  --on-orange: #0b1033;
+  --deep: #0b1033; /* dark bands (hero, footer) stay dark in both themes */
+  --deep-2: #121845;
+  --deep-ink: #f2f3fa;
+  --deep-muted: #a1a7c6;
+  --deep-rule: rgb(169 174 255 / 0.14);
+  --success: #0f7a4a;
+  --danger: #b42318;
+  --focus: #fc4e08;
+  --shadow: 0 1px 2px rgb(11 16 51 / 0.06), 0 8px 24px -12px rgb(11 16 51 / 0.18);
+  --display-scale: 1;
+  --f-display: var(--font-markazi), "Amiri", Georgia, serif;
+  --f-sans: var(--font-plex-arabic), var(--font-plex), Tahoma, system-ui, sans-serif;
+  --f-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --paper: #070a1c;
+  --paper-2: #0b1028;
+  --surface: #0e1330;
+  --ink: #f2f3fa;
+  --text: #e4e6f2;
+  --muted: #a1a7c6;
+  --faint: #6d7395;
+  --rule: #232a4f;
+  --rule-strong: #39416e;
+  --blue: #a9aeff;
+  --blue-2: #c4c7ff;
+  --blue-wash: #151b45;
+  --orange: #ff6a2b;
+  --orange-text: #ff8a55;
+  --on-blue: #070a1c;
+  --on-orange: #070a1c;
+  --deep: #03051a;
+  --deep-2: #0a0f2e;
+  --deep-ink: #f2f3fa;
+  --deep-muted: #a1a7c6;
+  --deep-rule: rgb(169 174 255 / 0.1);
+  --success: #4ade80;
+  --danger: #ff8a80;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+/* Arabic Naskh runs optically smaller than Latin at the same size. */
+:lang(ar) {
+  --display-scale: 1.12;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-blue: var(--blue);
+  --color-blue-2: var(--blue-2);
+  --color-blue-wash: var(--blue-wash);
+  --color-orange: var(--orange);
+  --color-orange-text: var(--orange-text);
+  --color-on-blue: var(--on-blue);
+  --color-on-orange: var(--on-orange);
+  --color-deep: var(--deep);
+  --color-deep-2: var(--deep-2);
+  --color-deep-ink: var(--deep-ink);
+  --color-deep-muted: var(--deep-muted);
+  --color-deep-rule: var(--deep-rule);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-display: var(--f-display);
+  --font-sans: var(--f-sans);
+  --font-mono: var(--f-mono);
+  --shadow-soft: var(--shadow);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+/* Latin text prefers Plex Sans; Arabic prefers Plex Sans Arabic. */
+:root:not(:lang(ar)) {
+  --f-sans: var(--font-plex), var(--font-plex-arabic), system-ui, "Segoe UI", sans-serif;
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 6rem;
+  }
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--f-sans);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  :lang(ar) body,
+  body:lang(ar) {
+    font-size: 1.125rem;
+    line-height: 1.85;
+    letter-spacing: 0 !important;
+  }
+  :lang(ar) * {
+    letter-spacing: 0 !important; /* never track Arabic: it breaks joined letterforms */
+    font-style: normal; /* no faux italics on Arabic */
+  }
+  h1, h2, h3, h4 {
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  ::selection {
+    background: var(--orange);
+    color: var(--on-orange);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  img, svg, video {
+    max-width: 100%;
+  }
+  bdi, .ltr {
+    unicode-bidi: isolate;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+/* ───────────────────────── Components ───────────────────────── */
+@layer components {
+  .container-x {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: max(1rem, env(safe-area-inset-left, 0px));
+  }
+  @media (min-width: 768px) {
+    .container-x { padding-inline: 2rem; }
+  }
+  @media (min-width: 1280px) {
+    .container-x { padding-inline: 2.5rem; }
+  }
+
+  /* Display type: Markazi Naskh for both scripts. */
+  .display {
+    font-family: var(--f-display);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+  :lang(ar) .display { line-height: 1.38; }
+  .d-hero { font-size: calc(clamp(2.6rem, 5.6vw, 5.25rem) * var(--display-scale)); }
+  .d-1 { font-size: calc(clamp(2.25rem, 4.4vw, 4rem) * var(--display-scale)); }
+  .d-2 { font-size: calc(clamp(1.9rem, 3.2vw, 3rem) * var(--display-scale)); }
+  .d-3 { font-size: calc(clamp(1.5rem, 2.2vw, 2.1rem) * var(--display-scale)); }
+  .d-4 { font-size: calc(1.4rem * var(--display-scale)); }
+  .display em, .accent-em em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  /* Working-paper reference label, e.g. "A·02". Audit files index every schedule this way. */
+  .wp-ref {
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--faint);
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--orange-text);
+  }
+  :lang(en) .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+  }
+  .eyebrow::before {
+    content: "";
+    inline-size: 1.75rem;
+    block-size: 1px;
+    background: currentColor;
+  }
+
+  .lede {
+    font-size: 1.1875rem;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  :lang(ar) .lede { font-size: 1.25rem; line-height: 1.95; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    min-height: 3rem;
+    padding-inline: 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1;
+    border: 1px solid transparent;
+    transition: transform 0.25s var(--ease-out-quint), background-color 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: var(--blue); color: var(--on-blue); }
+  .btn-primary:hover { background: var(--blue-2); box-shadow: 0 10px 24px -12px var(--blue); }
+  .btn-accent { background: var(--orange); color: var(--on-orange); }
+  .btn-accent:hover { box-shadow: 0 10px 24px -10px var(--orange); }
+  .btn-ghost { border-color: var(--rule-strong); color: var(--ink); background: transparent; }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-on-deep { border-color: rgb(242 243 250 / 0.3); color: var(--deep-ink); }
+  .btn-on-deep:hover { border-color: var(--deep-ink); }
+  .btn[disabled] { opacity: 0.6; pointer-events: none; }
+  .btn .arrow { transition: transform 0.3s var(--ease-out-quint); }
+  .btn:hover .arrow, .link-arrow:hover .arrow { transform: translateX(4px); }
+  [dir="rtl"] .btn:hover .arrow, [dir="rtl"] .link-arrow:hover .arrow { transform: translateX(-4px); }
+  .flip-rtl { }
+  [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .link-u {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s var(--ease-out-quint);
+  }
+  [dir="ltr"] .link-u { background-position: 0 100%; }
+  .link-u:hover { background-size: 100% 1px; }
+
+  /* Ledger rule that draws from the reading start edge. */
+  .rule-draw {
+    position: relative;
+    block-size: 1px;
+    background: var(--rule);
+    overflow: hidden;
+  }
+  .rule-draw::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    background: var(--ink);
+    transform-origin: left;
+    transform: scaleX(var(--p, 1));
+  }
+  [dir="rtl"] .rule-draw::after { transform-origin: right; }
+
+  /* Dotted leader, as on a financial schedule. */
+  .leader {
+    flex: 1;
+    min-inline-size: 1.5rem;
+    border-block-end: 1px dotted var(--rule-strong);
+    transform: translateY(-0.35em);
+  }
+
+  /* Prose for rich text */
+  .prose-sco {
+    max-width: 70ch;
+    color: var(--text);
+  }
+  .prose-sco > * + * { margin-block-start: 1.1em; }
+  .prose-sco h2 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(1.85rem * var(--display-scale));
+    line-height: 1.25;
+    margin-block-start: 2.2em;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--rule);
+  }
+  .prose-sco h3 {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-block-start: 1.8em;
+    color: var(--ink);
+  }
+  .prose-sco h2:first-child, .prose-sco h3:first-child { margin-block-start: 0; }
+  .prose-sco ul, .prose-sco ol { padding-inline-start: 0; list-style: none; }
+  .prose-sco li { position: relative; padding-inline-start: 1.75rem; }
+  .prose-sco li + li { margin-block-start: 0.6em; }
+  .prose-sco ul > li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.15rem;
+    inset-block-start: 0.72em;
+    inline-size: 0.7rem;
+    block-size: 1px;
+    background: var(--orange);
+  }
+  .prose-sco ol { counter-reset: n; }
+  .prose-sco ol > li { counter-increment: n; }
+  .prose-sco ol > li::before {
+    content: counter(n);
+    position: absolute;
+    inset-inline-start: 0;
+    font-family: var(--f-mono);
+    font-size: 0.8rem;
+    color: var(--orange-text);
+    inset-block-start: 0.25em;
+  }
+  .prose-sco strong { color: var(--ink); font-weight: 600; }
+  .prose-sco a { color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
+  .prose-sco blockquote, .prose-sco .callout {
+    border-inline-start: 2px solid var(--orange);
+    background: var(--paper-2);
+    padding: 1rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+  }
+  [dir="rtl"] .prose-sco blockquote, [dir="rtl"] .prose-sco .callout { border-radius: 6px 0 0 6px; }
+  .prose-sco figure img { border-radius: 6px; }
+  .prose-sco figcaption { font-size: 0.875rem; color: var(--muted); margin-block-start: 0.5rem; }
+  .prose-sco table { width: 100%; border-collapse: collapse; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+  .prose-sco th, .prose-sco td { text-align: start; padding: 0.6rem 0.75rem; border-block-end: 1px solid var(--rule); }
+  .prose-sco th { color: var(--muted); font-weight: 600; font-size: 0.85rem; }
+  .prose-sco .table-wrap { overflow-x: auto; }
+  .prose-sco iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 6px; }
+
+  /* Form fields */
+  .field { display: grid; gap: 0.4rem; }
+  .field label, .field .label { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+  .input {
+    inline-size: 100%;
+    min-block-size: 3rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input:hover { border-color: var(--faint); }
+  .input:focus-visible { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-wash); }
+  .input[aria-invalid="true"] { border-color: var(--danger); }
+  textarea.input { min-block-size: 8rem; resize: vertical; }
+  .input-ltr { direction: ltr; text-align: start; }
+  [dir="rtl"] .input-ltr { text-align: right; }
+  .field-error { font-size: 0.85rem; color: var(--danger); }
+  .field-hint { font-size: 0.85rem; color: var(--muted); }
+
+  /* Ledger grid backdrop (decorative). */
+  .ledger-grid {
+    background-image:
+      linear-gradient(var(--deep-rule) 1px, transparent 1px),
+      linear-gradient(90deg, var(--deep-rule) 1px, transparent 1px);
+    background-size: 100% 3rem, calc(100% / 12) 100%;
+  }
+  .paper-grid {
+    background-image: linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+    background-size: calc(100% / 12) 100%;
+    background-position: center;
+  }
+
+  /* Client logo: greyscale → colour on hover/focus. */
+  .logo-mono {
+    filter: grayscale(1) contrast(1.05);
+    opacity: 0.72;
+    transition: filter 0.4s, opacity 0.4s;
+  }
+  .logo-mono:hover, .logo-mono:focus-visible, a:focus-visible > .logo-mono, a:hover > .logo-mono {
+    filter: none;
+    opacity: 1;
+  }
+  [data-theme="dark"] .logo-tile { background: #f2f3fa; }
+}
+
+/* ───────────────────────── Motion ───────────────────────── */
+@keyframes tick-draw { from { stroke-dashoffset: var(--len, 120); } to { stroke-dashoffset: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes marquee-rtl { from { transform: translateX(0); } to { transform: translateX(50%); } }
+
+/* Content is visible at rest; JS adds .is-armed only when motion is allowed, then reveals. */
+.reveal-armed [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(18px); }
+[data-reveal] { transition: opacity 0.9s var(--ease-out-quint), transform 0.9s var(--ease-out-quint); transition-delay: var(--d, 0ms); }
+.reveal-armed .split-word { display: inline-block; opacity: 0; transform: translateY(0.4em); transition: opacity 0.7s var(--ease-out-quint), transform 0.7s var(--ease-out-quint); transition-delay: calc(var(--i) * 45ms + var(--d, 0ms)); }
+.reveal-armed .is-in .split-word, .reveal-armed .split-word.is-in { opacity: 1; transform: none; }
+
+.marquee-track { animation: marquee 48s linear infinite; }
+[dir="rtl"] .marquee-track { animation-name: marquee-rtl; }
+.marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
+
+.tick-path { stroke-dasharray: var(--len, 120); stroke-dashoffset: 0; }
+.motion-ok .tick-path.animate { animation: tick-draw 1.1s var(--ease-in-out-expo) var(--d, 0.5s) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee-track { animation: none !important; }
+}
+
+/* View transitions between pages (progressive enhancement). */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.22s; }
+
+/* Hero choreography: sheets settle in sequence, the ledger line draws, then the tick. */
+@keyframes sheet-in { from { opacity: 0; transform: translateY(28px) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+@keyframes line-draw { from { stroke-dashoffset: 700; } to { stroke-dashoffset: 0; } }
+.hero-ledger { stroke-dasharray: 700; }
+.motion-ok .hero-sheet { animation: sheet-in 1.1s var(--ease-out-quint) both; transform-box: fill-box; }
+.motion-ok .hero-sheet-3 { animation-delay: 0.05s; }
+.motion-ok .hero-sheet-2 { animation-delay: 0.18s; }
+.motion-ok .hero-sheet-1 { animation-delay: 0.32s; }
+.motion-ok .hero-ledger { animation: line-draw 2.4s var(--ease-in-out-expo) 0.2s both; }
+
+/* Honeypot: invisible and unreachable for people, present for bots. Clipped in place (no off-screen offset that could widen RTL pages). */
+.hp-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }
