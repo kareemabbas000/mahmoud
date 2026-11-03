@@ -2,40 +2,39 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Emph } from "./Section";
-import { HeroScene } from "./HeroScene";
-import { getClients } from "@/lib/data";
+import { HeroStage } from "./HeroStage";
+import { getClients, getServices } from "@/lib/data";
 import { href as h, prettyPhone, waLink } from "@/lib/i18n";
 import type { BlockProps, LinkProp } from "./types";
 import type { L } from "@/lib/types";
 
 type P = { eyebrow?: L; title?: L; subtitle?: L; primary?: LinkProp; secondary?: LinkProp; show_contacts?: boolean };
 
-/** Cinematic, centred opening: light-cone + live 3D scene behind a luminous headline, trust row of client marks below. */
+/** Opening: headline and actions beside a CSS-3D "stamped report" scene; trust row of client marks below. */
 export async function Hero({ site, props }: BlockProps<P>) {
   const { settings, locale, t } = site;
   const phone = settings.contact.phones[0];
   const second = props.secondary;
-  const logos = (await getClients()).filter((c) => c.featured && c.logo).slice(0, 8);
+  const [clients, services] = await Promise.all([getClients(), getServices()]);
+  const logos = clients.filter((c) => c.featured && c.logo).slice(0, 8);
+  const ar = locale === "ar";
+  const chips = [
+    { big: String(settings.brand.founded_year), small: ar ? "منذ عام" : "Since" },
+    { big: "21145", small: t("credentials.reg_no") },
+    ...(services.length ? [{ big: String(services.length), small: ar ? "خدمة متخصصة" : "specialist services" }] : []),
+  ];
   return (
     <section data-hero className="hero relative isolate overflow-hidden">
-      {settings.theme.hero_3d !== false && <HeroScene rtl={site.dir === "rtl"} />}
       <div aria-hidden="true" className="hero-cone pointer-events-none absolute inset-x-0 top-0 -z-10 h-full" />
       <div data-hero-grid className="ledger-grid pointer-events-none absolute inset-0 -z-10 opacity-60" aria-hidden="true" />
-      <div className="container-x relative grid min-h-[min(52rem,calc(100svh-6rem))] items-center gap-8 pb-10 pt-10 lg:grid-cols-12 lg:pt-16">
-        <div className="hero-mark-fallback mx-auto lg:hidden" aria-hidden="true">
-          <svg viewBox="0 0 48 48" className="size-full">
-            <rect x="4" y="9" width="32" height="32" rx="3" fill="none" stroke="url(#hmf)" strokeWidth="5" />
-            <path d="M11 25.5 18.5 33 44 6" fill="none" stroke="#ff6a2b" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" className="tick-path animate" style={{ ["--len" as string]: 56, ["--d" as string]: "0.4s" } as React.CSSProperties} />
-            <defs><linearGradient id="hmf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6d75ff" /><stop offset="1" stopColor="#04019f" /></linearGradient></defs>
-          </svg>
-        </div>
-      <div className="flex flex-col items-center text-center lg:col-span-6 lg:items-start lg:text-start" data-hero-copy>
-        {props.eyebrow && (
-          <p className="eyebrow" data-reveal>
-            {site.l(props.eyebrow)}
-          </p>
+      <div className="container-x relative grid min-h-[min(50rem,calc(100svh-6rem))] items-center gap-6 pb-10 pt-6 lg:grid-cols-12 lg:gap-10 lg:pt-12">
+        {settings.theme.hero_3d !== false && (
+          <div className="order-first lg:order-none lg:col-span-6 lg:col-start-7 lg:row-start-1">
+            <HeroStage chips={chips} seal={ar ? "المكتب الاستشاري المتخصص • مراجعة • ضرائب • " : "SPECIALIZED CONSULTING OFFICE • AUDIT • TAX • "} ar={ar} />
+          </div>
         )}
-        <h1 className="display d-hero mt-6 max-w-[16ch]" data-split>
+      <div className="flex flex-col items-center text-center lg:col-span-6 lg:col-start-1 lg:row-start-1 lg:items-start lg:text-start" data-hero-copy>
+        <h1 className="display d-hero hero-title max-w-[16ch]" data-split>
           <Emph text={site.l(props.title)} />
         </h1>
         {props.subtitle && (

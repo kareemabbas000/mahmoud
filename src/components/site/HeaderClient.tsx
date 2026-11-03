@@ -111,14 +111,10 @@ export function HeaderClient(p: Props) {
   };
 
   return (
-    <header
-      className={`sticky top-0 z-40 border-b transition-[background-color,border-color,box-shadow] duration-300 ${
-        scrolled || open ? "border-rule bg-paper/90 shadow-[0_1px_0_var(--rule)] backdrop-blur-xl" : "border-transparent bg-paper"
-      }`}
-      style={{ top: "env(safe-area-inset-top, 0px)" }}
-    >
+    <>
+    <header className={`site-header sticky top-0 z-40 ${scrolled ? "is-scrolled" : ""} ${open ? "is-open" : ""}`}>
       {/* Utility row */}
-      <div className="hidden border-b border-rule md:block">
+      <div className="utility-row hidden md:block">
         <div className="container-x flex h-9 items-center justify-between text-[0.8125rem] text-muted">
           <div className="flex items-center gap-6">
             {p.phone && (
@@ -160,7 +156,7 @@ export function HeaderClient(p: Props) {
       </div>
 
       {/* Main row */}
-      <div className="container-x flex h-[4.5rem] items-center justify-between gap-6">
+      <div className="nav-bar flex items-center justify-between gap-3 lg:gap-6">
         <Link href={`/${p.locale}`} className="shrink-0" aria-label="SCO">
           {p.logo}
         </Link>
@@ -206,13 +202,13 @@ export function HeaderClient(p: Props) {
           <span className="md:hidden">{p.showTheme && <ThemeToggle labels={p.labels} />}</span>
           <button
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-full border border-rule text-ink lg:hidden"
+            className={`burger lg:hidden ${open ? "is-open" : ""}`}
             aria-expanded={open}
             aria-controls={`${menuId}-mobile`}
             aria-label={open ? p.labels.close : p.labels.open}
             onClick={() => setOpen((o) => !o)}
           >
-            <Icon name={open ? "close" : "menu"} size={20} />
+            <span /><span /><span />
           </button>
         </div>
       </div>
@@ -254,56 +250,63 @@ export function HeaderClient(p: Props) {
           </div>
         ))}
 
-      {/* Mobile menu */}
-      <div
-        id={`${menuId}-mobile`}
-        hidden={!open}
-        className="fixed inset-x-0 bottom-0 top-[4.5rem] overflow-y-auto bg-paper lg:hidden"
-        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))" }}
-      >
-        <nav aria-label={p.labels.nav} className="container-x py-6">
-          <ul>
-            {p.items.map((it, i) => (
-              <li key={it.id} className="border-b border-rule">
-                <Link href={it.href} className="flex items-baseline gap-4 py-4" aria-current={isActive(it.href) ? "page" : undefined}>
-                  <span className="wp-ref w-8">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="display d-4 flex-1">{it.label}</span>
-                </Link>
-                {it.children && (
-                  <ul className="mb-4 ms-12 grid gap-1">
-                    {it.children.map((c) => (
-                      <li key={c.id}>
-                        <Link href={c.href} className="block py-1.5 text-muted hover:text-ink">
-                          {c.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-8 grid gap-4">
+    </header>
+
+      {/* Mobile menu: a full-screen sheet outside the header (the header's glass would otherwise trap a fixed child) */}
+      <div id={`${menuId}-mobile`} className={`m-sheet lg:hidden ${open ? "is-open" : ""}`} aria-hidden={!open} inert={!open}>
+        <button type="button" className="m-sheet-scrim" tabIndex={-1} aria-label={p.labels.close} onClick={() => setOpen(false)} />
+        <div className="m-sheet-panel" data-lenis-prevent>
+          <nav aria-label={p.labels.nav}>
+            <ul className="grid gap-1">
+              {p.items.map((it, i) => (
+                <li key={it.id} style={{ ["--i" as string]: i } as React.CSSProperties} className="m-item">
+                  <Link href={it.href} onClick={() => setOpen(false)} className={`m-link ${isActive(it.href) ? "is-active" : ""}`} aria-current={isActive(it.href) ? "page" : undefined}>
+                    <span className="flex-1">{it.label}</span>
+                    <Icon name="arrow" size={18} className="flip-rtl opacity-50" />
+                  </Link>
+                  {it.children && (
+                    <ul className="m-subs">
+                      {it.children.map((c) => (
+                        <li key={c.id}>
+                          <Link href={c.href} onClick={() => setOpen(false)}>{c.label}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="m-foot" style={{ ["--i" as string]: p.items.length } as React.CSSProperties}>
             {p.cta && (
-              <Link href={p.cta.href} className="btn btn-primary w-full">
+              <Link href={p.cta.href} onClick={() => setOpen(false)} className="btn btn-accent w-full">
                 {p.cta.label}
+                <Icon name="arrow" size={16} className="arrow flip-rtl" />
               </Link>
             )}
-            {p.phone && (
-              <a href={`tel:${p.phone.tel}`} className="btn btn-ghost w-full">
-                <Icon name="phone" size={16} />
-                <bdi dir="ltr">{p.phone.display}</bdi>
-              </a>
-            )}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {p.phone && (
+                <a href={`tel:${p.phone.tel}`} className="m-quick">
+                  <Icon name="phone" size={16} />
+                  <bdi dir="ltr">{p.phone.display}</bdi>
+                </a>
+              )}
+              {p.email && (
+                <a href={`mailto:${p.email}`} className="m-quick">
+                  <Icon name="mail" size={16} />
+                  <bdi dir="ltr" className="truncate">{p.email}</bdi>
+                </a>
+              )}
+            </div>
             {p.showLang && p.langs.length > 1 && (
-              <div className="flex justify-center gap-2 pt-2">
+              <div className="mt-4 flex justify-center gap-2">
                 {p.langs.map((l) => (
                   <Link
                     key={l.code}
                     href={swapLocale(pathname, p.locale, l.code)}
                     hrefLang={l.code}
                     lang={l.code}
-                    className={`rounded-full border px-4 py-2 text-sm ${l.code === p.locale ? "border-ink text-ink" : "border-rule text-muted"}`}
+                    className={`rounded-full px-4 py-1.5 text-sm ${l.code === p.locale ? "bg-ink text-paper" : "text-muted shadow-[inset_0_0_0_1px_var(--rule-strong)]"}`}
                     onClick={() => {
                       document.cookie = `NEXT_LOCALE=${l.code};path=/;max-age=31536000;samesite=lax`;
                     }}
@@ -314,8 +317,8 @@ export function HeaderClient(p: Props) {
               </div>
             )}
           </div>
-        </nav>
+        </div>
       </div>
-    </header>
+    </>
   );
 }

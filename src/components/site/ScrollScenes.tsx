@@ -63,8 +63,8 @@ export function ScrollScenes() {
           if (s3) gsap.to(s3, { y: -140, x: 40 * dir, rotate: 12 * dir, ease: "none", scrollTrigger: st });
           const grid = hero.querySelector("[data-hero-grid]");
           if (grid) gsap.to(grid, { yPercent: 18, ease: "none", scrollTrigger: st });
-          const copy = hero.querySelector("[data-hero-copy]");
-          if (copy) gsap.to(copy, { y: 80, opacity: 0.25, ease: "none", scrollTrigger: st });
+          const stage = hero.querySelector("[data-hstage]");
+          if (stage) gsap.to(stage, { y: -50, scale: 0.96, ease: "none", scrollTrigger: st });
           const glow = hero.querySelector("[data-hero-glow]");
           if (glow) gsap.to(glow, { scale: 1.35, opacity: 0.4, ease: "none", scrollTrigger: st });
         });

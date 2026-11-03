@@ -157,8 +157,10 @@ export function ConsentManager({ tracking, labels, privacyHref }: { tracking: Pu
       if (c.analytics) window.clarity?.("event", `sco_${event}`);
     };
     const c = readConsent();
+    // Ask only when something would actually be loaded; with no trackers configured there is nothing to consent to.
+    const needed = Object.values(tracking).some((v) => typeof v === "string" && v.trim() !== "");
     if (c) apply(c, tracking);
-    else setOpen(true);
+    else if (needed) setOpen(true);
     const reopen = () => {
       setDraft(readConsent() ?? { analytics: false, marketing: false });
       setCustom(true);
@@ -184,42 +186,38 @@ export function ConsentManager({ tracking, labels, privacyHref }: { tracking: Pu
       role="dialog"
       aria-modal="false"
       aria-labelledby="consent-title"
-      className="fixed inset-x-0 bottom-0 z-50 p-3 sm:p-5"
-      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))" }}
+      className="consent-pop fixed inset-x-3 z-50 mx-auto max-w-md sm:inset-x-auto sm:start-5"
+      style={{ bottom: "max(5rem, calc(env(safe-area-inset-bottom, 0px) + 4.5rem))" }}
     >
-      <div className="mx-auto max-w-3xl rounded-xl border border-rule bg-surface p-5 shadow-soft sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-          <div className="flex-1">
-            <h2 id="consent-title" className="font-semibold text-ink">{labels.title}</h2>
-            <p className="mt-1 text-sm text-muted">
-              {labels.text}{" "}
-              <a href={privacyHref} className="text-blue underline underline-offset-2">{labels.policy}</a>
-            </p>
-            {custom && (
-              <fieldset className="mt-4 grid gap-3 text-sm">
-                <label className="flex items-center gap-3 text-muted">
-                  <input type="checkbox" checked disabled className="size-4" /> {labels.necessary}
-                </label>
-                <label className="flex items-center gap-3 text-ink">
-                  <input type="checkbox" className="size-4 accent-[var(--blue)]" checked={draft.analytics} onChange={(e) => setDraft({ ...draft, analytics: e.target.checked })} /> {labels.analytics}
-                </label>
-                <label className="flex items-center gap-3 text-ink">
-                  <input type="checkbox" className="size-4 accent-[var(--blue)]" checked={draft.marketing} onChange={(e) => setDraft({ ...draft, marketing: e.target.checked })} /> {labels.marketing}
-                </label>
-              </fieldset>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 sm:flex-col sm:items-stretch">
-            {custom ? (
-              <button type="button" className="btn btn-primary !min-h-10" onClick={() => decide(draft)}>{labels.save}</button>
-            ) : (
-              <button type="button" className="btn btn-primary !min-h-10" onClick={() => decide({ analytics: true, marketing: true })}>{labels.accept}</button>
-            )}
-            <button type="button" className="btn btn-ghost !min-h-10" onClick={() => decide({ analytics: false, marketing: false })}>{labels.reject}</button>
-            {!custom && (
-              <button type="button" className="btn btn-ghost !min-h-10" onClick={() => setCustom(true)}>{labels.customize}</button>
-            )}
-          </div>
+      <div className="rounded-2xl border border-rule bg-surface p-3.5 shadow-soft backdrop-blur-xl">
+        <p className="text-xs leading-relaxed text-muted">
+          <span id="consent-title" className="font-semibold text-ink">{labels.title}. </span>
+          {labels.text}{" "}
+          <a href={privacyHref} className="text-blue underline underline-offset-2">{labels.policy}</a>
+        </p>
+        {custom && (
+          <fieldset className="mt-3 grid gap-2 text-xs">
+            <label className="flex items-center gap-2.5 text-muted">
+              <input type="checkbox" checked disabled className="size-4" /> {labels.necessary}
+            </label>
+            <label className="flex items-center gap-2.5 text-ink">
+              <input type="checkbox" className="size-4 accent-[var(--blue)]" checked={draft.analytics} onChange={(e) => setDraft({ ...draft, analytics: e.target.checked })} /> {labels.analytics}
+            </label>
+            <label className="flex items-center gap-2.5 text-ink">
+              <input type="checkbox" className="size-4 accent-[var(--blue)]" checked={draft.marketing} onChange={(e) => setDraft({ ...draft, marketing: e.target.checked })} /> {labels.marketing}
+            </label>
+          </fieldset>
+        )}
+        <div className="mt-3 flex items-center gap-2">
+          {custom ? (
+            <button type="button" className="consent-btn is-main" onClick={() => decide(draft)}>{labels.save}</button>
+          ) : (
+            <button type="button" className="consent-btn is-main" onClick={() => decide({ analytics: true, marketing: true })}>{labels.accept}</button>
+          )}
+          <button type="button" className="consent-btn" onClick={() => decide({ analytics: false, marketing: false })}>{labels.reject}</button>
+          {!custom && (
+            <button type="button" className="ms-auto text-xs text-muted underline underline-offset-2 hover:text-ink" onClick={() => setCustom(true)}>{labels.customize}</button>
+          )}
         </div>
       </div>
     </section>

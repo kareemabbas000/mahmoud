@@ -32,7 +32,6 @@ export const pages: Page[] = [
     seo: { ar: {}, en: {} },
     blocks: [
       b("hero", {
-        eyebrow: { ar: "محاسبون قانونيون · مستشارون · خبراء ضرائب", en: "Chartered Accountants · Consultants · Tax Advisers" },
         title: { ar: "مراجعة دقيقة ومشورة *تُبنى عليها* القرارات", en: "Rigorous audit. Advice you can *build decisions on.*" },
         subtitle: {
           ar: "منذ عام {founded} يقدّم المكتب الاستشاري المتخصص خدمات المراجعة والمحاسبة والضرائب وتأسيس الشركات ودراسات الجدوى وتمويل المشروعات للشركات والمستثمرين والمؤسسات الأهلية.",
