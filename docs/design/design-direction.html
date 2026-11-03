@@ -1,0 +1,418 @@
+<title>SCO Design Direction</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Readex+Pro:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600&display=swap">
+<style>
+/* Layout: an architectural 12-col grid with ledger hairlines; content sits on rules like an audit working paper. */
+:root{
+  --bg:#F5F6FA; --surface:#FFFFFF; --ink:#0B1033; --text:#1A1F3D; --muted:#525874; --line:#DADDEA; --line-strong:#B9BED3;
+  --blue:#04019F; --blue-soft:#E8E9FB; --orange:#FC4E08; --orange-text:#C23A00; --on-blue:#FFFFFF; --focus:#FC4E08;
+  --hero-bg:#0B1033; --hero-ink:#F2F3FA; --hero-muted:#A1A7C6; --hero-line:rgba(169,174,255,.16); --paper:#FFFFFF; --paper-line:#E3E6F1; --paper-ink:#1A1F3D;
+  --f-display-ar:"Markazi Text","Amiri",serif; --f-display-en:"Markazi Text",Georgia,serif;
+  --f-body-ar:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif; --f-body-en:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#070A1C; --surface:#0E1330; --ink:#F2F3FA; --text:#E4E6F2; --muted:#A1A7C6; --line:#252C52; --line-strong:#39416E;
+  --blue:#A9AEFF; --blue-soft:#161C45; --orange:#FF6A2B; --orange-text:#FF8A55; --on-blue:#070A1C; --focus:#FF6A2B;
+  --hero-bg:#03051A; --hero-ink:#F2F3FA; --hero-muted:#A1A7C6; --hero-line:rgba(169,174,255,.12); --paper:#141A3C; --paper-line:#2A3263; --paper-ink:#E4E6F2;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#070A1C; --surface:#0E1330; --ink:#F2F3FA; --text:#E4E6F2; --muted:#A1A7C6; --line:#252C52; --line-strong:#39416E;
+  --blue:#A9AEFF; --blue-soft:#161C45; --orange:#FF6A2B; --orange-text:#FF8A55; --on-blue:#070A1C; --focus:#FF6A2B;
+  --hero-bg:#03051A; --hero-ink:#F2F3FA; --hero-muted:#A1A7C6; --hero-line:rgba(169,174,255,.12); --paper:#141A3C; --paper-line:#2A3263; --paper-ink:#E4E6F2;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--f-body-en);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1160px;margin-inline:auto}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:2px}
+[lang="ar"]{font-family:var(--f-body-ar);line-height:1.85;letter-spacing:0}
+h1,h2,h3{text-wrap:balance;color:var(--ink);margin:0}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.eyebrow[lang="ar"]{font-family:var(--f-body-ar);font-size:13px;letter-spacing:0;text-transform:none;font-weight:500}
+
+/* top bar */
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-block:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:12px;align-items:baseline}
+.brand b{font-family:var(--f-display-en);font-size:28px;font-weight:700;color:var(--blue);letter-spacing:.02em}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 14px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--blue);color:var(--on-blue)}
+.seg button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+
+/* hero mock */
+.hero{margin-block:28px 8px;background:var(--hero-bg);color:var(--hero-ink);border-radius:var(--r);overflow:hidden;position:relative;
+  display:grid;grid-template-columns:1.15fr .85fr;min-height:440px}
+.hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--hero-line) 1px,transparent 1px),linear-gradient(90deg,var(--hero-line) 1px,transparent 1px);background-size:100% 44px,calc(100%/12) 100%;pointer-events:none}
+.hero .copy{position:relative;padding:clamp(24px,5vw,56px);display:flex;flex-direction:column;justify-content:center;gap:20px}
+.hero h1{color:var(--hero-ink);font-family:var(--f-display-ar);font-weight:600;font-size:clamp(36px,5.2vw,64px);line-height:1.25}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero .sub{color:var(--hero-muted);max-width:52ch;font-size:17px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:14px;color:var(--hero-muted)}
+.hero .meta bdi{color:var(--hero-ink);font-family:var(--f-body-en)}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s ease,background-color .2s ease}
+.btn.primary{background:#FC4E08;color:#0B1033}
+.btn.ghost{border-color:rgba(242,243,250,.35);color:var(--hero-ink);background:transparent}
+.btn:hover{transform:translateY(-1px)}
+.btn .arr{display:inline-block;transition:transform .2s ease}
+.btn:hover .arr{transform:translateX(3px)}
+[dir="rtl"] .btn .arr{transform:scaleX(-1)}
+[dir="rtl"] .btn:hover .arr{transform:scaleX(-1) translateX(3px)}
+.stage{position:relative;min-height:320px}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.doc{fill:var(--paper);stroke:var(--paper-line)}
+.rule{stroke:var(--paper-line);stroke-width:1}
+.num{fill:var(--paper-ink);font-family:var(--f-mono);font-size:11px}
+.tick{fill:none;stroke:var(--orange);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:120;stroke-dashoffset:0}
+.ledger{stroke:var(--blue);stroke-width:1.2;fill:none;opacity:.9}
+@media (prefers-reduced-motion:no-preference){
+  .play .tick{animation:draw 1.1s cubic-bezier(.65,0,.35,1) .6s both}
+  .play .ledger{stroke-dasharray:600;animation:draw2 2.2s cubic-bezier(.65,0,.35,1) .1s both}
+  .play .d1{animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
+  .play .d2{animation:rise 1s cubic-bezier(.2,.7,.2,1) .12s both}
+  .play .d3{animation:rise 1s cubic-bezier(.2,.7,.2,1) .24s both}
+}
+@keyframes draw{from{stroke-dashoffset:120}to{stroke-dashoffset:0}}
+@keyframes draw2{from{stroke-dashoffset:600}to{stroke-dashoffset:0}}
+@keyframes rise{from{transform:translateY(14px)}to{transform:none}}
+.caption{font-size:13px;color:var(--muted);margin-block:8px 0}
+
+section{padding-block:56px 0}
+.sec-head{display:grid;grid-template-columns:200px 1fr;gap:24px;border-top:1px solid var(--line-strong);padding-top:16px;margin-bottom:28px}
+.sec-head h2{font-family:var(--f-display-en);font-weight:600;font-size:34px;line-height:1.15}
+.sec-head p{color:var(--muted);max-width:68ch;margin-top:8px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card.pick{border-color:var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+.tag{align-self:flex-start;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.cand-ar{font-size:30px;line-height:1.5;color:var(--ink)}
+.cand-en{font-size:26px;line-height:1.2;color:var(--ink)}
+.cand-body{font-size:15px}
+.small{font-size:13px;color:var(--muted)}
+dl.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:13px}
+dl.facts dt{color:var(--muted)} dl.facts dd{margin:0}
+
+/* recommended specimen */
+.scale{display:flex;flex-direction:column;gap:6px}
+.scale .row{display:grid;grid-template-columns:90px minmax(0,1fr);gap:16px;align-items:baseline;border-bottom:1px solid var(--line);padding-block:10px}
+.scale .lbl{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.d-ar{font-family:var(--f-display-ar);color:var(--ink);line-height:1.35}
+.d-en{font-family:var(--f-display-en);color:var(--ink);line-height:1.15}
+.prose{max-width:65ch;font-size:17px}
+.prose[lang="ar"]{font-size:18px}
+.prose strong{color:var(--ink);font-weight:600}
+.prose .hl{color:var(--blue);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:start;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:13px}
+td.n{font-family:var(--f-mono);text-align:end}
+td.n[data-ar]{font-family:var(--f-body-ar)}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+
+form{display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field label{font-size:14px;font-weight:500;color:var(--ink)}
+.field input,.field textarea,.field select{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line-strong);border-radius:4px;padding:10px 12px;min-width:0;width:100%}
+.field input:focus-visible,.field textarea:focus-visible{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
+.field .hint{font-size:12px;color:var(--muted)}
+.field input[type="tel"],.field input[type="email"]{direction:ltr;text-align:end}
+[lang="en"] .field input[type="tel"],[lang="en"] .field input[type="email"]{text-align:start}
+.btn.solid{background:var(--blue);color:var(--on-blue);justify-self:start}
+
+.digits{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end}
+.digit-big{font-family:var(--f-body-ar);font-size:56px;font-weight:600;color:var(--blue);line-height:1;font-variant-numeric:tabular-nums}
+.digit-big.en{font-family:var(--f-body-en)}
+
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);min-width:0}
+.sw .chip{height:72px;display:flex;align-items:flex-end;padding:8px;font-family:var(--f-mono);font-size:11px}
+.sw .info{padding:10px;display:grid;gap:2px;font-size:12px}
+.sw .info b{font-size:13px;color:var(--ink)}
+.sw .info code{font-family:var(--f-mono);color:var(--muted)}
+.aa{font-family:var(--f-mono);font-size:11px}
+.aa.ok{color:var(--blue)} .aa.lg{color:var(--orange-text)}
+
+ul.principles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 32px}
+ul.principles li{border-top:1px solid var(--line);padding-block:14px;display:grid;gap:4px}
+ul.principles b{color:var(--ink)}
+ol.decide{margin:0;padding-inline-start:22px;display:grid;gap:10px;max-width:75ch}
+ol.decide b{color:var(--ink)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .stage{min-height:260px;order:-1}
+  .grid3,.grid2,ul.principles{grid-template-columns:1fr}
+  .sec-head{grid-template-columns:1fr;gap:4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div class="brand"><b>SCO</b><span class="eyebrow">Design direction · Phase 2 · for approval</span></div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Theme">
+        <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-set="system" aria-pressed="true">System</button>
+        <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div>
+      <button class="btn ghost" id="replay" type="button" style="color:var(--text);border-color:var(--line-strong);padding:6px 14px;font-size:13px">Replay motion</button>
+    </div>
+  </header>
+
+  <!-- HERO MOCK -->
+  <div class="hero play" id="hero" dir="rtl" lang="ar">
+    <div class="copy">
+      <span class="eyebrow" lang="ar" style="color:var(--hero-muted)">محاسبون قانونيون · مستشارون · خبراء ضرائب</span>
+      <h1>مراجعة دقيقة ومشورة <em>تُبنى عليها</em> القرارات</h1>
+      <p class="sub">منذ عام 2005 يقدّم المكتب الاستشاري المتخصص خدمات المراجعة والمحاسبة والضرائب وتأسيس الشركات ودراسات الجدوى وتمويل المشروعات للشركات والمستثمرين والمؤسسات الأهلية.</p>
+      <div class="btns">
+        <a class="btn primary" href="#type">احجز استشارة <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn ghost" href="#palette">خدماتنا</a>
+      </div>
+      <div class="meta"><span>الهاتف <bdi dir="ltr">+20 101 131 5442</bdi></span><span>البريد <bdi dir="ltr">info@sco-eg.com</bdi></span></div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <svg viewBox="0 0 440 440" preserveAspectRatio="xMidYMid meet">
+        <path class="ledger" d="M20 380 L120 330 L190 352 L270 270 L340 290 L420 200"/>
+        <g class="d3"><rect class="doc" x="150" y="70" width="210" height="270" rx="4" transform="rotate(6 255 205)"/></g>
+        <g class="d2"><rect class="doc" x="120" y="86" width="210" height="270" rx="4" transform="rotate(-3 225 221)"/></g>
+        <g class="d1">
+          <rect class="doc" x="96" y="100" width="210" height="270" rx="4"/>
+          <line class="rule" x1="116" y1="140" x2="286" y2="140"/>
+          <line class="rule" x1="116" y1="170" x2="286" y2="170"/>
+          <line class="rule" x1="116" y1="200" x2="286" y2="200"/>
+          <line class="rule" x1="116" y1="230" x2="286" y2="230"/>
+          <line class="rule" x1="116" y1="260" x2="286" y2="260"/>
+          <line class="rule" x1="116" y1="300" x2="286" y2="300" style="stroke-width:2"/>
+          <text class="num" x="282" y="160" text-anchor="end">1,240,500</text>
+          <text class="num" x="282" y="190" text-anchor="end">  386,200</text>
+          <text class="num" x="282" y="220" text-anchor="end">  142,900</text>
+          <text class="num" x="282" y="250" text-anchor="end">   58,400</text>
+          <text class="num" x="282" y="290" text-anchor="end" style="font-weight:500">1,828,000</text>
+          <path class="tick" d="M128 318 L146 338 L182 300"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <p class="caption">Hero concept: a stack of working papers on a ledger grid. The orange stroke is an <strong>audit tick mark</strong>, the same mark as the check in SCO's logo, drawn once as if by the reviewer's pen. The figures on the paper are illustrative; the live site shows no numbers until the firm confirms them. Built in SVG and CSS rather than WebGL, so it adds about 3 KB and stays still under reduced motion.</p>
+
+  <!-- TYPE CANDIDATES -->
+  <section id="type">
+    <div class="sec-head">
+      <span class="eyebrow">01 · Typeface candidates</span>
+      <div><h2>Three pairings, one recommendation</h2>
+      <p>All candidates are licensed under the SIL Open Font License 1.1, so they are free for commercial use and can be self-hosted through <code>next/font</code>. I set aside Cairo, Tajawal and Almarai as too common. A premium commercial Arabic face (such as 29LT or Monotype) would need a paid web licence for every domain and adds little for this brief.</p></div>
+    </div>
+    <div class="grid3">
+      <article class="card pick">
+        <span class="tag">Recommended · A</span>
+        <p class="cand-ar" lang="ar" dir="rtl" style="font-family:var(--f-display-ar);font-weight:600">المراجعة الخارجية والإقرارات الضريبية</p>
+        <p class="cand-en" style="font-family:var(--f-display-en);font-weight:600">External audit &amp; tax returns</p>
+        <p class="cand-body" lang="ar" dir="rtl" style="font-family:'IBM Plex Sans Arabic'">نُعدّ القوائم المالية ونراجعها وفق معايير المراجعة المصرية والدولية.</p>
+        <p class="cand-body" style="font-family:'IBM Plex Sans'">We prepare and audit financial statements under Egyptian and International Standards on Auditing.</p>
+        <dl class="facts"><dt>Display</dt><dd>Markazi Text, an editorial Naskh by Borna Izadpanah with a matching Latin</dd><dt>Text / UI</dt><dd>IBM Plex Sans Arabic + IBM Plex Sans</dd><dt>Figures</dt><dd>IBM Plex Mono for ledgers and labels</dd></dl>
+        <p class="small">Naskh carries the gravitas of legal and financial documents, and Markazi does it without looking like a newspaper from the past. Plex was drawn for engineering precision, its Arabic and Latin share proportions, and it has true tabular figures.</p>
+      </article>
+      <article class="card">
+        <span class="tag">B · Modern geometric</span>
+        <p class="cand-ar" lang="ar" dir="rtl" style="font-family:'Readex Pro';font-weight:600">المراجعة الخارجية والإقرارات الضريبية</p>
+        <p class="cand-en" style="font-family:'Readex Pro';font-weight:600">External audit &amp; tax returns</p>
+        <p class="cand-body" lang="ar" dir="rtl" style="font-family:'Readex Pro';font-weight:300">نُعدّ القوائم المالية ونراجعها وفق معايير المراجعة المصرية والدولية.</p>
+        <p class="cand-body" style="font-family:'Readex Pro';font-weight:300">We prepare and audit financial statements under Egyptian and International Standards on Auditing.</p>
+        <dl class="facts"><dt>All roles</dt><dd>Readex Pro (variable, Kufi-influenced)</dd></dl>
+        <p class="small">Clean and technical, with one family for everything. It reads more like a tech start-up than a firm of chartered accountants, and has less authority at large sizes.</p>
+      </article>
+      <article class="card">
+        <span class="tag">C · Classical</span>
+        <p class="cand-ar" lang="ar" dir="rtl" style="font-family:'Amiri';font-weight:700">المراجعة الخارجية والإقرارات الضريبية</p>
+        <p class="cand-en" style="font-family:'Amiri';font-weight:700">External audit &amp; tax returns</p>
+        <p class="cand-body" lang="ar" dir="rtl" style="font-family:'Noto Sans Arabic'">نُعدّ القوائم المالية ونراجعها وفق معايير المراجعة المصرية والدولية.</p>
+        <p class="cand-body" style="font-family:'Noto Sans Arabic'">We prepare and audit financial statements under Egyptian and International Standards on Auditing.</p>
+        <dl class="facts"><dt>Display</dt><dd>Amiri (book Naskh)</dd><dt>Text</dt><dd>Noto Sans Arabic</dd></dl>
+        <p class="small">Very dignified, but traditional. Amiri's tall ascenders and descenders make tight UI headings awkward, and its Latin is Times-like.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- SPECIMEN A -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">02 · Specimen A</span>
+      <div><h2>Type scale, prose, numbers, table, form</h2>
+      <p>Arabic body text is set at 18px with a line height of 1.85 and no letter-spacing. Emphasis uses weight or colour, never italics. English body text is 17px at 1.6. Display sizes use a 1.25 ratio and are fluid with clamp().</p></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card" dir="rtl" lang="ar">
+        <span class="eyebrow" lang="ar">المقياس الطباعي · عربي</span>
+        <div class="scale">
+          <div class="row"><span class="lbl">Display 56</span><span class="d-ar" style="font-size:clamp(36px,4vw,56px);font-weight:600">تأسيس الشركات</span></div>
+          <div class="row"><span class="lbl">H2 40</span><span class="d-ar" style="font-size:40px;font-weight:600">دراسات الجدوى</span></div>
+          <div class="row"><span class="lbl">H3 28</span><span class="d-ar" style="font-size:28px;font-weight:600">ضريبة القيمة المضافة</span></div>
+          <div class="row"><span class="lbl">H4 20 · Plex</span><span style="font-size:20px;font-weight:600;color:var(--ink)">مسك الدفاتر والتسويات البنكية</span></div>
+          <div class="row"><span class="lbl">Body 18</span><span style="font-size:18px">السجل التجاري، العقود، التقاضي</span></div>
+          <div class="row"><span class="lbl">Small 14</span><span style="font-size:14px;color:var(--muted)">آخر مراجعة قانونية: 2021</span></div>
+        </div>
+      </div>
+      <div class="card" lang="en">
+        <span class="eyebrow">Type scale · English</span>
+        <div class="scale">
+          <div class="row"><span class="lbl">Display 56</span><span class="d-en" style="font-size:clamp(36px,4vw,56px);font-weight:600">Company formation</span></div>
+          <div class="row"><span class="lbl">H2 40</span><span class="d-en" style="font-size:40px;font-weight:600">Feasibility studies</span></div>
+          <div class="row"><span class="lbl">H3 28</span><span class="d-en" style="font-size:28px;font-weight:600">Value added tax</span></div>
+          <div class="row"><span class="lbl">H4 20 · Plex</span><span style="font-size:20px;font-weight:600;color:var(--ink)">Bookkeeping &amp; bank reconciliations</span></div>
+          <div class="row"><span class="lbl">Body 17</span><span style="font-size:17px">Commercial register, contracts, litigation</span></div>
+          <div class="row"><span class="lbl">Small 14</span><span style="font-size:14px;color:var(--muted)">Last legal review: 2021</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card" dir="rtl" lang="ar">
+        <span class="eyebrow" lang="ar">نص تحريري · من صفحة «من نحن» بعد التحرير</span>
+        <h3 class="d-ar" style="font-size:32px;font-weight:600">أكثر من عشرين عامًا من الخبرة</h3>
+        <p class="prose" lang="ar">تأسس <strong>المكتب الاستشاري المتخصص (SCO)</strong> عام <span class="hl">2005</span> على يد نخبة من المتخصصين في المحاسبة والمراجعة والضرائب، ثم تطوّر سريعًا ليصبح مؤسسة متكاملة الخدمات تشمل: الاستشارات المالية والإدارية، والموارد البشرية، والخدمات والاستشارات القانونية، وتأسيس الشركات والجامعات والمدارس الخاصة والجمعيات والمؤسسات الأهلية، وإعادة الهيكلة المالية والإدارية، وإعداد الخطط الاستراتيجية وخطط تمويل المشروعات، إلى جانب أعمال الحراسة القضائية وتصفية الشركات.</p>
+      </div>
+      <div class="card" lang="en">
+        <span class="eyebrow">Editorial prose · About page, rewritten</span>
+        <h3 class="d-en" style="font-size:32px;font-weight:600">Over two decades of practice</h3>
+        <p class="prose">Founded in <span class="hl">2005</span> by specialists in accounting, audit and tax, <strong>the Specialized Consulting Office (SCO)</strong> has grown into a full-service advisory firm. We advise on financial, management, HR and legal matters; establish companies, private universities, schools and non-profit organisations; lead financial and organisational restructuring; prepare strategic and project-finance plans; and act in judicial receiverships and company liquidations.</p>
+      </div>
+    </div>
+    <p class="caption">The text is the legacy About paragraph, edited. "Over two decades" comes from the founding year of 2005; the site will calculate it rather than hard-code "16 years".</p>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <span class="eyebrow">Numerals in the Arabic interface · panel setting</span>
+        <div class="seg" role="group" aria-label="Arabic numerals" style="align-self:flex-start">
+          <button type="button" data-digits="latn" aria-pressed="true">Western 0–9 (recommended)</button>
+          <button type="button" data-digits="arab" aria-pressed="false">Arabic-Indic ٠–٩</button>
+        </div>
+        <div class="digits" dir="rtl" lang="ar">
+          <div><div class="digit-big js-num" data-v="2005" data-plain="1">2005</div><div class="small">سنة التأسيس</div></div>
+          <div><div class="digit-big js-num" data-v="21145" data-plain="1">21145</div><div class="small">رقم القيد بسجل المحاسبين</div></div>
+        </div>
+        <p class="small">I recommend Western digits. The legacy site uses them, Egyptian financial statements and tax forms usually do, and they keep phone numbers, registration numbers and figures identical in both languages. Phone numbers and emails always stay LTR and Western-digit, whatever this setting is.</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:22px 22px 0"><span class="eyebrow" lang="ar">جدول · عضويات وقيد المؤسس (بيانات حقيقية من الموقع)</span></div>
+        <div class="tablewrap" style="border:0;border-radius:0" dir="rtl" lang="ar">
+          <table>
+            <thead><tr><th scope="col">الجهة</th><th scope="col">الصفة</th><th scope="col" style="text-align:end">رقم القيد</th><th scope="col" style="text-align:end">السنة</th></tr></thead>
+            <tbody>
+              <tr><td>سجل المحاسبين والمراجعين</td><td>محاسب قانوني</td><td class="n js-num" data-v="21145">21145</td><td class="n">—</td></tr>
+              <tr><td>جمعية الضرائب المصرية</td><td>عضو</td><td class="n js-num" data-v="8385">8385</td><td class="n js-num" data-v="2012">2012</td></tr>
+              <tr><td>الجمعية المصرية للمالية العامة والضرائب</td><td>زميل</td><td class="n js-num" data-v="2262">2262</td><td class="n js-num" data-v="2010">2010</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <form class="card" dir="rtl" lang="ar" novalidate onsubmit="event.preventDefault()">
+        <span class="eyebrow" lang="ar">نموذج · طلب استشارة</span>
+        <div class="field"><label for="ar-name">الاسم بالكامل</label><input id="ar-name" autocomplete="name" value="أحمد سامي"></div>
+        <div class="field"><label for="ar-phone">رقم الموبايل</label><input id="ar-phone" type="tel" inputmode="tel" value="+20 100 000 0000"><span class="hint">سنتواصل معك عبر واتساب أو مكالمة.</span></div>
+        <div class="field"><label for="ar-svc">الخدمة المطلوبة</label><select id="ar-svc"><option>المراجعة الخارجية</option><option>الخدمات المحاسبية</option><option>تأسيس الشركات</option><option>دراسات الجدوى</option><option>تمويل المشروعات</option><option>الخدمات الضريبية</option></select></div>
+        <div class="field"><label for="ar-msg">رسالتك</label><textarea id="ar-msg" rows="3">نرغب في مراجعة القوائم المالية لعام 2025 وإعداد الإقرار الضريبي.</textarea></div>
+        <button class="btn solid" type="submit">إرسال الطلب <span class="arr" aria-hidden="true">→</span></button>
+      </form>
+      <form class="card" lang="en" novalidate onsubmit="event.preventDefault()">
+        <span class="eyebrow">Form · Book a consultation</span>
+        <div class="field"><label for="en-name">Full name</label><input id="en-name" autocomplete="name" value="Sarah Mansour"></div>
+        <div class="field"><label for="en-phone">Mobile number</label><input id="en-phone" type="tel" inputmode="tel" value="+20 100 000 0000"><span class="hint">We will reply by WhatsApp or phone.</span></div>
+        <div class="field"><label for="en-svc">Service</label><select id="en-svc"><option>External audit</option><option>Accounting &amp; bookkeeping</option><option>Company formation</option><option>Feasibility studies</option><option>Project finance</option><option>Tax services</option></select></div>
+        <div class="field"><label for="en-msg">Your message</label><textarea id="en-msg" rows="3">We would like our 2025 financial statements audited and our tax return prepared.</textarea></div>
+        <button class="btn solid" type="submit">Send request <span class="arr" aria-hidden="true">→</span></button>
+      </form>
+    </div>
+    <p class="caption">The form values are examples. The arrows flip direction in RTL, while phone fields stay LTR.</p>
+  </section>
+
+  <!-- PALETTE -->
+  <section id="palette">
+    <div class="sec-head">
+      <span class="eyebrow">03 · Palette</span>
+      <div><h2>Taken from the logo, then disciplined</h2>
+      <p>The logo pairs ultramarine <code>#04019F</code> with a signal orange <code>#FC4E08</code>. Blue carries authority: headings, links and primary buttons. Orange is the one accent, kept to the tick mark, rules, key figures and focus rings. Neutrals lean slightly blue so the page reads as cool paper, not grey. Use the theme switch at the top to see the dark palette; contrast ratios are measured against the page background.</p></div>
+    </div>
+    <div class="sw-grid" id="swatches"></div>
+    <p class="caption">Rule: brand orange on a light background is <strong>3.1:1</strong>, which passes only for large text (24px and up) and graphics. Small orange text uses <code>--orange-text</code> (<code>#C23A00</code>, 5.0:1). Primary buttons use white on blue (13.9:1). On dark backgrounds the orange is lifted to <code>#FF6A2B</code> (6.9:1).</p>
+  </section>
+
+  <!-- MOTION -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">04 · Motion &amp; detail</span>
+      <div><h2>Precise, slow, never noisy</h2></div>
+    </div>
+    <ul class="principles">
+      <li><b>One signature moment</b><span>The audit tick draws on the hero, and on "verified" items such as credentials and completed steps. It is used nowhere else.</span></li>
+      <li><b>Ledger lines</b><span>Hairline rules draw from the start edge as sections enter. In RTL they draw from the right.</span></li>
+      <li><b>Headings reveal by word</b><span>Arabic is split by word, never by letter, so the joined letterforms stay intact. Each word rises 8px and fades in over 600ms with a 40ms stagger.</span></li>
+      <li><b>Real figures only</b><span>Counters animate once, using tabular figures, and only when the firm has confirmed the values. Otherwise the block is hidden.</span></li>
+      <li><b>Lenis smooth scroll + GSAP ScrollTrigger</b><span>Lazy-loaded after the first paint. With <code>prefers-reduced-motion</code> everything renders in its final state.</span></li>
+      <li><b>Micro-interactions</b><span>Buttons lift 1px and their arrow nudges toward the reading direction. Client logos go from greyscale to colour on hover or focus. Page transitions are a 200ms cross-fade.</span></li>
+    </ul>
+  </section>
+
+  <!-- DECISIONS -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">05 · Decisions for you</span>
+      <div><h2>What I need approved</h2></div>
+    </div>
+    <ol class="decide">
+      <li><b>Typeface:</b> pairing A (Markazi Text with IBM Plex Sans Arabic / Plex Sans), or B or C.</li>
+      <li><b>Palette and concept:</b> logo blue and orange with cool neutrals and the audit-tick motif, in light and dark.</li>
+      <li><b>Arabic numerals:</b> Western 0–9 by default, switchable in the panel.</li>
+      <li><b>Hero:</b> an SVG working-paper stack with ledger grid and drawn tick (light and fast), instead of a WebGL scene.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  function setTheme(v){ if(v==='system'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',v)}
+    document.querySelectorAll('[data-theme-set]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.themeSet===v))}); renderSwatches();
+    try{localStorage.setItem('sco-theme',v)}catch(e){} }
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){b.addEventListener('click',function(){setTheme(b.dataset.themeSet)})});
+  try{var s=localStorage.getItem('sco-theme'); if(s){setTheme(s)}}catch(e){}
+
+  document.getElementById('replay').addEventListener('click',function(){var h=document.getElementById('hero');h.classList.remove('play');void h.offsetWidth;h.classList.add('play')});
+
+  var fmtAr=new Intl.NumberFormat('ar-EG',{useGrouping:false});
+  document.querySelectorAll('[data-digits]').forEach(function(b){b.addEventListener('click',function(){
+    var arab=b.dataset.digits==='arab';
+    document.querySelectorAll('[data-digits]').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    document.querySelectorAll('.js-num').forEach(function(n){var v=Number(n.dataset.v);n.textContent=arab?fmtAr.format(v):String(v)});
+  })});
+
+  function lum(hex){var h=hex.replace('#','');var c=[0,2,4].map(function(i){var x=parseInt(h.substr(i,2),16)/255;return x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+  function ratio(a,b){var A=lum(a),B=lum(b);var hi=Math.max(A,B),lo=Math.min(A,B);return (hi+.05)/(lo+.05)}
+  var tokens=[['--ink','Ink','Headings'],['--text','Text','Body copy'],['--muted','Muted','Secondary text'],['--blue','SCO Blue','Links, primary'],['--orange','Signal Orange','Tick, rules, large figures'],['--orange-text','Orange (text)','Small accent text'],['--surface','Surface','Cards'],['--bg','Paper','Page background'],['--line','Rule','Hairlines']];
+  function renderSwatches(){
+    var cs=getComputedStyle(root),bg=cs.getPropertyValue('--bg').trim(),wrap=document.getElementById('swatches');wrap.innerHTML='';
+    tokens.forEach(function(t){var v=cs.getPropertyValue(t[0]).trim();var r=ratio(v,bg);
+      var isText=['--bg','--surface','--line'].indexOf(t[0])<0;
+      var verdict=!isText?'':(r>=4.5?'<span class="aa ok">AA '+r.toFixed(1)+':1</span>':(r>=3?'<span class="aa lg">AA large only '+r.toFixed(1)+':1</span>':'<span class="aa lg">'+r.toFixed(1)+':1</span>'));
+      var d=document.createElement('div');d.className='sw';
+      d.innerHTML='<div class="chip" style="background:'+v+';color:'+(lum(v)>.4?'#0B1033':'#F2F3FA')+'">'+v.toUpperCase()+'</div><div class="info"><b>'+t[1]+'</b><span>'+t[2]+'</span><code>'+t[0]+'</code>'+verdict+'</div>';
+      wrap.appendChild(d)});
+  }
+  renderSwatches();
+  if(window.matchMedia){matchMedia('(prefers-color-scheme: dark)').addEventListener('change',renderSwatches)}
+})();
+</script>
