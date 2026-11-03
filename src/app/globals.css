@@ -865,8 +865,6 @@ html.site:not([data-theme="dark"]) main section.stats-stage-band { background: r
 .founder-tone { background: linear-gradient(180deg, rgb(91 99 255 / 0.15), rgb(4 1 159 / 0.35)); mix-blend-mode: color; transition: opacity 0.9s; }
 .founder-card:hover .founder-img { filter: none; mix-blend-mode: normal; transform: scale(1.02); }
 .founder-card:hover .founder-tone { opacity: 0; }
-.founder-orbit-dot { offset-path: path("M10 60 A140 34 0 1 0 290 60 A140 34 0 1 0 10 60"); }
-.motion-ok .founder-orbit-dot { animation: orbit 9s linear infinite; }
 @keyframes orbit { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 .founder-chip { display: inline-flex; gap: 0.4rem; align-items: baseline; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.72rem; color: #dfe2f2; background: rgb(10 13 38 / 0.6); border: 1px solid rgb(255 255 255 / 0.14); backdrop-filter: blur(10px); box-shadow: 0 12px 30px -14px rgb(0 0 0 / 0.8); }
 .founder-chip b { color: #fff; font-size: 0.85rem; }
@@ -936,7 +934,6 @@ html.site:not([data-theme="dark"]) main section.stats-stage-band { background: r
 .founder-img { filter: none !important; mix-blend-mode: normal !important; }
 .founder-card:hover .founder-img { transform: scale(1.02); }
 .founder-floor { background: radial-gradient(closest-side, rgb(11 16 51 / 0.22), transparent); filter: blur(4px); }
-.founder-orbit { opacity: 0.55; }
 .founder-chip { color: var(--text) !important; background: rgb(255 255 255 / 0.85) !important; border-color: rgb(11 16 51 / 0.08) !important; }
 .founder-chip b { color: var(--blue) !important; }
 [data-theme="dark"] .founder-chip { background: rgb(13 16 41 / 0.75) !important; color: #dfe2f2 !important; border-color: rgb(255 255 255 / 0.14) !important; }

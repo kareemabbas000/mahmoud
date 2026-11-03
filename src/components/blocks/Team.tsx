@@ -51,16 +51,6 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
                 />
                 <div className="founder-floor absolute inset-x-[10%] bottom-0 h-6" aria-hidden="true" />
               </div>
-              <svg viewBox="0 0 300 120" className="founder-orbit pointer-events-none absolute inset-x-[-4%] top-[8%] -z-0 w-[108%]" aria-hidden="true">
-                <ellipse cx="150" cy="60" rx="140" ry="34" fill="none" stroke="url(#fo)" strokeWidth="1.2" />
-                <defs>
-                  <linearGradient id="fo" x1="0" x2="1"><stop offset="0" stopColor="#8f97ff" stopOpacity="0" /><stop offset="0.5" stopColor="#8f97ff" /><stop offset="1" stopColor="#ff6a2b" /></linearGradient>
-                </defs>
-                <g className="founder-orbit-dot">
-                  <circle r="9" fill="#ff6a2b" />
-                  <path d="M-4 0.5 -1 3.5 4.5 -3" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </g>
-              </svg>
               <span className="founder-chip absolute start-0 top-[22%]"><b className="tnum" dir="ltr">21145</b> {site.t("credentials.reg_no")}</span>
               <span className="founder-chip absolute end-0 top-[48%]">{site.locale === "ar" ? "منذ" : "Since"} <b className="tnum" dir="ltr">{site.settings.brand.founded_year}</b></span>
             </div>
