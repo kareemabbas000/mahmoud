@@ -800,3 +800,14 @@ header.sticky > div:first-child { border: 0 !important; }
 /* Footer map, tinted to the night palette */
 .footer-map iframe { filter: grayscale(1) invert(0.92) hue-rotate(195deg) contrast(0.9) brightness(0.95); }
 :root:not([data-theme="dark"]) .footer-map iframe { filter: grayscale(0.4) contrast(0.95); }
+
+/* v4 polish */
+[data-theme="dark"] .steps-deck > li { background: linear-gradient(180deg, #121633, #0a0d22) !important; }
+[data-theme="dark"] .logo-tile { background: rgb(255 255 255 / 0.94) !important; border-color: transparent !important; }
+[data-theme="dark"] .logo-tile .logo-mono { filter: grayscale(0.6); opacity: 0.9; }
+[data-theme="dark"] .logo-tile:hover .logo-mono { filter: none; opacity: 1; }
+.avatar-ring > span { background: #10142e !important; }
+:root:not([data-theme="dark"]) .avatar-ring > span { background: #eef0fb !important; }
+.avatar-ring > span > span { color: #b7bcff; }
+.mosaic button > span:last-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 767px) { .mosaic button > span:last-child { font-size: 0.75rem; padding: 0.6rem; } }

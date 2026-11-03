@@ -129,7 +129,7 @@ export function HeroScene({ rtl }: { rtl: boolean }) {
       const cols = 16, rows = 7;
       const barGeo = new T3.BoxGeometry(0.16, 1, 0.16);
       barGeo.translate(0, 0.5, 0);
-      const barMat = new T3.MeshStandardMaterial({ color: cPrimary, emissive: cPrimary, emissiveIntensity: 0.35, roughness: 0.35, metalness: 0.35, transparent: true, opacity: 0.85 });
+      const barMat = new T3.MeshStandardMaterial({ color: cPrimary, emissive: cPrimary, emissiveIntensity: 0.3, roughness: 0.35, metalness: 0.35, transparent: true, opacity: 0.45 });
       const bars = new T3.InstancedMesh(barGeo, barMat, cols * rows);
       const heights: number[] = [];
       const dummy = new T3.Object3D();
@@ -142,7 +142,7 @@ export function HeroScene({ rtl }: { rtl: boolean }) {
           bars.setColorAt(i, color.copy(cPrimary).lerp(cAccent, x === cols - 2 && z === 1 ? 1 : 0));
         }
       if (gold) {
-        bars.position.set(-2.7, -2.6, -6.5);
+        bars.position.set(-2.7, -3.1, -7.5);
         bars.rotation.y = 0;
       } else {
         bars.position.set(1.2 * dir, -1.9, -5.2);
