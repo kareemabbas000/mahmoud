@@ -154,9 +154,10 @@ export function ScrollScenes() {
                 const d = i - f; // <0 gone, 0 active, >0 waiting in the deck
                 if (d < -1) gsap.set(c, { yPercent: -120, rotate: -6, opacity: 0, scale: 1 });
                 else if (d < 0) gsap.set(c, { yPercent: d * 140, rotate: d * 7, opacity: Math.max(0, 1 + d * 2.4), scale: 1 + d * 0.04 });
-                else gsap.set(c, { yPercent: Math.min(d, 3) * 7, scale: 1 - Math.min(d, 3) * 0.055, opacity: d > 3 ? 0 : 1 - Math.min(d, 3) * 0.22, rotate: 0 });
+                else gsap.set(c, { yPercent: Math.min(d, 2.5) * 6, scale: 1 - Math.min(d, 2.5) * 0.05, opacity: d > 2.6 ? 0 : 1, rotate: 0 });
               });
               const active = Math.round(f);
+              cards.forEach((c, i) => c.classList.toggle("is-current", i === active));
               labels.forEach((l, i) => l.classList.toggle("is-step", i === active));
               if (counter) counter.textContent = fmt(active + 1);
               if (bar) gsap.set(bar, { scaleX: p });

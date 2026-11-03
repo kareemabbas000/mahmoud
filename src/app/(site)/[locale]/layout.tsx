@@ -10,6 +10,7 @@ import { AnnouncementBar } from "@/components/site/AnnouncementBar";
 import { FloatingContact } from "@/components/site/FloatingContact";
 import { Motion } from "@/components/site/Motion";
 import { ScrollScenes } from "@/components/site/ScrollScenes";
+import { IntroCurtain } from "@/components/site/IntroCurtain";
 import { JsonLd } from "@/components/site/JsonLd";
 import { getBranches, getEnabledLanguages, getTracking } from "@/lib/data";
 import { getSite } from "@/lib/site";
@@ -67,6 +68,7 @@ export default async function SiteLayout({ children, params }: { children: React
       </head>
       <body className="min-h-dvh">
         <div className="aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+        <IntroCurtain />
         <a href="#main" className="sr-only z-[60] rounded-md bg-ink px-4 py-2 text-paper focus:not-sr-only focus:fixed focus:start-4 focus:top-4">
           {t("a11y.skip")}
         </a>

@@ -51,13 +51,19 @@ export async function Clients({ site, props }: BlockProps<P>) {
                 </Link>
               )}
             </div>
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-7" data-stagger>
-              {featured.map((c) => (
-                <li key={c.name.en ?? c.name.ar}>
-                  <LogoTile c={c} name={site.l(c.name)} big />
-                </li>
-              ))}
-            </ul>
+            <div className="logo-ring-stage lg:col-span-7" aria-label={site.l(props.title)}>
+              <div className="logo-ring-glow" aria-hidden="true" />
+              <ul className="logo-ring" style={{ ["--n" as string]: featured.length } as React.CSSProperties}>
+                {featured.map((c, i) => (
+                  <li key={c.name.en ?? c.name.ar} style={{ ["--i" as string]: i } as React.CSSProperties}>
+                    <span className="logo-ring-card">
+                      <img src={c.logo!} alt={site.l(c.name)} loading="lazy" decoding="async" />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="logo-ring-floor" aria-hidden="true" />
+            </div>
           </div>
         </div>
         <div className="marquee relative overflow-hidden border-t border-rule py-6 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]" aria-hidden="true">

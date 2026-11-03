@@ -1,4 +1,3 @@
-import { Icon } from "@/components/ui/Icon";
 import { SectionHead } from "./Section";
 import { num } from "@/lib/i18n";
 import type { BlockProps, HeadProps } from "./types";
@@ -6,57 +5,63 @@ import type { L } from "@/lib/types";
 
 type P = HeadProps & { text?: L };
 
-const ICON: Record<string, string> = { years: "clock", clients: "team", services: "layers", consultations: "spark" };
-
-/** "Why SCO": a bright gallery of the firm's published figures, each counting up as it enters. */
+/**
+ * "Why SCO" — an isometric 3D monument of the firm's figures (CSS 3D + animated @property heights).
+ * Column heights use a log scale so every figure reads; columns rise in sequence as the section enters,
+ * the stage tilts with the cursor, and the figures count up beneath. Works on phones (no WebGL needed).
+ */
 export function Stats({ site, props }: BlockProps<P>) {
   const { stats, brand } = site.settings;
   const now = new Date().getFullYear();
   const years = now - brand.founded_year;
   const items = stats.items
     .map((it) => ({ ...it, value: it.auto_years ? years : it.value }))
-    .filter((it) => it.value !== null && (stats.visible || it.auto_years));
-  const fmt = (v: number) => num(v, site.locale, site.numerals);
+    .filter((it) => it.value !== null && (stats.visible || it.auto_years)) as { key: string; value: number; label: L }[];
+  if (!items.length) return null;
+  const max = Math.max(...items.map((i) => Math.log10(i.value + 1)));
+  const h = (v: number) => Math.round(70 + (Math.log10(v + 1) / max) * 230); // px
   return (
-    <section className="stats-canvas relative overflow-hidden bg-paper">
-      <div aria-hidden="true" className="stats-orbs pointer-events-none absolute inset-0" />
+    <section className="stats-stage-band relative overflow-hidden bg-deep text-deep-muted">
+      <div aria-hidden="true" className="stats-glow pointer-events-none absolute inset-0" />
       <div className="container-x section-pad relative">
-        <SectionHead site={site} head={{ eyebrow: props.eyebrow, title: props.title, intro: props.text }} align="center" />
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-stagger>
-          {items.map((it) => {
-            const yearsCard = it.key === "years";
-            return (
-              <li
+        <SectionHead site={site} head={{ eyebrow: props.eyebrow, title: props.title, intro: props.text }} align="center" onDeep />
+
+        <div className="iso-wrap" data-reveal data-tilt>
+          <div className="iso-plane" style={{ ["--n" as string]: items.length } as React.CSSProperties}>
+            <div className="iso-floor" aria-hidden="true" />
+            {items.map((it, i) => (
+              <div
                 key={it.key}
-                data-tilt
-                className={`stat-card group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[1.75rem] p-7 ${yearsCard ? "bg-deep text-deep-muted" : "bg-surface"}`}
+                className={`iso-bar ${it.key === "consultations" ? "is-accent" : ""}`}
+                style={{ ["--h" as string]: `${h(it.value)}px`, ["--i" as string]: i } as React.CSSProperties}
+                aria-hidden="true"
               >
-                <span className={`inline-flex size-12 items-center justify-center rounded-2xl ${yearsCard ? "bg-white/10 text-orange" : "bg-gradient-to-br from-blue to-[#3b3ff5] text-white shadow-[0_12px_30px_-12px_var(--blue)]"}`}>
-                  <Icon name={ICON[it.key] ?? "spark"} size={22} />
+                <span className="f-top" />
+                <span className="f-front" />
+                <span className="f-side" />
+                <span className="f-glow" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <ul className="relative z-[1] mt-2 grid grid-cols-2 gap-4 md:mt-6 md:grid-cols-4" data-stagger>
+          {items.map((it) => (
+            <li key={it.key} className="iso-label rounded-2xl p-5 text-center">
+              <p className="tnum font-display text-[clamp(2.2rem,3.4vw,3.2rem)] font-bold leading-none text-deep-ink" dir="ltr">
+                <span data-count={it.value} data-suffix={it.key === "clients" ? "+" : ""}>
+                  {num(it.value, site.locale, site.numerals)}
+                  {it.key === "clients" ? "+" : ""}
                 </span>
-                <p className={`stat-num tnum mt-auto pt-8 font-display text-[clamp(2.6rem,3.6vw,3.6rem)] font-bold leading-none ${yearsCard ? "text-deep-ink" : ""}`} dir="ltr">
-                  <span data-count={it.value ?? 0} data-suffix={it.key === "clients" ? "+" : ""}>
-                    {fmt(it.value ?? 0)}
-                    {it.key === "clients" ? "+" : ""}
-                  </span>
+              </p>
+              <p className="mt-2 text-sm text-deep-muted">{site.l(it.label)}</p>
+              {it.key === "years" && (
+                <p className="tnum mt-1 text-xs text-orange" dir="ltr">
+                  {brand.founded_year} — {now}
                 </p>
-                <p className={`mt-3 font-medium ${yearsCard ? "text-deep-ink" : "text-ink"}`}>{site.l(it.label)}</p>
-                {yearsCard ? (
-                  <div className="mt-5" aria-hidden="true">
-                    <div className="relative h-1 rounded-full bg-white/10">
-                      <span className="stat-line absolute inset-y-0 start-0 w-full origin-left rounded-full bg-gradient-to-r from-orange to-[#ffb08a] rtl:origin-right" />
-                    </div>
-                    <div className="tnum mt-2 flex justify-between text-xs text-deep-muted" dir="ltr">
-                      <span>{brand.founded_year}</span>
-                      <span>{now}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <span className="stat-line mt-5 block h-0.5 w-16 origin-left rounded-full bg-orange rtl:origin-right" aria-hidden="true" />
-                )}
-              </li>
-            );
-          })}
+              )}
+            </li>
+          ))}
         </ul>
       </div>
     </section>

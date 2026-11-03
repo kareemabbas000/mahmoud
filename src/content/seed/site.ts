@@ -39,7 +39,7 @@ export const settings: SiteSettings = {
     og_image: null,
     verification: {},
   },
-  theme: { default_mode: "dark", numerals_ar: "latn", preset: "ledger", hero_3d: true },
+  theme: { default_mode: "light", numerals_ar: "latn", preset: "ledger", hero_3d: true },
   header: {
     show_announcement: false,
     announcement: { ar: "", en: "" },

@@ -8,15 +8,16 @@ import type { BlockProps, HeadProps, LinkProp } from "./types";
 import type { TeamMember } from "@/lib/types";
 
 function Avatar({ m, name, size }: { m: TeamMember; name: string; size: number }) {
-  const parts = name.replace(/^(د\.|أ\/|Dr\.)\s*/, "").split(/\s+/).filter(Boolean);
-  const ini = (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
   return (
     <span className="avatar-ring relative inline-flex shrink-0 rounded-full p-[3px]" style={{ width: size, height: size }}>
       <span className="relative block size-full overflow-hidden rounded-full bg-paper-2">
         {m.photo ? (
           <Image src={m.photo} alt={name} fill sizes={`${size}px`} className="object-cover object-top" />
         ) : (
-          <span className="flex size-full items-center justify-center font-display text-lg font-bold text-blue">{ini}</span>
+          <svg viewBox="0 0 64 64" className="avatar-ph size-full" role="img" aria-label={name}>
+            <circle cx="32" cy="25" r="11" fill="#8f97ff" opacity="0.9" />
+            <path d="M12 60c1.5-11 9.5-18 20-18s18.5 7 20 18Z" fill="#8f97ff" opacity="0.9" />
+          </svg>
         )}
       </span>
     </span>
@@ -33,28 +34,51 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
       <SectionHead site={site} head={props} link={props.link} />
       <div className="grid gap-5 lg:grid-cols-12">
         {lead && (
-          <article className="relative overflow-hidden rounded-[2rem] bg-deep text-deep-muted lg:col-span-5 lg:row-span-2" data-reveal>
-            <div className="ledger-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
-            <div aria-hidden="true" className="absolute -top-24 end-[-6rem] size-80 rounded-full bg-[radial-gradient(closest-side,rgb(59_63_245/0.55),transparent)]" />
-            <div className="relative grid h-full grid-rows-[auto_1fr]">
-              <div className="relative mx-auto mt-8 h-72 w-full max-w-xs">
-                <Image src="/legacy/team/mahmoud-al-sheikh-cutout.png" alt={site.l(lead.name)} fill sizes="320px" className="object-contain object-bottom" />
+          <article className="founder-card group relative overflow-hidden rounded-[2rem] text-deep-muted lg:col-span-5 lg:row-span-2" data-reveal data-spot>
+            <div className="founder-visual relative mx-auto mt-8 aspect-[4/4.2] w-[82%]">
+              <svg viewBox="0 0 200 200" className="founder-rings absolute inset-x-0 top-0 w-full" aria-hidden="true">
+                {[96, 80, 64, 48].map((r) => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.4" />)}
+              </svg>
+              <div className="founder-arch absolute inset-x-[8%] bottom-0 top-[6%] overflow-hidden">
+                <div className="founder-light absolute inset-0" aria-hidden="true" />
+                <Image
+                  src="/legacy/team/mahmoud-al-sheikh-cutout.png"
+                  alt={site.l(lead.name)}
+                  fill
+                  quality={92}
+                  sizes="(min-width:1024px) 30vw, 80vw"
+                  className="founder-img object-contain object-bottom"
+                />
+                <div className="founder-tone absolute inset-0" aria-hidden="true" />
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0d26] to-transparent" aria-hidden="true" />
               </div>
-              <div className="relative border-t border-deep-rule bg-deep/80 p-7 backdrop-blur">
-                <p className="eyebrow on-deep">{site.l(lead.role)}</p>
-                <h3 className="display d-3 mt-4 !text-deep-ink">{site.l(lead.name)}</h3>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {(lead.credentials[site.locale] ?? lead.credentials[site.defaultLocale] ?? []).slice(0, 3).map((c) => (
-                    <li key={c} className="rounded-full border border-deep-rule px-3 py-1 text-xs text-deep-ink">{c}</li>
-                  ))}
-                </ul>
-                {lead.has_profile && (
-                  <Link href={h(`/team/${lead.slug}`, site.locale)} className="link-arrow mt-6 text-sm !text-orange">
-                    {site.t("team.profile")}
-                    <Icon name="arrow" size={16} className="arrow flip-rtl" />
-                  </Link>
-                )}
-              </div>
+              <svg viewBox="0 0 300 120" className="founder-orbit pointer-events-none absolute inset-x-[-4%] bottom-[18%] w-[108%]" aria-hidden="true">
+                <ellipse cx="150" cy="60" rx="140" ry="34" fill="none" stroke="url(#fo)" strokeWidth="1.2" />
+                <defs>
+                  <linearGradient id="fo" x1="0" x2="1"><stop offset="0" stopColor="#8f97ff" stopOpacity="0" /><stop offset="0.5" stopColor="#8f97ff" /><stop offset="1" stopColor="#ff6a2b" /></linearGradient>
+                </defs>
+                <g className="founder-orbit-dot">
+                  <circle r="9" fill="#ff6a2b" />
+                  <path d="M-4 0.5 -1 3.5 4.5 -3" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </g>
+              </svg>
+              <span className="founder-chip absolute start-0 top-[22%]"><b className="tnum" dir="ltr">21145</b> {site.t("credentials.reg_no")}</span>
+              <span className="founder-chip absolute end-0 top-[48%]">{site.locale === "ar" ? "منذ" : "Since"} <b className="tnum" dir="ltr">{site.settings.brand.founded_year}</b></span>
+            </div>
+            <div className="relative p-7 pt-5">
+              <p className="eyebrow on-deep">{site.l(lead.role)}</p>
+              <h3 className="display d-3 mt-4 !text-deep-ink">{site.l(lead.name)}</h3>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {(lead.credentials[site.locale] ?? lead.credentials[site.defaultLocale] ?? []).slice(0, 3).map((c) => (
+                  <li key={c} className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-deep-ink">{c}</li>
+                ))}
+              </ul>
+              {lead.has_profile && (
+                <Link href={h(`/team/${lead.slug}`, site.locale)} className="link-arrow mt-6 text-sm !text-orange">
+                  {site.t("team.profile")}
+                  <Icon name="arrow" size={16} className="arrow flip-rtl" />
+                </Link>
+              )}
             </div>
           </article>
         )}

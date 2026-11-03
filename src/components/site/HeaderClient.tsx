@@ -29,14 +29,14 @@ function applyTheme(mode: Mode) {
   d.dataset.theme = resolved;
   d.dataset.themePref = mode;
   try {
-    localStorage.setItem("sco-theme", mode);
+    localStorage.setItem("sco-theme-v2", mode);
   } catch {}
 }
 
 function ThemeToggle({ labels }: { labels: Props["labels"] }) {
   const [mode, setMode] = useState<Mode>("system");
   useEffect(() => {
-    setMode((document.documentElement.dataset.themePref as Mode) || "system");
+    setMode((document.documentElement.dataset.themePref as Mode) || "light");
     const mq = matchMedia("(prefers-color-scheme: dark)");
     const on = () => {
       if ((document.documentElement.dataset.themePref ?? "system") === "system") applyTheme("system");
@@ -44,7 +44,7 @@ function ThemeToggle({ labels }: { labels: Props["labels"] }) {
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  const next: Record<Mode, Mode> = { system: "light", light: "dark", dark: "system" };
+  const next: Record<Mode, Mode> = { system: "dark", light: "dark", dark: "light" };
   const icon = mode === "light" ? "sun" : mode === "dark" ? "moon" : "monitor";
   const name = labels[mode];
   return (
