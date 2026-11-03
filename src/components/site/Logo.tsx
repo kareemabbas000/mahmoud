@@ -38,9 +38,9 @@ export function Logo({ site, onDeep = false }: { site: Site; onDeep?: boolean })
   return (
     <span className="inline-flex items-center gap-3">
       <Mark onDeep={onDeep} />
-      <span className="flex flex-col leading-none">
-        <span className={`font-mono text-[1.35rem] font-medium tracking-[0.14em] ${onDeep ? "text-deep-ink" : "text-ink"}`} dir="ltr">
-          {brand.short_name}
+      <span className="flex flex-col items-start leading-none">
+        <span className={`self-start font-mono text-[1.35rem] font-medium tracking-[0.14em] ${onDeep ? "text-deep-ink" : "text-ink"}`}>
+          <bdi>{brand.short_name}</bdi>
         </span>
         <span className={`mt-1 hidden text-[0.72rem] font-medium sm:block ${onDeep ? "text-deep-muted" : "text-muted"}`}>{name}</span>
       </span>
