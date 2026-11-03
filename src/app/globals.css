@@ -33,7 +33,7 @@
   --focus: #fc4e08;
   --shadow: 0 1px 2px rgb(11 16 51 / 0.06), 0 8px 24px -12px rgb(11 16 51 / 0.18);
   --display-scale: 1;
-  --f-display: var(--font-markazi), "Amiri", Georgia, serif;
+  --f-display: var(--font-alexandria), "IBM Plex Sans Arabic", system-ui, sans-serif;
   --f-sans: var(--font-plex-arabic), var(--font-plex), Tahoma, system-ui, sans-serif;
   --f-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
   color-scheme: light;
@@ -67,7 +67,7 @@
 }
 /* Arabic Naskh runs optically smaller than Latin at the same size. */
 :lang(ar) {
-  --display-scale: 1.12;
+  --display-scale: 0.94;
 }
 
 @theme inline {
@@ -178,14 +178,14 @@
     .container-x { padding-inline: 2.5rem; }
   }
 
-  /* Display type: Markazi Naskh for both scripts. */
+  /* Display type: Alexandria (geometric, straight strokes) for both scripts. */
   .display {
     font-family: var(--f-display);
     font-weight: 600;
-    line-height: 1.12;
-    letter-spacing: -0.01em;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
   }
-  :lang(ar) .display { line-height: 1.38; }
+  :lang(ar) .display { line-height: 1.32; font-weight: 600; }
   .d-hero { font-size: calc(clamp(2.6rem, 5.6vw, 5.25rem) * var(--display-scale)); }
   .d-1 { font-size: calc(clamp(2.25rem, 4.4vw, 4rem) * var(--display-scale)); }
   .d-2 { font-size: calc(clamp(1.9rem, 3.2vw, 3rem) * var(--display-scale)); }
@@ -574,3 +574,83 @@
 }
 [data-preset="gold"] [data-hero-glow] { background: radial-gradient(closest-side, rgb(176 141 87 / 0.35), transparent); }
 [data-preset="gold"] #scroll-progress { background: linear-gradient(90deg, #8a6a35, #f1dcaa, #8a6a35); }
+
+
+/* ───────────────────────── Steps deck ───────────────────────── */
+@media (min-width: 1024px) {
+  .steps-section { min-height: calc(var(--steps) * 55svh + 45svh); }
+}
+[data-step-label].is-step { color: var(--deep-ink); }
+[data-step-label].is-step .wp-ref { color: var(--orange); }
+.steps-deck > li { will-change: transform, opacity; transform-origin: 50% 100%; }
+
+/* ───────────────────────── Atmosphere: grain + cursor spotlight on dark bands ───────────────────────── */
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+[data-spot] { --mx: 50%; --my: 30%; }
+[data-spot]::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(38rem circle at var(--mx) var(--my), rgb(59 63 245 / 0.18), transparent 60%);
+  transition: opacity 0.4s;
+}
+[data-preset="gold"] [data-spot]::before { background: radial-gradient(38rem circle at var(--mx) var(--my), rgb(207 174 108 / 0.14), transparent 60%); }
+
+/* ───────────────────────── Kinetic ticker ───────────────────────── */
+.ticker-row { display: flex; gap: 3rem; width: max-content; will-change: transform; }
+.ticker-word {
+  font-family: var(--f-display); font-weight: 700; font-size: clamp(3rem, 9vw, 8.5rem); line-height: 1.15; white-space: nowrap;
+  color: color-mix(in srgb, var(--ink) 11%, transparent); transition: color 0.4s;
+}
+.ticker-word:hover { color: var(--ink); }
+.ticker-word.solid { color: var(--blue); }
+.ticker-sep { align-self: center; width: clamp(2rem, 4vw, 3.5rem); height: auto; flex: none; }
+
+/* ───────────────────────── Tilt ───────────────────────── */
+[data-tilt] { transform-style: preserve-3d; transition: transform 0.5s var(--ease-out-quint), box-shadow 0.5s; }
+[data-tilt]:hover { box-shadow: 0 30px 60px -30px rgb(11 16 51 / 0.35); }
+
+/* ───────────────────────── Snap carousel (mobile) ───────────────────────── */
+@layer components {
+  .snap-x-row { display: grid; grid-auto-flow: column; grid-auto-columns: min(82%, 22rem); gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 1rem; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .snap-x-row::-webkit-scrollbar { display: none; }
+  .snap-x-row > * { scroll-snap-align: start; }
+}
+
+/* Living gradient field behind the figures */
+@keyframes mesh-drift { 0% { transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1); } 50% { transform: translate3d(5%, 6%, 0) rotate(18deg) scale(1.1); } 100% { transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1); } }
+.stats-mesh::before, .stats-mesh::after { content: ""; position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; filter: blur(80px); opacity: 0.55; animation: mesh-drift 22s ease-in-out infinite; }
+.stats-mesh::before { background: radial-gradient(circle, rgb(4 1 159 / 0.9), transparent 65%); top: -30%; inset-inline-start: -15%; }
+.stats-mesh::after { background: radial-gradient(circle, rgb(252 78 8 / 0.35), transparent 65%); bottom: -40%; inset-inline-end: -20%; animation-delay: -11s; animation-duration: 28s; }
+[data-preset="gold"] .stats-mesh::before { background: radial-gradient(circle, rgb(176 141 87 / 0.5), transparent 65%); }
+[data-preset="gold"] .stats-mesh::after { background: radial-gradient(circle, rgb(241 220 170 / 0.25), transparent 65%); }
+.stat-tile { transition: border-color 0.4s, background-color 0.4s; }
+.stat-tile:hover { border-color: rgb(169 174 255 / 0.35); background-color: rgb(255 255 255 / 0.05); }
+
+/* Notes tiles */
+.note-tile { transition: border-color 0.4s, box-shadow 0.5s, transform 0.5s var(--ease-out-quint); }
+.note-tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(24rem circle at 0% 0%, var(--blue-wash), transparent 60%); opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+.note-tile:hover { border-color: var(--rule-strong); }
+.note-tile:hover::before { opacity: 1; }
+.note-tile > * { position: relative; }
+
+/* Logo river: second row runs the other way */
+.marquee-reverse { animation-direction: reverse; animation-duration: 56s; }
+
+/* FAQ: smooth open/close with modern CSS (progressive enhancement) */
+:root { interpolate-size: allow-keywords; }
+details::details-content { block-size: 0; overflow: hidden; transition: block-size 0.45s var(--ease-out-quint), content-visibility 0.45s allow-discrete; }
+details[open]::details-content { block-size: auto; }
+.faq-item details[open] summary span:nth-child(2) { color: var(--blue); }
+
+/* CTA: animated conic-gradient halo */
+@property --halo { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes halo-spin { to { --halo: 360deg; } }
+.cta-glow::before {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; z-index: 0; pointer-events: none;
+  background: conic-gradient(from var(--halo), transparent 0 70%, rgb(252 78 8 / 0.9) 80%, transparent 90%);
+  animation: halo-spin 6s linear infinite;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); padding: 2px;
+}
+.cta-glow > * { position: relative; z-index: 1; }

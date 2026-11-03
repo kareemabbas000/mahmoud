@@ -10,6 +10,7 @@ export function PageHeader({ site, props, refCode }: BlockProps<P>) {
   return (
     <section className="relative overflow-hidden border-b border-rule bg-paper">
       <div className="paper-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:linear-gradient(to_bottom,black,transparent)]" aria-hidden="true" />
+      <span aria-hidden="true" data-parallax="0.25" className="pointer-events-none absolute -bottom-10 end-[-2rem] select-none font-display text-[clamp(8rem,26vw,22rem)] font-bold leading-none text-transparent [-webkit-text-stroke:1px_var(--rule-strong)] opacity-60" dir="ltr">{refCode.split("·")[0]}</span>
       <div className="container-x relative pt-10 pb-16 md:pt-14 md:pb-24">
         <Breadcrumbs items={crumbs} label={site.t("a11y.breadcrumb")} />
         <div className="mt-12 grid gap-8 lg:mt-20 lg:grid-cols-12 lg:items-end">

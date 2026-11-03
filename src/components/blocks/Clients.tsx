@@ -33,6 +33,13 @@ export async function Clients({ site, props, refCode }: BlockProps<P>) {
               </li>
             ))}
           </ul>
+          <ul className="marquee-track marquee-reverse mt-4 flex w-max gap-4" aria-hidden="true">
+            {[...loop].reverse().map((c, i) => (
+              <li key={i}>
+                <LogoTile c={c} name={site.l(c.name)} />
+              </li>
+            ))}
+          </ul>
         </div>
       </Band>
     );

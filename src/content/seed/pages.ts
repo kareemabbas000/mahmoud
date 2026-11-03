@@ -51,7 +51,12 @@ export const pages: Page[] = [
         video_url: "https://www.youtube.com/watch?v=3xzxlWo8TGc",
         link: { label: { ar: "تعرّف على المكتب", en: "About the firm" }, href: "/about" },
         media_side: "end",
+        collage: [
+          { src: "/legacy/gallery/09-swedish-ambassador.jpg", alt: { ar: "لقاء مع سفير دولة السويد", en: "Meeting with the Ambassador of Sweden" } },
+          { src: "/legacy/gallery/07-wayana-mou-signing.jpg", alt: { ar: "توقيع مذكرة تفاهم", en: "Signing a memorandum of understanding" } },
+        ],
       }),
+      b("ticker", {}),
       b("services", {
         eyebrow: { ar: "خدماتنا", en: "What we do" },
         title: { ar: "خدمات متكاملة لكل مرحلة من مراحل نمو منشأتك", en: "Integrated services for every stage of your organisation's growth" },

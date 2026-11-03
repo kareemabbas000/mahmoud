@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /**
- * 1. Unprefixed paths → visitor's language (cookie → Accept-Language → default), 307 (varies per visitor).
+ * 1. Unprefixed paths → the default language (Arabic), 307. Visitors switch language explicitly.
  *    Legacy WordPress URLs never reach here: next.config redirects (301) run first.
  * 2. /{locale}/… → pass through, exposing the locale to not-found via a request header.
  * 3. /admin → refresh the Supabase session cookie.
@@ -36,26 +36,6 @@ async function enabledLanguages(): Promise<Lang[]> {
   return FALLBACK;
 }
 
-function negotiate(req: NextRequest, langs: Lang[]): string {
-  const codes = langs.map((l) => l.code);
-  const cookie = req.cookies.get("NEXT_LOCALE")?.value;
-  if (cookie && codes.includes(cookie)) return cookie;
-  const header = req.headers.get("accept-language") ?? "";
-  const prefs = header
-    .split(",")
-    .map((p) => {
-      const [tag, q] = p.trim().split(";q=");
-      return { tag: (tag ?? "").toLowerCase(), q: q ? Number(q) : 1 };
-    })
-    .sort((a, b) => b.q - a.q);
-  for (const { tag } of prefs) {
-    const base = tag.split("-")[0] ?? "";
-    if (codes.includes(tag)) return tag;
-    if (codes.includes(base)) return base;
-  }
-  return (langs.find((l) => l.is_default) ?? langs[0] ?? FALLBACK[0]!).code;
-}
-
 async function adminSession(req: NextRequest) {
   let res = NextResponse.next({ request: req });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -86,10 +66,11 @@ export async function proxy(req: NextRequest) {
     headers.set("x-sco-locale", seg);
     return NextResponse.next({ request: { headers } });
   }
-  const loc = negotiate(req, await enabledLanguages());
+  // Product decision: the site always lands in the default language (Arabic); English is one click away.
+  const langs = await enabledLanguages();
+  const loc = (langs.find((l) => l.is_default) ?? langs[0] ?? FALLBACK[0]!).code;
   const target = new URL(`/${loc}${pathname === "/" ? "" : pathname}${search}`, req.url);
   const res = NextResponse.redirect(target, 307);
-  res.headers.set("Vary", "Accept-Language, Cookie");
   return res;
 }
 

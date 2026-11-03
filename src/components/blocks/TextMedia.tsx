@@ -7,7 +7,7 @@ import { href as h } from "@/lib/i18n";
 import type { BlockProps, LinkProp } from "./types";
 import type { L } from "@/lib/types";
 
-type P = { eyebrow?: L; title?: L; text?: L; image?: string; image_alt?: L; video_url?: string; link?: LinkProp; media_side?: "start" | "end" };
+type P = { eyebrow?: L; title?: L; text?: L; image?: string; image_alt?: L; video_url?: string; link?: LinkProp; media_side?: "start" | "end"; collage?: { src: string; alt?: L }[] };
 
 export function TextMedia({ site, props, refCode }: BlockProps<P>) {
   const mediaFirst = props.media_side === "start";
@@ -48,6 +48,17 @@ export function TextMedia({ site, props, refCode }: BlockProps<P>) {
                 </div>
               )}
             </div>
+            {(props.collage ?? []).slice(0, 2).map((c, i) => (
+              <div
+                key={c.src}
+                data-parallax={i === 0 ? "0.22" : "0.35"}
+                className={`absolute hidden overflow-hidden rounded-md border-4 border-paper shadow-[0_30px_60px_-25px_rgb(11_16_51/0.55)] sm:block ${i === 0 ? "-bottom-14 -start-8 w-[38%] rotate-[-4deg]" : "-top-12 -end-6 w-[30%] rotate-[5deg]"}`}
+              >
+                <div className="relative aspect-[4/5]">
+                  <Image src={c.src} alt={site.l(c.alt)} fill sizes="20vw" className="object-cover" />
+                </div>
+              </div>
+            ))}
           </figure>
         )}
       </div>

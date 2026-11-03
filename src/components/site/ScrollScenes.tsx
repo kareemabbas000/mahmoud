@@ -102,7 +102,7 @@ export function ScrollScenes() {
             v: target,
             duration: 1.8,
             ease: "power2.out",
-            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+            scrollTrigger: { trigger: el, start: "top 92%", once: true },
             onUpdate: () => {
               el.textContent = fmt.format(Math.round(o.v)) + suffix;
             },
@@ -114,23 +114,55 @@ export function ScrollScenes() {
           gsap.fromTo(el, { clipPath: "inset(6% 8% 6% 8% round 24px)" }, { clipPath: "inset(0% 0% 0% 0% round 12px)", ease: "none", scrollTrigger: { trigger: el, start: "top 95%", end: "top 45%", scrub: 0.5 } });
         });
 
-        // Pinned horizontal journey (desktop only).
+        // Sticky deck journey (desktop only) — scrubbed from scroll progress; no pinning, no DOM moves.
         const mm = gsap.matchMedia();
         mm.add("(min-width: 1024px)", () => {
-          gsap.utils.toArray<HTMLElement>("[data-hscroll]").forEach((sec) => {
-            const track = sec.querySelector<HTMLElement>("[data-hscroll-track]");
-            const progress = sec.querySelector<HTMLElement>("[data-hscroll-progress]");
-            if (!track) return;
-            const distance = () => Math.max(0, track.scrollWidth - innerWidth);
-            const tl = gsap.timeline({
-              scrollTrigger: { trigger: sec, start: () => `top ${document.querySelector("header")?.getBoundingClientRect().height ?? 0}px`, end: () => `+=${distance() + innerHeight * 0.4}`, pin: true, scrub: 0.7, invalidateOnRefresh: true, anticipatePin: 1 },
-            });
-            tl.to(track, { x: () => (rtl ? distance() : -distance()), ease: "none" }, 0);
-            if (progress) tl.fromTo(progress, { scaleX: 0 }, { scaleX: 1, ease: "none" }, 0);
-            const cards = track.querySelectorAll(":scope > li");
-            cards.forEach((card, i) => {
-              tl.fromTo(card, { opacity: 0.35, y: 30 }, { opacity: 1, y: 0, ease: "power2.out", duration: 0.2 }, Math.max(0, (i - 1) * 0.16));
-            });
+          gsap.utils.toArray<HTMLElement>("[data-steps]").forEach((sec) => {
+            const cards = gsap.utils.toArray<HTMLElement>(sec.querySelectorAll("[data-step-card]"));
+            const labels = gsap.utils.toArray<HTMLElement>(sec.querySelectorAll("[data-step-label]"));
+            const counter = sec.querySelector<HTMLElement>("[data-step-counter]");
+            const bar = sec.querySelector<HTMLElement>("[data-step-bar]");
+            const n = cards.length;
+            const fmt = (i: number) => new Intl.NumberFormat(lang === "ar" ? (arab ? "ar-EG" : "ar-EG-u-nu-latn") : lang, { minimumIntegerDigits: 2 }).format(i);
+            const render = (p: number) => {
+              const f = Math.min(n - 1, Math.max(0, p * (n - 0.35))); // fractional active index
+              cards.forEach((c, i) => {
+                const d = i - f; // <0 gone, 0 active, >0 waiting in the deck
+                if (d < -1) gsap.set(c, { yPercent: -120, rotate: -6, opacity: 0, scale: 1 });
+                else if (d < 0) gsap.set(c, { yPercent: d * 140, rotate: d * 7, opacity: Math.max(0, 1 + d * 2.4), scale: 1 + d * 0.04 });
+                else gsap.set(c, { yPercent: Math.min(d, 3) * 7, scale: 1 - Math.min(d, 3) * 0.055, opacity: d > 3 ? 0 : 1 - Math.min(d, 3) * 0.22, rotate: 0 });
+              });
+              const active = Math.round(f);
+              labels.forEach((l, i) => l.classList.toggle("is-step", i === active));
+              if (counter) counter.textContent = fmt(active + 1);
+              if (bar) gsap.set(bar, { scaleX: p });
+            };
+            render(0);
+            ScrollTrigger.create({ trigger: sec, start: "top top", end: "bottom bottom", scrub: true, onUpdate: (self) => render(self.progress), onRefresh: (self) => render(self.progress) });
+          });
+        });
+
+        // Gauges, timeline rules and the tick: stroke draws in when the tile enters.
+        gsap.utils.toArray<SVGElement>("[data-ring]").forEach((el, i) => {
+          gsap.fromTo(el, { strokeDashoffset: 100 }, { strokeDashoffset: el.closest("[data-constellation]") ? 0 : 0, duration: 2, ease: "power2.inOut", delay: (i % 4) * 0.12, scrollTrigger: { trigger: el.closest("article") ?? el, start: "top 88%", once: true } });
+        });
+        gsap.utils.toArray<SVGCircleElement>("[data-travel]").forEach((el) => {
+          gsap.fromTo(el, { attr: { cx: 0 } }, { attr: { cx: Number(el.dataset.travel || 300) }, duration: 2, ease: "power2.inOut", scrollTrigger: { trigger: el.closest("article") ?? el, start: "top 88%", once: true } });
+        });
+        gsap.utils.toArray<HTMLElement>("[data-constellation]").forEach((box) => {
+          const lines = box.querySelectorAll("[data-draw]");
+          const nodes = box.querySelectorAll("[data-node]");
+          const tl = gsap.timeline({ scrollTrigger: { trigger: box, start: "top 88%", once: true } });
+          tl.fromTo(nodes, { scale: 0, transformOrigin: "center", opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, stagger: 0.07, ease: "back.out(3)" })
+            .fromTo(lines, { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.06 }, 0.3);
+          gsap.to(nodes, { y: "random(-1.5, 1.5)", x: "random(-1.5, 1.5)", duration: 3, ease: "sine.inOut", repeat: -1, yoyo: true, stagger: 0.2 });
+        });
+
+        // Kinetic ticker rows slide against each other with scroll.
+        gsap.utils.toArray<HTMLElement>("[data-ticker]").forEach((sec) => {
+          sec.querySelectorAll<HTMLElement>("[data-ticker-row]").forEach((row) => {
+            const d = Number(row.dataset.tickerRow); // tracks are laid out LTR in every language
+            gsap.fromTo(row, { xPercent: d > 0 ? 0 : -25 }, { xPercent: d > 0 ? -25 : 0, ease: "none", scrollTrigger: { trigger: sec, start: "top bottom", end: "bottom top", scrub: 0.4 } });
           });
         });
 

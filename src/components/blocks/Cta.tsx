@@ -14,7 +14,7 @@ export function Cta({ site, props }: BlockProps<P>) {
   return (
     <section className="bg-paper">
       <div className="container-x py-16 md:py-24">
-        <div data-expand className="relative overflow-hidden rounded-xl bg-blue px-6 py-14 text-on-blue md:px-16 md:py-20 dark:bg-blue-wash dark:text-ink">
+        <div data-expand className="cta-glow relative overflow-hidden rounded-xl bg-blue px-6 py-14 text-on-blue md:px-16 md:py-20 dark:bg-blue-wash dark:text-ink">
           <div className="pointer-events-none absolute -end-10 -top-10 opacity-[0.12]" aria-hidden="true">
             <svg viewBox="0 0 48 48" width="320" height="320"><path d="M11 25.5 18.5 33 44 6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </div>

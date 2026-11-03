@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getDefaultLocale, getDictionary, getEnabledLanguages, getLanguages, getMenus, getServices, getSettings } from "@/lib/data";
-import { dirOf, fill, makeT, tr } from "@/lib/i18n";
+import { digits, dirOf, fill, makeT, tr } from "@/lib/i18n";
 import type { L } from "@/lib/types";
 
 const LOCALE_RE = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/;
@@ -31,7 +31,8 @@ export const getSite = cache(async (locale: string) => {
     getMenus(),
     getServices(),
   ]);
-  const t = makeT(dict, locale, def);
+  const tRaw = makeT(dict, locale, def);
+  const t = (k: string) => digits(tRaw(k), locale, settings.theme.numerals_ar);
   const founded = settings.brand.founded_year;
   return {
     locale,
@@ -44,7 +45,7 @@ export const getSite = cache(async (locale: string) => {
     numerals: settings.theme.numerals_ar,
     t,
     /** Localize + fill tokens ({years}, {founded}, {year}). */
-    l: (v: L | null | undefined) => fill(tr(v, locale, def), founded),
+    l: (v: L | null | undefined) => digits(fill(tr(v, locale, def), founded), locale, settings.theme.numerals_ar),
   };
 });
 

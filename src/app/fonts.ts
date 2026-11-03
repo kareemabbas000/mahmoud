@@ -1,13 +1,12 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic, Markazi_Text } from "next/font/google";
+import { Alexandria, IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 
 // All SIL Open Font License 1.1 — self-hosted by next/font at build time (no runtime Google requests).
-export const markazi = Markazi_Text({
+// Display: Alexandria — geometric, straight-stroke Arabic + Latin (Mohamed Gaber, OFL). Variable weight axis.
+export const alexandria = Alexandria({
   subsets: ["arabic", "latin"],
-  weight: ["500", "600", "700"],
   display: "swap",
-  variable: "--font-markazi",
-  adjustFontFallback: false,
-  fallback: ["Amiri", "Georgia", "serif"],
+  variable: "--font-alexandria",
+  fallback: ["IBM Plex Sans Arabic", "Tahoma", "system-ui", "sans-serif"],
 });
 export const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
@@ -31,4 +30,4 @@ export const plexMono = IBM_Plex_Mono({
   preload: false,
 });
 
-export const fontVars = `${markazi.variable} ${plexArabic.variable} ${plex.variable} ${plexMono.variable}`;
+export const fontVars = `${alexandria.variable} ${plexArabic.variable} ${plex.variable} ${plexMono.variable}`;

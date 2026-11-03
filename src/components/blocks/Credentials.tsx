@@ -10,7 +10,24 @@ export async function Credentials({ site, props, refCode }: BlockProps<HeadProps
   return (
     <Band>
       <SectionHead site={site} refCode={refCode} head={props} />
-      <div className="overflow-x-auto">
+      <ul className="grid gap-3 md:hidden" data-stagger>
+        {certs.map((c, i) => (
+          <li key={i} className="flex gap-4 rounded-2xl border border-rule bg-surface p-5">
+            <svg viewBox="0 0 24 24" width="22" height="22" className="mt-1 shrink-0" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-ink">{site.l(c.title)}</p>
+              <p className="mt-1 text-sm text-muted">{site.l(c.issuer)}</p>
+              {(c.reference || c.year) && (
+                <p className="tnum mt-3 flex gap-4 font-mono text-sm text-ink">
+                  {c.reference && <span>{site.t("credentials.reg_no")}: <bdi>{digits(c.reference, site.locale, site.numerals)}</bdi></span>}
+                  {c.year && <span className="text-muted">{site.t("credentials.since")} {digits(String(c.year), site.locale, site.numerals)}</span>}
+                </p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[36rem] border-collapse text-start">
           <thead>
             <tr className="border-b border-rule-strong text-sm text-muted">
@@ -23,7 +40,7 @@ export async function Credentials({ site, props, refCode }: BlockProps<HeadProps
           </thead>
           <tbody data-stagger>
             {certs.map((c, i) => (
-              <tr key={i} className="border-b border-rule">
+              <tr key={i} className="cred-row border-b border-rule transition-colors hover:bg-paper-2">
                 <td className="py-4 align-top">
                   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                     <path d="M5 12.5 9.5 17 19 7" fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="tick-path animate" style={{ ["--len" as string]: 24, ["--d" as string]: `${0.3 + i * 0.08}s` } as React.CSSProperties} />

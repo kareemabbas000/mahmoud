@@ -15,14 +15,14 @@ export function Cards({ site, props, refCode }: BlockProps<P>) {
   return (
     <Band>
       <SectionHead site={site} refCode={refCode} head={props} />
-      <ul className={`grid gap-x-10 gap-y-12 ${cols}`} data-stagger>
+      <ul className={`grid gap-5 ${cols}`} data-stagger>
         {items.map((it, i) => (
-          <li key={i} className="group border-t border-rule-strong pt-6">
+          <li key={i} data-tilt className="note-tile group relative overflow-hidden rounded-2xl border border-rule bg-surface p-7">
             <div className="flex items-center justify-between text-faint">
               <span className="text-xs font-medium">
                 {noteWord} {num(i + 1, site.locale, site.numerals)}
               </span>
-              {it.icon && <Icon name={it.icon} size={22} className="text-blue transition-transform duration-500 group-hover:-translate-y-0.5" />}
+              {it.icon && <span className="note-icon inline-flex size-12 items-center justify-center rounded-xl bg-blue-wash text-blue transition-all duration-500 group-hover:bg-blue group-hover:text-on-blue"><Icon name={it.icon} size={22} /></span>}
             </div>
             <h3 className="mt-5 text-xl font-semibold leading-snug text-ink">{site.l(it.title)}</h3>
             <p className="mt-3 text-muted">{site.l(it.text)}</p>

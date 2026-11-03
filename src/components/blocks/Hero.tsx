@@ -110,7 +110,7 @@ export function Hero({ site, props }: BlockProps<P>) {
             </dl>
           )}
         </div>
-        <div className="hero-svg relative hidden aspect-square w-full max-w-[34rem] justify-self-center transition-opacity duration-1000 sm:block lg:col-span-5">
+        <div className="hero-svg relative mx-auto aspect-square w-full max-w-[19rem] justify-self-center transition-opacity duration-1000 sm:max-w-[34rem] lg:col-span-5">
           <HeroVisual />
         </div>
       </div>

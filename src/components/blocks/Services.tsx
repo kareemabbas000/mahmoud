@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Band, SectionHead } from "./Section";
+import { ServicesExplorer } from "./ServicesExplorer";
 import { href as h } from "@/lib/i18n";
 import type { BlockProps, HeadProps } from "./types";
 
@@ -10,8 +11,27 @@ type P = HeadProps & { layout?: "grid" | "list" };
 export function Services({ site, props, refCode }: BlockProps<P>) {
   const { services, locale } = site;
   const detailed = props.layout === "list";
+  if (!detailed) {
+    return (
+      <Band tone="surface">
+        <SectionHead site={site} refCode={refCode} head={props} />
+        <ServicesExplorer
+          more={site.t("common.learn_more")}
+          items={services.map((s, i) => ({
+            slug: s.slug,
+            ref: `B·${String(i + 1).padStart(2, "0")}`,
+            icon: s.icon,
+            name: site.l(s.name),
+            summary: site.l(s.summary),
+            highlights: s.highlights[locale] ?? s.highlights[site.defaultLocale] ?? [],
+            href: h(`/services/${s.slug}`, locale),
+          }))}
+        />
+      </Band>
+    );
+  }
   return (
-    <Band tone={detailed ? "paper" : "surface"}>
+    <Band tone="paper">
       <SectionHead site={site} refCode={refCode} head={props} />
       <ol className="border-b border-rule" data-stagger>
         {services.map((s, i) => (

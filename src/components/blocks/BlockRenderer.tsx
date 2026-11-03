@@ -4,6 +4,7 @@ import type { Block } from "@/lib/types";
 import type { BlockProps } from "./types";
 import { Hero } from "./Hero";
 import { Process } from "./Process";
+import { Ticker } from "./Ticker";
 import { PageHeader } from "./PageHeader";
 import { TextMedia } from "./TextMedia";
 import { Services } from "./Services";
@@ -22,6 +23,7 @@ import { CareersBlock, NewsletterBlock } from "./Forms";
 export const registry: Record<string, ComponentType<BlockProps<any>>> = {
   hero: Hero,
   process: Process,
+  ticker: Ticker,
   pageHeader: PageHeader,
   textMedia: TextMedia,
   services: Services,

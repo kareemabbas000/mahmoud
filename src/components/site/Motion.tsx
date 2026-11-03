@@ -94,5 +94,35 @@ export function Motion() {
     };
   }, [pathname]);
 
+  // Cursor spotlight on dark bands + subtle 3D tilt on cards (fine pointers only).
+  useEffect(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
+    const onMove = (e: PointerEvent) => {
+      const t = e.target as Element | null;
+      const spot = t?.closest<HTMLElement>("[data-spot]");
+      if (spot) {
+        const r = spot.getBoundingClientRect();
+        spot.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        spot.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }
+      const tilt = t?.closest<HTMLElement>("[data-tilt]");
+      document.querySelectorAll<HTMLElement>("[data-tilt][data-tilting]").forEach((el) => {
+        if (el !== tilt) {
+          el.style.transform = "";
+          el.removeAttribute("data-tilting");
+        }
+      });
+      if (tilt) {
+        const r = tilt.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        tilt.style.transform = `perspective(900px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg) translateZ(0)`;
+        tilt.setAttribute("data-tilting", "");
+      }
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [pathname]);
+
   return null;
 }
