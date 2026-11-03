@@ -68,14 +68,17 @@ export function ContactForm({
           <input id="cf-company" name="company" autoComplete="organization" className="input" />
         </Field>
       </div>
-      <Field id="cf-service" label={labels.service}>
-        <select id="cf-service" name="service" defaultValue={defaultService} className="input">
-          <option value="">{labels.general}</option>
-          {services.map((s) => (
-            <option key={s.slug} value={s.slug}>{s.name}</option>
+      <fieldset className="grid gap-3">
+        <legend className="mb-1 text-sm font-medium text-ink">{labels.service}</legend>
+        <div className="flex flex-wrap gap-2">
+          {[{ slug: "", name: labels.general }, ...services].map((sv) => (
+            <label key={sv.slug || "general"} className="svc-chip">
+              <input type="radio" name="service" value={sv.slug} defaultChecked={sv.slug === defaultService} className="sr-only" />
+              <span>{sv.name}</span>
+            </label>
           ))}
-        </select>
-      </Field>
+        </div>
+      </fieldset>
       <Field id="cf-message" label={labels.message} error={err("message")}>
         <textarea id="cf-message" name="message" required rows={5} className="input" {...inv("message")} />
       </Field>

@@ -34,7 +34,7 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
       <SectionHead site={site} head={props} link={props.link} />
       <div className="grid gap-5 lg:grid-cols-12">
         {lead && (
-          <article className="founder-card group relative overflow-hidden rounded-[2rem] text-deep-muted lg:col-span-5 lg:row-span-2" data-reveal data-spot>
+          <article className="founder-card group relative overflow-hidden rounded-[2rem] text-muted lg:col-span-5 lg:row-span-2" data-reveal>
             <div className="founder-visual relative mx-auto mt-8 aspect-[4/4.2] w-[82%]">
               <svg viewBox="0 0 200 200" className="founder-rings absolute inset-x-0 top-0 w-full" aria-hidden="true">
                 {[96, 80, 64, 48].map((r) => <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="currentColor" strokeWidth="0.4" />)}
@@ -49,10 +49,9 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
                   sizes="(min-width:1024px) 30vw, 80vw"
                   className="founder-img object-contain object-bottom"
                 />
-                <div className="founder-tone absolute inset-0" aria-hidden="true" />
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0d26] to-transparent" aria-hidden="true" />
+                <div className="founder-floor absolute inset-x-[10%] bottom-0 h-6" aria-hidden="true" />
               </div>
-              <svg viewBox="0 0 300 120" className="founder-orbit pointer-events-none absolute inset-x-[-4%] bottom-[18%] w-[108%]" aria-hidden="true">
+              <svg viewBox="0 0 300 120" className="founder-orbit pointer-events-none absolute inset-x-[-4%] top-[8%] -z-0 w-[108%]" aria-hidden="true">
                 <ellipse cx="150" cy="60" rx="140" ry="34" fill="none" stroke="url(#fo)" strokeWidth="1.2" />
                 <defs>
                   <linearGradient id="fo" x1="0" x2="1"><stop offset="0" stopColor="#8f97ff" stopOpacity="0" /><stop offset="0.5" stopColor="#8f97ff" /><stop offset="1" stopColor="#ff6a2b" /></linearGradient>
@@ -66,11 +65,11 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
               <span className="founder-chip absolute end-0 top-[48%]">{site.locale === "ar" ? "منذ" : "Since"} <b className="tnum" dir="ltr">{site.settings.brand.founded_year}</b></span>
             </div>
             <div className="relative p-7 pt-5">
-              <p className="eyebrow on-deep">{site.l(lead.role)}</p>
-              <h3 className="display d-3 mt-4 !text-deep-ink">{site.l(lead.name)}</h3>
+              <p className="eyebrow">{site.l(lead.role)}</p>
+              <h3 className="display d-3 mt-4">{site.l(lead.name)}</h3>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {(lead.credentials[site.locale] ?? lead.credentials[site.defaultLocale] ?? []).slice(0, 3).map((c) => (
-                  <li key={c} className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-deep-ink">{c}</li>
+                  <li key={c} className="rounded-full border border-rule bg-surface px-3 py-1 text-xs text-ink">{c}</li>
                 ))}
               </ul>
               {lead.has_profile && (

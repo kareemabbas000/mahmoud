@@ -163,6 +163,7 @@ export function ScrollScenes() {
               if (bar) gsap.set(bar, { scaleX: p });
             };
             render(0);
+            sec.querySelector(".steps-deck")?.classList.add("is-ready");
             ScrollTrigger.create({ trigger: sec, start: "top top", end: "bottom bottom", scrub: true, onUpdate: (self) => render(self.progress), onRefresh: (self) => render(self.progress) });
           });
         });

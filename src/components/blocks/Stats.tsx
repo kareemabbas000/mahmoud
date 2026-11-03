@@ -19,7 +19,7 @@ export function Stats({ site, props }: BlockProps<P>) {
     .filter((it) => it.value !== null && (stats.visible || it.auto_years)) as { key: string; value: number; label: L }[];
   if (!items.length) return null;
   const max = Math.max(...items.map((i) => Math.log10(i.value + 1)));
-  const h = (v: number) => Math.round(70 + (Math.log10(v + 1) / max) * 230); // px
+  const h = (v: number) => Math.round(50 + (Math.log10(v + 1) / max) * 140); // px
   return (
     <section className="stats-stage-band relative overflow-hidden bg-deep text-deep-muted">
       <div aria-hidden="true" className="stats-glow pointer-events-none absolute inset-0" />
