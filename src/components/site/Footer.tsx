@@ -17,8 +17,8 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
     <footer className="relative overflow-hidden bg-deep text-deep-muted" data-theme-scope="deep">
       <div className="ledger-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
       <div className="container-x relative pt-20 pb-10">
-        <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-4">
+        <div className="footer-top grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-12 lg:gap-12">
+          <div className="col-span-2 lg:col-span-4">
             <Logo site={site} onDeep />
             <p className="mt-6 max-w-sm leading-relaxed">{l(f.about)}</p>
             {f.show_social && socials.length > 0 && (
@@ -44,9 +44,8 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
             <div className="lg:col-span-3">
               <h2 className="mb-5 text-sm font-semibold text-deep-ink">{t("footer.services")}</h2>
               <ul className="grid gap-2.5">
-                {site.services.map((s, i) => (
+                {site.services.map((s) => (
                   <li key={s.slug} className="flex items-baseline gap-3">
-                    <span className="wp-ref !text-deep-muted/70">B·{String(i + 1).padStart(2, "0")}</span>
                     <Link href={href(`/services/${s.slug}`, locale)} className="link-u hover:text-deep-ink">
                       {l(s.name)}
                     </Link>
@@ -72,7 +71,7 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
           ))}
         </div>
 
-        <div className="mt-16 grid gap-10 border-t border-deep-rule pt-12 lg:grid-cols-12">
+        <div className="footer-bottom mt-16 grid gap-10 border-t border-deep-rule pt-12 lg:grid-cols-12">
           {f.show_contact && (
             <address className="not-italic lg:col-span-4">
               <h2 className="mb-5 text-sm font-semibold text-deep-ink">{t("footer.contact")}</h2>
@@ -145,7 +144,7 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
                 src={`https://maps.google.com/maps?q=${branch.lat},${branch.lng}&z=16&hl=${locale}&output=embed`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="block h-64 w-full lg:h-full lg:min-h-64"
+                className="block h-56 w-full sm:h-64 lg:h-full lg:min-h-64"
               />
               <figcaption className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-full bg-[#070918]/85 px-4 py-2 text-xs text-deep-ink backdrop-blur">
                 <span className="flex items-center gap-2 truncate"><Icon name="pin" size={14} className="shrink-0 text-orange" />{l(branch.name)}</span>

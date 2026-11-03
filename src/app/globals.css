@@ -1242,3 +1242,46 @@ body { -webkit-tap-highlight-color: transparent; text-size-adjust: 100%; -webkit
 .utility-row { transition: max-height 0.35s var(--ease-out-quint), opacity 0.25s; max-height: 3rem; overflow: hidden; }
 .site-header.is-scrolled .utility-row { max-height: 0; opacity: 0; }
 @media (min-width: 768px) { .site-header.is-scrolled { padding-top: 0.625rem; } }
+
+/* ───────────────────────── Mobile polish v3 ───────────────────────── */
+/* CTA: the decorative tick must stay out of the flow */
+.cta-glow > .absolute { position: absolute; z-index: 0; }
+/* grids never stretch past the screen */
+footer .grid > *, .footer-bottom dl > * { min-width: 0; }
+footer input { min-width: 0; }
+
+/* stacking cards (phones/tablets) */
+@media (max-width: 1023px) {
+  .m-stack { display: grid; gap: 1rem; perspective: 1200px; }
+  .m-stack > li { position: sticky; top: calc(5.25rem + var(--i) * 0.7rem); z-index: calc(var(--i) + 1) !important; }
+  .m-stack > li > * { will-change: transform, filter; transform-origin: 50% 0%; }
+  .steps-deck.m-stack > li { min-height: 17rem; }
+  .steps-section .steps-stage > .container-x { padding-bottom: 6rem; }
+}
+.m-svc-card { position: relative; display: flex; flex-direction: column; overflow: hidden; border-radius: 1.75rem; padding: 1.5rem; min-height: 21rem;
+  background: radial-gradient(70% 60% at 100% 0%, rgb(43 47 245 / 0.45), transparent 60%), radial-gradient(60% 50% at 0% 100%, rgb(252 78 8 / 0.18), transparent 65%), linear-gradient(160deg, #171c4a, #0b0f2b 60%, #080b22);
+  border: 1px solid rgb(143 151 255 / 0.2); box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset, 0 30px 60px -30px rgb(11 16 51 / 0.7); }
+.m-svc-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image: linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px); background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(70% 60% at 85% 10%, #000, transparent); mask-image: radial-gradient(70% 60% at 85% 10%, #000, transparent); }
+.m-svc-icon { display: grid; place-items: center; width: 3.25rem; height: 3.25rem; border-radius: 1rem; color: #fff;
+  background: linear-gradient(145deg, #4b51ff, #1a1db8 60%, #0b0d7a); box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset, 0 12px 26px -10px rgb(59 63 245 / 0.8); }
+
+@media (max-width: 767px) {
+  /* tighter vertical rhythm and comfortable type on phones */
+  .section-pad { padding-block: 4rem; }
+  .sec-head { margin-bottom: 2rem !important; }
+  .lede { font-size: 1rem; }
+  /* footer map: a neat card */
+  .footer-map { border-radius: 1.25rem; }
+  .footer-map figcaption { font-size: 0.7rem; padding: 0.45rem 0.75rem; }
+  /* image media cards a little rounder */
+  [data-clip] { border-radius: 1rem; }
+}
+.faq-item summary { padding-inline: 1.1rem; }
+.faq-item details > :not(summary) { padding-inline: 1.1rem; }
+.faq-item { border-radius: 1.25rem; margin-bottom: 0.75rem; border-top: 0 !important; }
+@media (max-width: 767px) { .faq-item summary > span.flex-1 { font-size: 1rem; } .faq-item summary { padding-block: 1.1rem; } }
+.m-sheet-panel nav > ul { grid-template-columns: minmax(0, 1fr); }
+.m-item { min-width: 0; }
+.m-sheet-panel { overflow-x: hidden; }

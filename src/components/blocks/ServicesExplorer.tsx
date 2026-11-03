@@ -22,20 +22,21 @@ export function ServicesExplorer({ items, more, head }: { items: SvcView[]; more
     <>
       <div className="container-x section-pad lg:hidden">
         {head}
-        <ul className="snap-x-row" aria-label={more}>
-          {items.map((s) => (
-            <li key={s.slug}>
-              <Link href={s.href} className="flex h-full flex-col rounded-2xl border border-rule bg-surface p-6 shadow-soft">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex size-12 items-center justify-center rounded-xl bg-blue text-on-blue"><Icon name={s.icon} size={24} /></span>
-                  <span className="font-display text-3xl font-bold text-rule-strong">{s.num}</span>
+        <ul className="m-stack mt-2" data-mstack aria-label={more}>
+          {items.map((s, i) => (
+            <li key={s.slug} style={{ ["--i" as string]: i } as React.CSSProperties}>
+              <Link href={s.href} className="m-svc-card">
+                <span aria-hidden="true" className="m-svc-glow" />
+                <div className="relative flex items-center justify-between">
+                  <span className="m-svc-icon"><Icon name={s.icon} size={24} /></span>
+                  <span className="tnum text-xs text-deep-muted" dir="ltr">{s.num} / {items[n - 1]!.num}</span>
                 </div>
-                <h3 className="display d-3 mt-6">{s.name}</h3>
-                <p className="mt-3 text-sm text-muted">{s.summary}</p>
-                <ul className="mt-4 grid gap-2 text-sm">
+                <h3 className="display d-3 relative mt-5 !text-deep-ink">{s.name}</h3>
+                <p className="relative mt-2 text-sm leading-relaxed text-deep-muted">{s.summary}</p>
+                <ul className="relative mt-4 grid gap-2 text-sm text-deep-ink">
                   {s.highlights.slice(0, 3).map((x) => <li key={x} className="flex items-start gap-2"><Icon name="check" size={16} className="mt-1 shrink-0 text-orange" />{x}</li>)}
                 </ul>
-                <span className="link-arrow mt-auto pt-5 text-sm">{more}<Icon name="arrow" size={16} className="arrow flip-rtl" /></span>
+                <span className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#ffb08a]">{more}<Icon name="arrow" size={16} className="flip-rtl" /></span>
               </Link>
             </li>
           ))}

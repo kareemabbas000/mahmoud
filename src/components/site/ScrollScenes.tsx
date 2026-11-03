@@ -138,6 +138,37 @@ export function ScrollScenes() {
           });
         });
 
+        // Phones and tablets: stacking cards — each card sticks under the header and the one beneath
+        // recedes (scales down, dims, tilts back) as the next slides over it. Scrubbed, no pinning.
+        gsap.matchMedia().add("(max-width: 1023px)", () => {
+          gsap.utils.toArray<HTMLElement>("[data-mstack]").forEach((list) => {
+            const cards = [...list.querySelectorAll<HTMLElement>(":scope > li")];
+            cards.forEach((card, i) => {
+              const next = cards[i + 1];
+              if (!next) return;
+              const inner = (card.hasAttribute("data-step-card") ? card : card.firstElementChild) as HTMLElement | null;
+              if (!inner) return;
+              gsap.fromTo(
+                inner,
+                { scale: 1, filter: "brightness(1)", rotateX: 0 },
+                {
+                  scale: 0.9,
+                  filter: "brightness(0.72)",
+                  rotateX: 6,
+                  transformOrigin: "50% 0%",
+                  ease: "none",
+                  scrollTrigger: { trigger: next, start: "top bottom", end: () => `top ${parseFloat(getComputedStyle(next).top) || 96}px`, scrub: true },
+                },
+              );
+            });
+          });
+
+          // Gallery and media: images settle from a slight zoom as they scroll through.
+          gsap.utils.toArray<HTMLElement>(".mosaic img, [data-clip] img").forEach((img) => {
+            gsap.fromTo(img, { scale: 1.18 }, { scale: 1, ease: "none", scrollTrigger: { trigger: img, start: "top bottom", end: "center center", scrub: true } });
+          });
+        });
+
         // Sticky deck journey (desktop only) — scrubbed from scroll progress; no pinning, no DOM moves.
         const mm = gsap.matchMedia();
         mm.add("(min-width: 1024px)", () => {

@@ -54,11 +54,11 @@ export function Process({ site, props }: BlockProps<P>) {
             </ol>
           </div>
           <div className="lg:col-span-7">
-            <ol className="steps-deck grid gap-5 lg:relative lg:block ">
+            <ol className="steps-deck m-stack grid gap-5 lg:relative lg:block" data-mstack>
               {steps.map((s, i) => {
                 const last = i === steps.length - 1;
                 return (
-                  <li key={i} data-step-card className={`step-card relative flex flex-col overflow-hidden rounded-[1.75rem] p-7 lg:absolute lg:inset-0 lg:p-10 ${last ? "is-last" : ""}`} style={{ zIndex: steps.length - i }}>
+                  <li key={i} data-step-card className={`step-card relative flex flex-col overflow-hidden rounded-[1.75rem] p-7 lg:absolute lg:inset-0 lg:p-10 ${last ? "is-last" : ""}`} style={{ zIndex: steps.length - i, ["--i" as string]: i } as React.CSSProperties}>
                     <span aria-hidden="true" className="step-mesh" />
                     <div className="relative flex items-center gap-4">
                       <span className="step-icon" aria-hidden="true">

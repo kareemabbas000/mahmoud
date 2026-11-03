@@ -9,15 +9,14 @@ import type { L } from "@/lib/types";
 
 type P = { eyebrow?: L; title?: L; text?: L; image?: string; image_alt?: L; video_url?: string; link?: LinkProp; media_side?: "start" | "end"; collage?: { src: string; alt?: L }[] };
 
-export function TextMedia({ site, props, refCode }: BlockProps<P>) {
+export function TextMedia({ site, props }: BlockProps<P>) {
   const mediaFirst = props.media_side === "start";
   return (
     <Band>
       <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
         <div className={`lg:col-span-6 ${mediaFirst ? "lg:order-2" : ""}`}>
           <div className="flex items-center gap-4">
-            <span className="wp-ref">{refCode}</span>
-            {props.eyebrow && <span className="eyebrow">{site.l(props.eyebrow)}</span>}
+                        {props.eyebrow && <span className="eyebrow">{site.l(props.eyebrow)}</span>}
           </div>
           {props.title && (
             <h2 className="display d-2 mt-5" data-split>
@@ -38,7 +37,7 @@ export function TextMedia({ site, props, refCode }: BlockProps<P>) {
         </div>
         {props.image && (
           <figure className={`relative lg:col-span-6 ${mediaFirst ? "lg:order-1" : ""}`} data-reveal>
-            <div aria-hidden="true" className="absolute -inset-3 translate-x-4 translate-y-4 rounded-md border border-blue/30 rtl:-translate-x-4" />
+            <div aria-hidden="true" className="absolute -inset-3 hidden translate-x-4 translate-y-4 rounded-md border border-blue/30 sm:block rtl:-translate-x-4" />
             <div className="relative aspect-[3/2] overflow-hidden rounded-md bg-paper-2" data-clip>
               {props.video_url ? (
                 <LiteVideo url={props.video_url} poster={props.image} label={site.t("common.watch_video")} title={site.l(props.image_alt) || site.t("common.watch_video")} />
