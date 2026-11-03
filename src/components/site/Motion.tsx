@@ -99,7 +99,7 @@ export function Motion() {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
     const onMove = (e: PointerEvent) => {
       const t = e.target as Element | null;
-      const spot = t?.closest<HTMLElement>("[data-spot]");
+      const spot = t?.closest<HTMLElement>("[data-spot], .stat-card, .cert-card, .member-card, .note-tile, .svc-panel, .logo-tile, .steps-deck > li");
       if (spot) {
         const r = spot.getBoundingClientRect();
         spot.style.setProperty("--mx", `${e.clientX - r.left}px`);

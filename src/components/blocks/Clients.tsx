@@ -9,91 +9,103 @@ import type { Client, ClientKind } from "@/lib/types";
 
 type P = HeadProps & { mode?: "marquee" | "full"; link?: LinkProp };
 
-function LogoTile({ c, name }: { c: Client; name: string }) {
+function LogoTile({ c, name, big = false }: { c: Client; name: string; big?: boolean }) {
   return (
-    <span className="logo-tile flex h-24 w-40 shrink-0 items-center justify-center rounded-md border border-rule bg-surface px-5" title={name}>
-      <img src={c.logo!} alt={name} decoding="async" className="logo-mono max-h-14 w-auto object-contain" />
+    <span className={`logo-tile shine relative flex items-center justify-center overflow-hidden rounded-2xl border border-rule bg-surface ${big ? "h-32 p-6" : "h-24 p-5"}`} title={name}>
+      <img src={c.logo!} alt={name} loading="lazy" decoding="async" className="logo-mono relative max-h-16 w-auto object-contain" />
     </span>
   );
 }
 
-export async function Clients({ site, props, refCode }: BlockProps<P>) {
+export async function Clients({ site, props }: BlockProps<P>) {
   const all = await getClients();
-  const withLogo = all.filter((c) => c.logo && (props.mode === "full" || c.featured));
+  const logos = all.filter((c) => c.logo);
+  const count = (k: ClientKind) => all.filter((c) => c.kind === k).length;
+  const label: Record<ClientKind, string> = { corporate: site.t("clients.corporate"), donor: site.t("clients.donor"), ngo: site.t("clients.ngo") };
+  const short: Record<ClientKind, [string, string]> = { corporate: ["شركة", "companies"], donor: ["جهة مانحة", "donors & agencies"], ngo: ["جمعية ومؤسسة", "NGOs & foundations"] };
+  const kinds: ClientKind[] = ["corporate", "donor", "ngo"];
+
   if (props.mode !== "full") {
-    const loop = [...withLogo, ...withLogo];
+    const featured = logos.filter((c) => c.featured).slice(0, 9);
+    const names = all.filter((c) => c.kind !== "corporate").map((c) => site.l(c.name));
     return (
-      <Band tone="paper-2">
-        <SectionHead site={site} refCode={refCode} head={props} link={props.link} />
-        <div className="marquee relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]" tabIndex={0} aria-label={site.l(props.title)}>
-          <ul className="marquee-track flex w-max gap-4">
-            {loop.map((c, i) => (
-              <li key={i} aria-hidden={i >= withLogo.length || undefined}>
-                <LogoTile c={c} name={site.l(c.name)} />
-              </li>
-            ))}
-          </ul>
-          <ul className="marquee-track marquee-reverse mt-4 flex w-max gap-4" aria-hidden="true">
-            {[...loop].reverse().map((c, i) => (
-              <li key={i}>
-                <LogoTile c={c} name={site.l(c.name)} />
-              </li>
+      <section className="relative overflow-hidden bg-paper-2">
+        <div className="container-x section-pad">
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <SectionHead site={site} head={props} align="stack" />
+              <ul className="-mt-4 grid grid-cols-3 gap-3" data-stagger>
+                {kinds.map((k) => (
+                  <li key={k} className="rounded-2xl border border-rule bg-surface p-4">
+                    <p className="tnum font-display text-3xl font-bold text-ink" dir="ltr">
+                      <span data-count={count(k)}>{num(count(k), site.locale, site.numerals)}</span>
+                    </p>
+                    <p className="mt-1 text-xs text-muted">{short[k][site.locale === "ar" ? 0 : 1]}</p>
+                  </li>
+                ))}
+              </ul>
+              {props.link && (
+                <Link href={h(props.link.href, site.locale)} className="btn btn-primary mt-8">
+                  {site.l(props.link.label)}
+                  <Icon name="arrow" size={16} className="arrow flip-rtl" />
+                </Link>
+              )}
+            </div>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-7" data-stagger>
+              {featured.map((c) => (
+                <li key={c.name.en ?? c.name.ar}>
+                  <LogoTile c={c} name={site.l(c.name)} big />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="marquee relative overflow-hidden border-t border-rule py-6 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]" aria-hidden="true">
+          <ul className="marquee-track flex w-max gap-3">
+            {[...names, ...names].map((n, i) => (
+              <li key={i} className="whitespace-nowrap rounded-full border border-rule bg-surface px-5 py-2 text-sm text-muted">{n}</li>
             ))}
           </ul>
         </div>
-      </Band>
+      </section>
     );
   }
-  const groups: ClientKind[] = ["corporate", "donor", "ngo"];
-  const label: Record<ClientKind, string> = { corporate: site.t("clients.corporate"), donor: site.t("clients.donor"), ngo: site.t("clients.ngo") };
-  const letters = { corporate: "C", donor: "D", ngo: "N" } as const;
+
   return (
     <>
       <Band tone="surface">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {withLogo.map((c) => (
-            <li key={c.name.en ?? c.name.ar} data-reveal>
-              <span className="logo-tile flex h-28 items-center justify-center rounded-md border border-rule bg-surface p-5">
-                <img src={c.logo!} alt={site.l(c.name)} loading="lazy" className="logo-mono max-h-16 w-auto object-contain" />
-              </span>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" data-stagger>
+          {logos.map((c) => (
+            <li key={c.name.en ?? c.name.ar}>
+              <LogoTile c={c} name={site.l(c.name)} big />
             </li>
           ))}
         </ul>
       </Band>
-      {groups.map((g, gi) => {
-        const list = all.filter((c) => c.kind === g);
-        if (!list.length) return null;
-        return (
-          <Band key={g} tone={gi % 2 ? "paper-2" : "paper"}>
-            <div className="grid gap-10 lg:grid-cols-12">
-              <div className="lg:col-span-4">
-                <span className="wp-ref">{`${refCode.split("·")[0]}·${letters[g]}`}</span>
-                <h2 className="display d-3 mt-4" data-split>{label[g]}</h2>
-                <p className="mt-3 font-mono text-sm text-faint" dir="ltr">
-                  n = {num(list.length, "en")}
-                </p>
-              </div>
-              <ol className="columns-1 gap-10 sm:columns-2 lg:col-span-8">
-                {list.map((c, i) => (
-                  <li key={i} className="mb-0 flex break-inside-avoid items-baseline gap-4 border-b border-rule py-3.5">
-                    <span className="wp-ref w-7 shrink-0">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-ink">{site.l(c.name)}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </Band>
-        );
-      })}
+      <Band tone="paper-2">
+        <div className="grid gap-5 lg:grid-cols-3">
+          {kinds.map((k) => {
+            const list = all.filter((c) => c.kind === k);
+            if (!list.length) return null;
+            return (
+              <article key={k} className="flex flex-col rounded-[1.75rem] border border-rule bg-surface p-7" data-reveal>
+                <div className="flex items-start justify-between gap-4">
+                  <h2 className="display d-3">{label[k]}</h2>
+                  <span className="tnum rounded-full bg-blue px-3 py-1 font-display text-sm font-bold text-on-blue" dir="ltr">{list.length}</span>
+                </div>
+                <ol className="mt-6 grid gap-0">
+                  {list.map((c, i) => (
+                    <li key={i} className="flex items-baseline gap-3 border-t border-rule py-3 text-sm">
+                      <span className="tnum w-6 shrink-0 text-xs text-faint" dir="ltr">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="text-ink">{site.l(c.name)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </article>
+            );
+          })}
+        </div>
+      </Band>
     </>
-  );
-}
-
-export function ClientsLink({ site, link }: { site: BlockProps["site"]; link: LinkProp }) {
-  return (
-    <Link href={h(link.href, site.locale)} className="link-arrow">
-      {site.l(link.label)}
-      <Icon name="arrow" size={16} className="arrow flip-rtl" />
-    </Link>
   );
 }

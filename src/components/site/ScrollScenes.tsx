@@ -87,7 +87,7 @@ export function ScrollScenes() {
         // Staggered children (ledger rows, notes, credentials).
         gsap.utils.toArray<HTMLElement>("[data-stagger]").forEach((list) => {
           const items = list.querySelectorAll(":scope > *");
-          gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", stagger: 0.08, scrollTrigger: { trigger: list, start: "top 85%", once: true } });
+          gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", stagger: 0.08, onStart: () => items.forEach((x) => x.classList.add("is-in")), scrollTrigger: { trigger: list, start: "top 85%", once: true } });
         });
 
         // Counting figures (balance-sheet stats).
@@ -112,6 +112,30 @@ export function ScrollScenes() {
         // CTA panel expands from an inset card to full bleed.
         gsap.utils.toArray<HTMLElement>("[data-expand]").forEach((el) => {
           gsap.fromTo(el, { clipPath: "inset(6% 8% 6% 8% round 24px)" }, { clipPath: "inset(0% 0% 0% 0% round 12px)", ease: "none", scrollTrigger: { trigger: el, start: "top 95%", end: "top 45%", scrub: 0.5 } });
+        });
+
+        // Scroll-locked services scene: holds while each scroll step advances one service.
+        gsap.matchMedia().add("(min-width: 1024px)", () => {
+          gsap.utils.toArray<HTMLElement>("[data-svc-scroll]").forEach((sec) => {
+            const items = [...sec.querySelectorAll<HTMLElement>("[data-svc-item]")];
+            const panels = [...sec.querySelectorAll<HTMLElement>("[data-svc-panel]")];
+            const bar = sec.querySelector<HTMLElement>("[data-svc-progress]");
+            const n = panels.length;
+            let cur = -1;
+            const set = (p: number) => {
+              const i = Math.min(n - 1, Math.max(0, Math.floor(p * n)));
+              if (bar) bar.style.transform = `scaleX(${Math.max(0.02, (i + 1) / n)})`;
+              if (i === cur) return;
+              cur = i;
+              items.forEach((x, k) => x.classList.toggle("is-active", k === i));
+              panels.forEach((x, k) => {
+                x.classList.toggle("is-active", k === i);
+                x.classList.toggle("is-past", k < i);
+              });
+            };
+            set(0);
+            ScrollTrigger.create({ trigger: sec, start: "top top", end: "bottom bottom", onUpdate: (self) => set(self.progress), onRefresh: (self) => set(self.progress) });
+          });
         });
 
         // Sticky deck journey (desktop only) — scrubbed from scroll progress; no pinning, no DOM moves.

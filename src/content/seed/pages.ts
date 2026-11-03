@@ -56,7 +56,6 @@ export const pages: Page[] = [
           { src: "/legacy/gallery/07-wayana-mou-signing.jpg", alt: { ar: "توقيع مذكرة تفاهم", en: "Signing a memorandum of understanding" } },
         ],
       }),
-      b("ticker", {}),
       b("services", {
         eyebrow: { ar: "خدماتنا", en: "What we do" },
         title: { ar: "خدمات متكاملة لكل مرحلة من مراحل نمو منشأتك", en: "Integrated services for every stage of your organisation's growth" },
@@ -100,6 +99,7 @@ export const pages: Page[] = [
           { icon: "target", title: { ar: "هدفنا", en: "Our goal" }, text: { ar: "مشورة متخصصة للشركات الريادية والمنظمات غير الهادفة للربح والأفراد.", en: "Specialist advice for entrepreneurial businesses, not-for-profit organisations and private individuals." } },
         ],
       }),
+      b("team", { eyebrow: { ar: "القيادة", en: "Leadership" }, title: { ar: "خبرة يقودها محاسبون قانونيون وخبراء ضرائب", en: "Led by chartered accountants and tax experts" }, link: { label: { ar: "تعرّف على الفريق", en: "Meet the team" }, href: "/team" } }),
       b("clients", {
         eyebrow: { ar: "عملاؤنا", en: "Clients" },
         title: { ar: "موضع ثقة الشركات والجهات المانحة والمؤسسات الأهلية", en: "Trusted by companies, donors and non-profits" },
@@ -110,6 +110,7 @@ export const pages: Page[] = [
         eyebrow: { ar: "القيد والعضويات", en: "Registrations & memberships" },
         title: { ar: "اعتمادات مهنية موثّقة", en: "Documented professional credentials" },
       }),
+      b("gallery", { eyebrow: { ar: "من أنشطتنا", en: "From our activities" }, title: { ar: "لقاءات وفعاليات وشراكات", en: "Meetings, events and partnerships" }, limit: 6, link: { label: { ar: "المعرض كاملًا", en: "Full gallery" }, href: "/gallery" } }),
       b("faq", {
         eyebrow: { ar: "الأسئلة الشائعة", en: "Tax FAQ" },
         title: { ar: "أسئلة متكررة حول ضريبة المرتبات", en: "Common questions on payroll tax" },

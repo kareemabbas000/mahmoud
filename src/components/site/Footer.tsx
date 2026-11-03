@@ -74,7 +74,7 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
 
         <div className="mt-16 grid gap-10 border-t border-deep-rule pt-12 lg:grid-cols-12">
           {f.show_contact && (
-            <address className="not-italic lg:col-span-7">
+            <address className="not-italic lg:col-span-4">
               <h2 className="mb-5 text-sm font-semibold text-deep-ink">{t("footer.contact")}</h2>
               <dl className="grid gap-4 sm:grid-cols-2">
                 {branch && (
@@ -138,8 +138,23 @@ export function Footer({ site, branch }: { site: Site; branch: Branch | null }) 
               </dl>
             </address>
           )}
+          {f.show_map && branch?.lat && branch?.lng && (
+            <figure className="footer-map relative overflow-hidden rounded-[1.5rem] border border-deep-rule lg:col-span-4">
+              <iframe
+                title={l(branch.name)}
+                src={`https://maps.google.com/maps?q=${branch.lat},${branch.lng}&z=16&hl=${locale}&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="block h-64 w-full lg:h-full lg:min-h-64"
+              />
+              <figcaption className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-full bg-[#070918]/85 px-4 py-2 text-xs text-deep-ink backdrop-blur">
+                <span className="flex items-center gap-2 truncate"><Icon name="pin" size={14} className="shrink-0 text-orange" />{l(branch.name)}</span>
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${branch.lat},${branch.lng}`} target="_blank" rel="noopener noreferrer" className="pointer-events-auto shrink-0 font-semibold text-orange">{t("common.directions")} ↗</a>
+              </figcaption>
+            </figure>
+          )}
           {f.show_newsletter && (
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-4">
               <h2 className="mb-2 text-sm font-semibold text-deep-ink">{t("newsletter.title")}</h2>
               <p className="mb-5 text-sm">{t("newsletter.text")}</p>
               <NewsletterForm

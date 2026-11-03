@@ -15,9 +15,9 @@ export function Process({ site, props, refCode }: BlockProps<P>) {
   if (!steps.length) return null;
   const n = (i: number) => num(i, site.locale, site.numerals).padStart(2, site.locale === "ar" && site.numerals === "arab" ? "٠" : "0");
   return (
-    <section data-steps style={{ ["--steps" as string]: steps.length } as React.CSSProperties} className="steps-section relative bg-deep text-deep-muted">
+    <section data-steps style={{ ["--steps" as string]: steps.length } as React.CSSProperties} className="steps-section relative mt-10 bg-deep pt-6 text-deep-muted lg:mt-16">
       <div className="ledger-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
-      <div className="steps-stage relative lg:sticky lg:top-[6.75rem] lg:flex lg:h-[calc(100svh-6.75rem)] lg:items-center">
+      <div className="steps-stage relative lg:sticky lg:top-[7.5rem] lg:flex lg:h-[calc(100svh-7.5rem)] lg:items-center">
         <div className="container-x grid w-full gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-0">
           <div className="lg:col-span-5">
             <div className="flex items-center gap-4">

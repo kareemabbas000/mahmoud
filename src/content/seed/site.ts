@@ -39,7 +39,7 @@ export const settings: SiteSettings = {
     og_image: null,
     verification: {},
   },
-  theme: { default_mode: "system", numerals_ar: "arab", preset: "ledger", hero_3d: true },
+  theme: { default_mode: "dark", numerals_ar: "latn", preset: "ledger", hero_3d: true },
   header: {
     show_announcement: false,
     announcement: { ar: "", en: "" },
@@ -126,6 +126,7 @@ export const menus: Menu[] = [
       },
       { id: "team", label: { ar: "فريق العمل", en: "Team" }, href: "/team" },
       { id: "clients", label: { ar: "عملاؤنا", en: "Clients" }, href: "/clients" },
+      { id: "gallery", label: { ar: "معرض الصور", en: "Gallery" }, href: "/gallery" },
       { id: "insights", label: { ar: "رؤى ومقالات", en: "Insights" }, href: "/insights" },
       { id: "faq", label: { ar: "الأسئلة الشائعة", en: "FAQ" }, href: "/faq" },
       { id: "contact", label: { ar: "اتصل بنا", en: "Contact" }, href: "/contact" },

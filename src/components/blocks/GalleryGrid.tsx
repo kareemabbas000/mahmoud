@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 
 type Item = { src: string; w: number; h: number; caption: string };
 
-export function GalleryGrid({ items, labels }: { items: Item[]; labels: { open: string; close: string; prev: string; next: string } }) {
+export function GalleryGrid({ items, labels, mosaic = false }: { items: Item[]; labels: { open: string; close: string; prev: string; next: string }; mosaic?: boolean }) {
   const [i, setI] = useState<number | null>(null);
   const dlg = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -28,6 +28,19 @@ export function GalleryGrid({ items, labels }: { items: Item[]; labels: { open: 
   const rtl = typeof document !== "undefined" && document.dir === "rtl";
   return (
     <>
+      {mosaic ? (
+        <ul className="mosaic">
+          {items.map((it, n) => (
+            <li key={it.src} className="group relative overflow-hidden rounded-2xl bg-paper-2" data-reveal>
+              <button type="button" onClick={(e) => open(n, e.currentTarget)} className="absolute inset-0 block" aria-label={`${labels.open}: ${it.caption}`}>
+                <Image src={it.src} alt={it.caption} fill sizes="(min-width:768px) 40vw, 50vw" className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+                <span className="absolute inset-0 bg-gradient-to-t from-deep/85 via-deep/10 to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
+                <span className="absolute inset-x-0 bottom-0 translate-y-2 p-4 text-start text-sm leading-snug text-white opacity-90 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">{it.caption}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
       <ul className="columns-2 gap-4 md:columns-3">
         {items.map((it, n) => (
           <li key={it.src} className="mb-4 break-inside-avoid" data-reveal>
@@ -40,6 +53,7 @@ export function GalleryGrid({ items, labels }: { items: Item[]; labels: { open: 
           </li>
         ))}
       </ul>
+      )}
       <dialog
         ref={dlg}
         onClose={() => setI(null)}

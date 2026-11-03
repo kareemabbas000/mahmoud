@@ -59,13 +59,14 @@ export default async function SiteLayout({ children, params }: { children: React
   const { t } = site;
 
   return (
-    <html lang={locale} dir={site.dir} className={fontVars} suppressHydrationWarning data-numerals={site.numerals} data-preset={site.settings.theme.preset ?? "ledger"}>
+    <html lang={locale} dir={site.dir} className={`site ${fontVars}`} suppressHydrationWarning data-numerals={site.numerals} data-preset={site.settings.theme.preset ?? "ledger"}>
       <head>
         <ThemeScript defaultMode={site.settings.theme.default_mode} preset={site.settings.theme.preset} />
         <ConsentDefaults />
         <JsonLd data={organizationLd(site, primary)} />
       </head>
       <body className="min-h-dvh">
+        <div className="aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
         <a href="#main" className="sr-only z-[60] rounded-md bg-ink px-4 py-2 text-paper focus:not-sr-only focus:fixed focus:start-4 focus:top-4">
           {t("a11y.skip")}
         </a>

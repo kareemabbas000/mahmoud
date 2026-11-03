@@ -31,7 +31,7 @@ export function HeroScene({ rtl }: { rtl: boolean }) {
       const cAccent = new T3.Color(css.getPropertyValue("--scene-accent").trim() || "#fc4e08");
       const cPaper = new T3.Color(css.getPropertyValue("--scene-paper").trim() || "#f7f8fc");
       const dir = rtl ? -1 : 1;
-      const gold = document.documentElement.dataset.preset === "gold";
+      const gold = true; // centred composition: scene sits behind the headline
 
       const renderer = new T3.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));

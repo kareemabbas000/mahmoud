@@ -13,13 +13,13 @@ export function Services({ site, props, refCode }: BlockProps<P>) {
   const detailed = props.layout === "list";
   if (!detailed) {
     return (
-      <Band tone="surface">
-        <SectionHead site={site} refCode={refCode} head={props} />
+      <section className="relative bg-surface">
         <ServicesExplorer
           more={site.t("common.learn_more")}
+          head={<SectionHead site={site} head={props} align="stack" />}
           items={services.map((s, i) => ({
             slug: s.slug,
-            ref: `B·${String(i + 1).padStart(2, "0")}`,
+            num: String(i + 1).padStart(2, "0"),
             icon: s.icon,
             name: site.l(s.name),
             summary: site.l(s.summary),
@@ -27,7 +27,7 @@ export function Services({ site, props, refCode }: BlockProps<P>) {
             href: h(`/services/${s.slug}`, locale),
           }))}
         />
-      </Band>
+      </section>
     );
   }
   return (
