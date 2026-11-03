@@ -37,12 +37,12 @@ export function Logo({ site, onDeep = false }: { site: Site; onDeep?: boolean })
   }
   return (
     <span className="inline-flex items-center gap-3">
-      <Mark onDeep={onDeep} />
+      <span className="logo-mark"><Mark onDeep={onDeep} /></span>
       <span className="flex flex-col items-start leading-none">
-        <span className={`self-start text-[1.7rem] font-bold leading-none tracking-[0.04em] ${onDeep ? "text-deep-ink" : "text-ink"}`} style={{ fontFamily: "Tahoma, Verdana, 'Segoe UI', sans-serif" }}>
+        <span className={`self-start text-[1.45rem] sm:text-[1.7rem] font-bold leading-none tracking-[0.04em] ${onDeep ? "text-deep-ink" : "text-ink"}`} style={{ fontFamily: "Tahoma, Verdana, 'Segoe UI', sans-serif" }}>
           <bdi>{brand.short_name}</bdi>
         </span>
-        <span className={`mt-1.5 hidden text-[0.75rem] font-medium sm:block ${onDeep ? "text-deep-muted" : "text-muted"}`}>{name}</span>
+        <span className={`logo-sub mt-1 text-[0.62rem] font-medium sm:mt-1.5 sm:text-[0.75rem] ${onDeep ? "text-deep-muted" : "text-muted"}`}>{name}</span>
       </span>
       <span className="sr-only">{name}</span>
     </span>

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/ui/Icon";
 
-export type NavItem = { id: string; label: string; href: string; children?: (NavItem & { ref?: string; summary?: string })[] };
+export type NavItem = { id: string; label: string; href: string; icon?: string; children?: (NavItem & { ref?: string; summary?: string })[] };
 export type LangOpt = { code: string; native: string };
 
 type Props = {
@@ -16,6 +16,7 @@ type Props = {
   cta?: { label: string; href: string } | null;
   phone?: { display: string; tel: string } | null;
   email?: string | null;
+  whatsapp?: string | null;
   showTheme: boolean;
   showLang: boolean;
   labels: { open: string; close: string; theme: string; language: string; nav: string; light: string; dark: string; system: string; viewAll: string };
@@ -252,70 +253,72 @@ export function HeaderClient(p: Props) {
 
     </header>
 
-      {/* Mobile menu: a full-screen sheet outside the header (the header's glass would otherwise trap a fixed child) */}
+      {/* Mobile menu: a deep "app launcher" sheet under the floating bar */}
       <div id={`${menuId}-mobile`} className={`m-sheet lg:hidden ${open ? "is-open" : ""}`} aria-hidden={!open} inert={!open}>
         <button type="button" className="m-sheet-scrim" tabIndex={-1} aria-label={p.labels.close} onClick={() => setOpen(false)} />
         <div className="m-sheet-panel" data-lenis-prevent>
-          <nav aria-label={p.labels.nav}>
-            <ul className="grid gap-1">
+          <span aria-hidden="true" className="m-sheet-aura" />
+          <nav aria-label={p.labels.nav} className="relative">
+            <ul className="m-grid">
               {p.items.map((it, i) => (
                 <li key={it.id} style={{ ["--i" as string]: i } as React.CSSProperties} className="m-item">
-                  <Link href={it.href} onClick={() => setOpen(false)} className={`m-link ${isActive(it.href) ? "is-active" : ""}`} aria-current={isActive(it.href) ? "page" : undefined}>
-                    <span className="flex-1">{it.label}</span>
-                    <Icon name="arrow" size={18} className="flip-rtl opacity-50" />
+                  <Link href={it.href} onClick={() => setOpen(false)} className={`m-tile ${isActive(it.href) ? "is-active" : ""}`} aria-current={isActive(it.href) ? "page" : undefined}>
+                    <span className="m-tile-icon"><Icon name={it.icon ?? "spark"} size={18} /></span>
+                    <span className="m-tile-label">{it.label}</span>
                   </Link>
-                  {it.children && (
-                    <ul className="m-subs">
-                      {it.children.map((c) => (
-                        <li key={c.id}>
-                          <Link href={c.href} onClick={() => setOpen(false)}>{c.label}</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </li>
               ))}
             </ul>
+            {p.items.filter((it) => it.children?.length).map((it) => (
+              <div key={it.id} className="m-item m-svc" style={{ ["--i" as string]: p.items.length } as React.CSSProperties}>
+                <p className="m-svc-title">{it.label}</p>
+                <ul className="flex flex-wrap gap-1.5">
+                  {it.children!.map((c) => (
+                    <li key={c.id}>
+                      <Link href={c.href} onClick={() => setOpen(false)} className={`m-pill ${isActive(c.href) ? "is-active" : ""}`}>{c.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </nav>
-          <div className="m-foot" style={{ ["--i" as string]: p.items.length } as React.CSSProperties}>
+          <div className="m-foot" style={{ ["--i" as string]: p.items.length + 1 } as React.CSSProperties}>
             {p.cta && (
-              <Link href={p.cta.href} onClick={() => setOpen(false)} className="btn btn-accent w-full">
+              <Link href={p.cta.href} onClick={() => setOpen(false)} className="m-cta">
                 {p.cta.label}
-                <Icon name="arrow" size={16} className="arrow flip-rtl" />
+                <Icon name="arrow" size={16} className="flip-rtl" />
               </Link>
             )}
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 flex items-center gap-2">
               {p.phone && (
-                <a href={`tel:${p.phone.tel}`} className="m-quick">
-                  <Icon name="phone" size={16} />
-                  <bdi dir="ltr">{p.phone.display}</bdi>
-                </a>
+                <a href={`tel:${p.phone.tel}`} className="m-round" aria-label={p.phone.display}><Icon name="phone" size={18} /></a>
+              )}
+              {p.whatsapp && (
+                <a href={p.whatsapp} target="_blank" rel="noopener noreferrer" className="m-round is-wa" aria-label="WhatsApp"><Icon name="whatsapp" size={19} /></a>
               )}
               {p.email && (
-                <a href={`mailto:${p.email}`} className="m-quick">
-                  <Icon name="mail" size={16} />
-                  <bdi dir="ltr" className="truncate">{p.email}</bdi>
-                </a>
+                <a href={`mailto:${p.email}`} className="m-round" aria-label={p.email}><Icon name="mail" size={18} /></a>
+              )}
+              {p.showLang && p.langs.length > 1 && (
+                <div className="m-seg ms-auto" role="group" aria-label={p.labels.language}>
+                  {p.langs.map((l) => (
+                    <Link
+                      key={l.code}
+                      href={swapLocale(pathname, p.locale, l.code)}
+                      hrefLang={l.code}
+                      lang={l.code}
+                      aria-current={l.code === p.locale ? "true" : undefined}
+                      className={l.code === p.locale ? "is-on" : ""}
+                      onClick={() => {
+                        document.cookie = `NEXT_LOCALE=${l.code};path=/;max-age=31536000;samesite=lax`;
+                      }}
+                    >
+                      {l.native}
+                    </Link>
+                  ))}
+                </div>
               )}
             </div>
-            {p.showLang && p.langs.length > 1 && (
-              <div className="mt-4 flex justify-center gap-2">
-                {p.langs.map((l) => (
-                  <Link
-                    key={l.code}
-                    href={swapLocale(pathname, p.locale, l.code)}
-                    hrefLang={l.code}
-                    lang={l.code}
-                    className={`rounded-full px-4 py-1.5 text-sm ${l.code === p.locale ? "bg-ink text-paper" : "text-muted shadow-[inset_0_0_0_1px_var(--rule-strong)]"}`}
-                    onClick={() => {
-                      document.cookie = `NEXT_LOCALE=${l.code};path=/;max-age=31536000;samesite=lax`;
-                    }}
-                  >
-                    {l.native}
-                  </Link>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
