@@ -37,7 +37,8 @@ export default async function MemberPage({ params }: Props) {
   const m = team.find((x) => x.slug === slug && x.has_profile);
   if (!m) notFound();
   const name = site.l(m.name);
-  const cutout = m.slug === "mahmoud-al-sheikh" ? "/legacy/team/mahmoud-al-sheikh-cutout.png" : m.photo;
+  // The lead member (first in Team order) uses the cut-out portrait from Settings → Site images.
+  const cutout = (m.slug === team[0]?.slug ? site.settings.images?.founder_cutout : null) || m.photo;
   const cta = home?.blocks.find((b) => b.type === "cta");
   return (
     <>

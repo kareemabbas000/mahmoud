@@ -19,7 +19,12 @@ export function ScrollScenes() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const root = document.documentElement;
+    // Panel: Settings → Appearance. "subtle" keeps reveals but drops scrubbed scenes; "off" is fully static.
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || root.dataset.motion === "off") return;
+    const scenes = root.dataset.motion !== "subtle";
+    const smooth = root.dataset.smooth !== "0";
+    if (!scenes && !smooth) return;
     let cleanup = () => {};
     let cancelled = false;
 
@@ -32,7 +37,7 @@ export function ScrollScenes() {
 
       // Lenis smooth scroll, driven by GSAP's ticker so ScrollTrigger stays in sync.
       let lenis: InstanceType<typeof LenisMod.default> | null = null;
-      if (!touch) {
+      if (!touch && smooth) {
         lenis = new LenisMod.default({ duration: 1.1, smoothWheel: true });
         lenis.on("scroll", ScrollTrigger.update);
         const tick = (t: number) => lenis?.raf(t * 1000);
@@ -44,6 +49,7 @@ export function ScrollScenes() {
         };
       }
 
+      if (!scenes) return;
       const ctx = gsap.context(() => {
         // Reading progress — an orange ledger line across the top.
         const bar = document.getElementById("scroll-progress");

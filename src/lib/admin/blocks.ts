@@ -74,6 +74,15 @@ export const BLOCKS: BlockDef[] = [
   { type: "spacer", group: "layout", icon: "minus", label: ["مسافة", "Spacer"], hint: ["فراغ بين الأقسام", "Space between sections"], fields: [{ key: "size", type: "select", label: ["الحجم", "Size"], options: [{ value: "s", label: ["صغير", "Small"] }, { value: "m", label: ["متوسط", "Medium"] }, { value: "l", label: ["كبير", "Large"] }] }] },
 ];
 
+/**
+ * Display options every section has (stored in props with a leading underscore, read by BlockRenderer):
+ * where it shows, and an anchor so menus and buttons can link to it (#pricing).
+ */
+export const DISPLAY_FIELDS: BField[] = [
+  { key: "_visible", type: "select", label: ["يظهر على", "Show on"], options: [{ value: "all", label: ["كل الأجهزة", "All devices"] }, { value: "desktop", label: ["الكمبيوتر فقط", "Desktop only"] }, { value: "mobile", label: ["الموبايل فقط", "Mobile only"] }] },
+  { key: "_anchor", type: "text", label: ["رابط داخلي للقسم (اختياري)", "Section anchor (optional)"], help: ["مثل: pricing — ثم اربط إليه بـ ‎#pricing من القوائم أو الأزرار.", "e.g. pricing — then link to it with #pricing from menus or buttons."], placeholder: "pricing" },
+];
+
 export const blockDef = (type: string) => BLOCKS.find((b) => b.type === type) ?? null;
 
 export const GROUPS: { key: BlockDef["group"]; label: [string, string] }[] = [

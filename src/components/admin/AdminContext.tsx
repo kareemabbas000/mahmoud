@@ -26,7 +26,7 @@ export function AdminProvider({ children, locale, role, langs }: { children: Rea
   return (
     <C.Provider value={{ locale, role, langs, t, toast }}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 start-4 z-[80] grid w-[min(26rem,calc(100vw-2rem))] gap-2" aria-live="polite">
+      <div className="pointer-events-none fixed bottom-24 start-4 z-[80] lg:bottom-4 grid w-[min(26rem,calc(100vw-2rem))] gap-2" aria-live="polite">
         {toasts.map((x) => (
           <p key={x.id} role={x.kind === "err" ? "alert" : "status"} className={`pointer-events-auto rounded-lg px-4 py-3 text-sm shadow-soft ${x.kind === "err" ? "bg-danger text-white" : "bg-ink text-paper"}`}>
             {x.text}

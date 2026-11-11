@@ -9,7 +9,7 @@ export function HeroTilt() {
     const stage = ref.current?.parentElement;
     const hero = stage?.closest<HTMLElement>("[data-hero]");
     if (!stage || !hero) return;
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches || document.documentElement.dataset.motion !== "full") return;
     let raf = 0;
     let tx = 0, ty = 0, x = 0, y = 0;
     const tick = () => {

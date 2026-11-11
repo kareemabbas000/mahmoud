@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { requirePage } from "@/lib/admin/auth";
+import { atLeast, requirePage } from "@/lib/admin/auth";
 import { getAdminT } from "@/lib/admin/i18n";
 import { sessionClient } from "@/lib/supabase/clients";
 import { PageTitle } from "@/components/admin/PageTitle";
+import { Icon, type IconName } from "@/components/ui/Icon";
 
 export const metadata = { title: "Dashboard" };
 
@@ -37,6 +38,23 @@ export default async function Dashboard() {
     sb.from("newsletter_subscribers").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
     sb.from("posts").select("id", { count: "exact", head: true }),
   ]);
+  const admin = atLeast(staff.role, "admin");
+  const L = (a: string, e: string) => (ar ? a : e);
+  const tasks: { href: string; icon: IconName; title: string; text: string }[] = [
+    { href: "/admin/pages", icon: "layers", title: L("تعديل الصفحات والأقسام", "Edit pages and sections"), text: L("أضف أقسامًا أو أخفها أو رتّبها وعدّل نصوصها وصورها مع معاينة مباشرة.", "Add, hide or reorder sections and edit their text and images with a live preview.") },
+    { href: "/admin/posts", icon: "book", title: L("كتابة مقال", "Write an article"), text: L("محرر احترافي مع محسّن SEO وجدولة النشر.", "A professional editor with an SEO optimiser and scheduling.") },
+    { href: "/admin/media", icon: "image", title: L("الصور واستبدالها", "Images and replacing them"), text: L("ارفع صورًا، واعرف أين تُستخدم، واستبدل أي صورة في كل مكان.", "Upload, see where each image is used, and replace any image everywhere.") },
+    ...(admin
+      ? [
+          { href: "/admin/settings?tab=theme", icon: "spark" as IconName, title: L("المظهر والألوان", "Look and colours"), text: L("الوضع الفاتح/الداكن، ألوان العلامة، الحركة والخلفية.", "Light/dark mode, brand colours, motion and background.") },
+          { href: "/admin/settings?tab=contact", icon: "phone" as IconName, title: L("بيانات التواصل", "Contact details"), text: L("الهواتف والبريد وواتساب في كل الموقع.", "Phones, email and WhatsApp across the site.") },
+          { href: "/admin/settings?tab=header", icon: "menu" as IconName, title: L("الرأس والتذييل والإعلان", "Header, footer and announcement"), text: L("زر الحجز وشريط الإعلان وما يظهر في التذييل.", "The booking button, announcement bar and footer content.") },
+          { href: "/admin/languages", icon: "globe" as IconName, title: L("اللغات ولغة الدخول", "Languages and landing language"), text: L("اختر اللغة التي يفتح بها الموقع وفعّل اللغات.", "Choose the language the site opens in and enable languages.") },
+          { href: "/admin/users", icon: "team" as IconName, title: L("دعوة فريقك", "Invite your team"), text: L("أضف محررين أو مسؤولين بصلاحيات محددة.", "Add editors or admins with the right permissions.") },
+        ]
+      : []),
+    { href: "/admin/account", icon: "shield", title: L("كلمة المرور والحساب", "Password and account"), text: L("غيّر كلمة المرور واسمك، أو اخرج من كل الأجهزة.", "Change your password and name, or sign out everywhere.") },
+  ];
   const stat = (label: string, value: number | null, href: string) => (
     <Link href={href} className="rounded-lg border border-rule bg-surface p-5 transition-colors hover:border-blue">
       <p className="text-sm text-muted">{label}</p>
@@ -46,17 +64,23 @@ export default async function Dashboard() {
   return (
     <>
       <PageTitle title={ar ? `أهلًا ${staff.full_name ?? ""}` : `Welcome ${staff.full_name ?? ""}`} intro={ar ? "نظرة سريعة على الموقع والطلبات واكتمال الترجمات." : "An overview of the site, incoming requests and translation coverage."} />
-      <div className="mb-6 flex flex-wrap gap-2">
-        {[
-          ["/admin/posts", ar ? "✍️ اكتب مقالًا" : "✍️ Write a post"],
-          ["/admin/pages", ar ? "🧩 حرّر الصفحات" : "🧩 Edit pages"],
-          ["/admin/media", ar ? "🖼 مكتبة الوسائط" : "🖼 Media library"],
-          ["/admin/settings", ar ? "⚙️ إعدادات الموقع" : "⚙️ Site settings"],
-          ["/admin/enquiries", ar ? "📥 الطلبات" : "📥 Enquiries"],
-        ].map(([href, label]) => (
-          <Link key={href} href={href!} className="rounded-full border border-rule bg-[var(--solid)] px-4 py-2 text-sm font-medium text-ink shadow-soft transition-colors hover:border-blue hover:text-blue">{label}</Link>
-        ))}
-      </div>
+      {/* Task hub: what people come here to do, in plain words, each one click from the right screen. */}
+      <section className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold text-muted">{ar ? "ماذا تريد أن تفعل؟" : "What would you like to do?"}</h2>
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {tasks.map((x) => (
+            <li key={x.href}>
+              <Link href={x.href} className="group flex h-full items-start gap-3 rounded-xl border border-rule bg-surface p-4 transition-colors hover:border-blue">
+                <span className="grid size-10 flex-none place-items-center rounded-xl bg-blue-wash text-blue"><Icon name={x.icon} size={19} /></span>
+                <span className="min-w-0">
+                  <b className="block text-sm font-semibold text-ink group-hover:text-blue">{x.title}</b>
+                  <span className="mt-0.5 block text-xs text-muted">{x.text}</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stat(ar ? "طلبات جديدة" : "New enquiries", newCount, "/admin/enquiries")}
         {stat(ar ? "مشتركون مؤكَّدون" : "Confirmed subscribers", subs, "/admin/newsletter")}

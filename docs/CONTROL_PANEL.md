@@ -35,7 +35,9 @@ Roles are enforced twice: in the panel and inside the database (row-level securi
 
 ## 3. What each section manages
 
-- **Dashboard**: new enquiries, subscribers, posts, translation coverage, quick actions.
+**Finding your way.** The sidebar is grouped by what you want to do: **Website** (pages, media, look, header & footer, menus), **Content** (posts and collections), **Inbox**, **Settings** and **People & security**. Press **Ctrl K** (⌘K on Mac) or **/** anywhere for quick search: type a word such as "colours", "password" or "image", in Arabic or English, and press Enter. On phones, the bottom bar has Home, Pages, Posts, Inbox and More.
+
+- **Dashboard**: a "What would you like to do?" list of common tasks (each opens the right screen), plus new enquiries, subscribers, posts and translation coverage.
 - **Pages**: visual page builder for every page, including the home page.
   - Add, reorder (drag and drop), duplicate, hide and delete sections.
   - Each section has its own form; every text field is per language.
@@ -43,6 +45,7 @@ Roles are enforced twice: in the panel and inside the database (row-level securi
   - Changes autosave as a **draft** that visitors can't see. **Publish** makes them live, and the previous version is kept under **Versions** for one-click restore.
   - Undo / redo (Ctrl+Z / Ctrl+Y). Page title, SEO title and description with a Google preview, share image, noindex.
   - **New page** creates a custom page from a starter (blank, content page, service landing page) or from a saved template.
+  - **Display options** (every section): show it on all devices, desktop only or mobile only, and give it an anchor (e.g. `pricing`) so menus and buttons can link to `#pricing`.
 - **Insights (blog)**:
   - **Editor**:
     - Headings H2–H4, bold, italic, underline, strikethrough, superscript, subscript, inline code.
@@ -65,24 +68,30 @@ Roles are enforced twice: in the panel and inside the database (row-level securi
     - Local backup: if the browser closes before you save, the panel offers to restore your work.
 - **Services, Team, Clients, Credentials, Branches, FAQ, Gallery**: content collections with ordering, publish toggles and per-language fields.
 - **Categories, tags & authors**: blog taxonomy.
-- **Media library**: uploads up to 10 MB, alt text per language.
+- **Media library**:
+  - **Library**: uploads up to 10 MB. Photos are converted to light WebP in three sizes automatically. Search, alt text per language, how many places use each image, copy URL, delete (with a warning when the image is in use).
+  - **On the website**: every image the site shows, including the original photos from the old site and design images, with where each one appears.
+  - **Replace / Replace everywhere**: pick or upload a new image and it replaces the old one in every page, section, collection, post and setting at once. Only the affected pages are refreshed.
 - **Enquiries**: inbox with statuses, replies and CSV export. **Newsletter**: double opt-in subscribers with CSV export.
 - **Texts & translations**: every interface string on the site, per language.
 - **Site settings** (admin):
   - Brand: name, logo, favicon, founding year.
   - Contact details and social accounts.
   - Default SEO and search-console verification codes.
-  - Appearance: light/dark default, colour preset, Arabic numerals, 3D hero.
+  - Appearance: light/dark default, colour preset or **custom brand colours** (primary + accent; dark-mode shades are derived), Arabic numerals, 3D hero, **motion** (full / subtle / off), intro animation, background glow, smooth scrolling.
+  - Design images: founder cut-out portrait, default video poster, and the office image and logo shown to search engines.
+  - Languages & landing: shortcuts to the default (landing) language and to interface texts.
   - Header and announcement bar, footer, floating buttons.
   - The figures shown in "Why SCO".
-- **Menus, header & footer**: navigation menus.
+- **Navigation menus**: header and footer menu links (nested items supported).
 - **Languages**: add, enable or set the default language.
 - **Analytics & tracking**:
   - GA4, Google Tag Manager, Google Ads conversions, Meta Pixel (+ Conversions API), Microsoft Clarity, LinkedIn, TikTok and custom code.
   - Nothing loads before visitor consent (Consent Mode v2). The cookie notice appears automatically once any tool is configured.
 - **Redirects**: 301 redirects, such as when a page or post address changes.
 - **Users & roles**: invite by email (a link is also shown for copying), change roles, revoke invitations, remove users.
-- **Audit log**: every create, edit and delete with who, when and what changed, filterable.
+- **Audit log**: every create, edit and delete with who, when and what changed, filterable. Draft autosaves aren't logged.
+- **My account** (everyone): change your display name, change your password (your current password is checked first, with a strength meter), and sign out of every device.
 
 ## 4. SEO built in
 

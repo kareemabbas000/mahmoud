@@ -979,13 +979,15 @@ html.site:not([data-theme="dark"]) main section.stats-stage-band { background: r
 .hs-tick svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .hs-amt { width: 14% !important; margin-inline-start: auto; background: #dde0f6; }
 .hs-rows li .hs-line:not(.hs-amt) { max-width: 66%; }
-.hs-seal { position: absolute; right: 6%; bottom: 5%; width: 34%; aspect-ratio: 1; transform: rotate(-14deg); opacity: 0.92; }
+/* The seal sits lower-middle on the sheet, half over the last ledger line like a real approval stamp: clear of the
+   floating SCO tile (bottom-right) and the facts chip (bottom-left). The tile's stamping move lands exactly here. */
+.hs-seal { position: absolute; left: 27%; bottom: 3%; width: 23%; aspect-ratio: 1; transform: rotate(-14deg); opacity: 0.9; }
 .hs-seal svg { width: 100%; height: 100%; overflow: visible; }
 .hs-seal-o { fill: rgb(252 78 8 / 0.06); stroke: #fc4e08; stroke-width: 3; }
 .hs-seal-i { fill: none; stroke: #fc4e08; stroke-width: 1.5; stroke-dasharray: 3 3; }
 .hs-seal-t { fill: #fc4e08; font: 700 10.5px var(--f-sans), sans-serif; letter-spacing: 0.04em; }
 .hs-seal-tick { fill: none; stroke: #fc4e08; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
-.hs-shadow { position: absolute; right: 5%; bottom: 6%; width: 34%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgb(4 1 159 / 0.28), transparent); opacity: 0; filter: blur(6px); }
+.hs-shadow { position: absolute; left: 27%; bottom: 3%; width: 23%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgb(4 1 159 / 0.28), transparent); opacity: 0; filter: blur(6px); }
 .hs-stamp { position: absolute; right: 5%; bottom: 13%; width: 27%; aspect-ratio: 1; transform: translateZ(70px) rotate(-8deg);
   filter: drop-shadow(0 22px 26px rgb(4 1 159 / 0.35)); }
 .hs-stamp::before { content: ""; position: absolute; inset: -14%; border-radius: 28%; z-index: -1;
@@ -1033,8 +1035,8 @@ html.site:not([data-theme="dark"]) main section.stats-stage-band { background: r
 @keyframes hs-stamp {
   0% { opacity: 0; transform: translateZ(320px) translateY(-60%) rotate(-24deg) scale(1.15); }
   45% { opacity: 1; transform: translateZ(240px) translateY(-40%) rotate(-14deg) scale(1.1); }
-  62% { transform: translate(-22%, 30%) translateZ(4px) rotate(-14deg) scale(0.94); }
-  70% { transform: translate(-22%, 30%) translateZ(4px) rotate(-14deg) scale(0.94); }
+  62% { transform: translate(-130%, 18%) translateZ(4px) rotate(-14deg) scale(0.8); }
+  70% { transform: translate(-130%, 18%) translateZ(4px) rotate(-14deg) scale(0.8); }
   100% { transform: translateZ(70px) rotate(-8deg); }
 }
 @keyframes hs-hover { to { transform: translateZ(95px) translateY(-6%) rotate(-5deg); } }
@@ -1047,6 +1049,7 @@ html.site:not([data-theme="dark"]) main section.stats-stage-band { background: r
   .hs-chip { padding: 0.5rem 0.75rem; border-radius: 0.8rem; }
   .hs-chip b { font-size: 1.05rem; }
   .hs-chip span { font-size: 0.65rem; }
+  .hs-seal, .hs-shadow { left: 30%; bottom: 9%; width: 20%; }
 }
 @media (prefers-reduced-motion: reduce) { .hs-scene { transition: none; } }
 
@@ -1533,6 +1536,12 @@ html.admin .bg-surface { background-color: #fff; }
 }
 .adm-scrim { position: fixed; inset: 0; z-index: 55; background: rgb(11 16 51 / 0.35); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .25s; }
 .adm-scrim.is-on { opacity: 1; pointer-events: auto; }
+/* Phones: bottom bar with the most used places (thumb-reachable, 44px+ targets, safe-area aware). */
+.adm-tabbar { position: fixed; inset-inline: 0; bottom: 0; z-index: 50; display: grid; grid-template-columns: repeat(5, 1fr); padding: 0.35rem 0.5rem; padding-bottom: max(0.35rem, env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--rule); box-shadow: 0 -10px 30px -18px rgb(11 16 51 / 0.25); }
+.adm-tabbar > a, .adm-tabbar > button { display: grid; justify-items: center; gap: 0.15rem; min-height: 3rem; padding-top: 0.3rem; border-radius: 0.8rem; font-size: 0.68rem; font-weight: 600; color: var(--muted); }
+.adm-tabbar > .is-on { color: var(--blue); background: var(--blue-wash); }
+.adm-tabbar-dot { position: absolute; top: -2px; inset-inline-end: -4px; width: 0.55rem; height: 0.55rem; border-radius: 99px; background: var(--orange); box-shadow: 0 0 0 2px #fff; }
+@media (max-width: 1023px) { .adm-main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important; } }
 .adm-topbar { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; padding-top: max(0.6rem, env(safe-area-inset-top)); background: rgb(255 255 255 / 0.9); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule); }
 .adm-burger { position: relative; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; background: var(--paper-2); }
 .adm-burger span { position: absolute; width: 1rem; height: 2px; border-radius: 2px; background: var(--ink); }
@@ -1575,3 +1584,6 @@ html.admin .bg-surface { background-color: #fff; }
 .auth-alt summary { list-style: none; text-align: center; }
 .auth-alt summary::-webkit-details-marker { display: none; }
 .adm-main :has(> table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Panel chrome: the phone bars are unlayered CSS, so Tailwind's lg:hidden can't hide them; hide them here. */
+@media (min-width: 1024px) { .adm-topbar, .adm-tabbar { display: none !important; } }

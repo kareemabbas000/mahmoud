@@ -42,7 +42,7 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
               <div className="founder-arch absolute inset-x-[8%] bottom-0 top-[6%] overflow-hidden">
                 <div className="founder-light absolute inset-0" aria-hidden="true" />
                 <SmartImage
-                  src="/legacy/team/mahmoud-al-sheikh-cutout.png"
+                  src={site.settings.images?.founder_cutout || lead.photo || "/legacy/team/mahmoud-al-sheikh-cutout.png"}
                   alt={site.l(lead.name)}
                   fill
                   quality={92}

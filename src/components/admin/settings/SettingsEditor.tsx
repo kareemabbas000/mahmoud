@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { saveSetting } from "@/app/actions/admin";
 import { ImageInput } from "../Fields";
@@ -14,6 +14,8 @@ type F =
   | { path: string; type: "number"; label: [string, string]; help?: [string, string] }
   | { path: string; type: "boolean"; label: [string, string]; help?: [string, string] }
   | { path: string; type: "image"; label: [string, string]; help?: [string, string] }
+  | { path: string; type: "color"; label: [string, string]; help?: [string, string] }
+  | { path: string; type: "link"; label: [string, string]; help?: [string, string]; href: string; cta: [string, string] }
   | { path: string; type: "code"; label: [string, string]; help?: [string, string] }
   | { path: string; type: "select"; label: [string, string]; options: { value: string; label: [string, string] }[]; help?: [string, string] }
   | { path: string; type: "strings"; label: [string, string]; help?: [string, string]; placeholder?: string }
@@ -35,7 +37,21 @@ export function SettingsEditor({ settingKey, initial, sections }: { settingKey: 
   const editable = canEdit(role, "admin");
   const [v, setV] = useState<Obj>(initial);
   const [saved, setSaved] = useState(JSON.stringify(initial));
-  const [tab, setTab] = useState(sections[0]!.key);
+  const params = useSearchParams();
+  const fromUrl = params.get("tab");
+  const [tab, setTabState] = useState(sections.some((x) => x.key === fromUrl) ? fromUrl! : sections[0]!.key);
+  // Deep links (?tab=theme) from the sidebar and quick search; switching tabs updates the URL so it can be shared.
+  useEffect(() => {
+    if (fromUrl && sections.some((x) => x.key === fromUrl)) setTabState(fromUrl);
+  }, [fromUrl, sections]);
+  // Phones show the tabs as a horizontal strip: keep the open tab in view.
+  useEffect(() => {
+    document.querySelector("[data-tab-on]")?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [tab]);
+  const setTab = (k: string) => {
+    setTabState(k);
+    window.history.replaceState(null, "", `?tab=${k}`);
+  };
   const [lang, setLang] = useState(langs.find((l) => l.is_default)?.code ?? "ar");
   const [pending, start] = useTransition();
   const dirty = JSON.stringify(v) !== saved;
@@ -91,6 +107,22 @@ export function SettingsEditor({ settingKey, initial, sections }: { settingKey: 
         );
       case "image":
         return wrap(<ImageInput value={(val as string) ?? null} onChange={(x) => set(f.path, x)} />);
+      case "color": {
+        const c = /^#[0-9a-fA-F]{6}$/.test(String(val ?? "")) ? String(val) : "#000000";
+        return wrap(
+          <div className="flex items-center gap-3">
+            <input type="color" aria-label={t(...f.label)} className="h-11 w-14 cursor-pointer rounded-lg border border-rule bg-surface p-1" value={c} onChange={(e) => set(f.path, e.target.value)} />
+            <input dir="ltr" className="ed-input !w-36 font-mono" value={String(val ?? "")} maxLength={7} onChange={(e) => set(f.path, e.target.value.trim())} placeholder="#04019f" />
+            <span className="h-11 flex-1 rounded-lg border border-rule" style={{ background: `linear-gradient(90deg, ${c}, color-mix(in srgb, ${c} 15%, white))` }} aria-hidden="true" />
+          </div>,
+        );
+      }
+      case "link":
+        return wrap(
+          <a href={f.href} className="flex items-center justify-end gap-4 rounded-xl border border-rule px-4 py-3 text-sm hover:bg-paper-2">
+            <span className="font-semibold text-blue">{t(...f.cta)} →</span>
+          </a>,
+        );
       case "code":
         return wrap(<textarea dir="ltr" spellCheck={false} className="ed-input min-h-32 font-mono text-xs" value={String(val ?? "")} onChange={(e) => set(f.path, e.target.value)} />);
       case "select":
@@ -160,7 +192,7 @@ export function SettingsEditor({ settingKey, initial, sections }: { settingKey: 
     <div className="grid gap-5 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
       <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-rule bg-[var(--solid)] p-1.5 lg:sticky lg:top-6 lg:grid">
         {sections.map((s) => (
-          <button key={s.key} type="button" onClick={() => setTab(s.key)} className={`whitespace-nowrap rounded-xl px-3 py-2 text-start text-sm ${tab === s.key ? "bg-blue-wash font-semibold text-blue" : "text-text hover:bg-paper-2"}`}>{t(...s.label)}</button>
+          <button key={s.key} type="button" data-tab-on={tab === s.key ? "" : undefined} onClick={() => setTab(s.key)} className={`whitespace-nowrap rounded-xl px-3 py-2 text-start text-sm ${tab === s.key ? "bg-blue-wash font-semibold text-blue" : "text-text hover:bg-paper-2"}`}>{t(...s.label)}</button>
         ))}
       </nav>
       <section className="rounded-2xl border border-rule bg-[var(--solid)] p-5 sm:p-7">

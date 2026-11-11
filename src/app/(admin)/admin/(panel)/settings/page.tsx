@@ -57,6 +57,29 @@ const sections: Section[] = [
       { path: "theme.preset", type: "select", label: ["لوحة الألوان", "Colour preset"], options: [{ value: "ledger", label: ["الأزرق والبرتقالي", "Blue & orange"] }, { value: "gold", label: ["الذهبي", "Gold"] }] },
       { path: "theme.numerals_ar", type: "select", label: ["الأرقام في النسخة العربية", "Numerals in Arabic"], options: [{ value: "latn", label: ["123", "123"] }, { value: "arab", label: ["١٢٣", "١٢٣"] }] },
       { path: "theme.hero_3d", type: "boolean", label: ["المشهد ثلاثي الأبعاد في الواجهة", "3D scene in the hero"] },
+      { path: "theme.motion", type: "select", label: ["الحركة والتأثيرات", "Motion & effects"], options: [{ value: "full", label: ["كاملة", "Full"] }, { value: "subtle", label: ["هادئة", "Subtle"] }, { value: "off", label: ["بدون حركة", "Off"] }], help: ["«هادئة» تُبقي ظهور الأقسام بنعومة وتُلغي مشاهد التمرير والإمالة. «بدون حركة» موقع ثابت تمامًا.", "“Subtle” keeps gentle reveals but drops scroll scenes and tilt. “Off” makes the site fully static."] },
+      { path: "theme.intro", type: "boolean", label: ["الشاشة الافتتاحية عند أول زيارة", "Intro animation on the first visit"] },
+      { path: "theme.background_glow", type: "boolean", label: ["الإضاءة الملوّنة في الخلفية", "Coloured glow in the background"] },
+      { path: "theme.smooth_scroll", type: "boolean", label: ["تمرير ناعم (الكمبيوتر)", "Smooth scrolling (desktop)"] },
+      { path: "theme.custom_colors.enabled", type: "boolean", label: ["استخدام ألوان مخصصة للعلامة", "Use custom brand colours"], help: ["تحل محل لوحة الألوان المختارة أعلاه. تُضبط درجات الوضع الداكن تلقائيًا.", "Replaces the colour preset above. Dark-mode shades are derived automatically."] },
+      { path: "theme.custom_colors.primary", type: "color", label: ["اللون الأساسي (الأزرار والروابط)", "Primary colour (buttons, links)"] },
+      { path: "theme.custom_colors.accent", type: "color", label: ["لون التمييز (العناوين المميزة والعلامات)", "Accent colour (highlights, marks)"] },
+    ],
+  },
+  {
+    key: "images", label: ["صور التصميم", "Design images"], intro: ["صور يستخدمها تصميم الموقع نفسه (ليست داخل قسم أو مجموعة). صور الأقسام والفريق والمعرض تُغيَّر من أماكنها، أو من «الوسائط» ← «استبدال» لتتغير في كل مكان.", "Images used by the design itself (not inside a section or collection). Section, team and gallery images are changed where they are, or from Media → Replace to change them everywhere."],
+    fields: [
+      { path: "images.founder_cutout", type: "image", label: ["صورة المؤسس المفرّغة (قسم الفريق وصفحته)", "Founder cut-out portrait (team section and profile)"], help: ["PNG بخلفية شفافة، طولية.", "Transparent-background PNG, portrait."] },
+      { path: "images.video_poster", type: "image", label: ["غلاف الفيديو الافتراضي", "Default video poster"] },
+      { path: "images.organization", type: "image", label: ["صورة المكتب لمحركات البحث", "Office image for search engines"] },
+      { path: "images.logo_schema", type: "image", label: ["الشعار لمحركات البحث", "Logo for search engines"], help: ["PNG مربّع أو أفقي على خلفية بيضاء.", "Square or wide PNG on white."] },
+    ],
+  },
+  {
+    key: "languages", label: ["اللغات ولغة الدخول", "Languages & landing"], intro: ["اللغة الافتراضية هي التي يفتح بها الموقع لكل زائر جديد.", "The default language is the one the site opens in for every new visitor."],
+    fields: [
+      { path: "_languages", type: "link", label: ["اللغة الافتراضية وتفعيل اللغات", "Default language and enabled languages"], href: "/admin/languages", cta: ["فتح إعدادات اللغات", "Open language settings"] },
+      { path: "_translations", type: "link", label: ["نصوص الواجهة (الأزرار والقوائم والرسائل)", "Interface texts (buttons, menus, messages)"], href: "/admin/translations", cta: ["فتح النصوص والترجمات", "Open texts & translations"] },
     ],
   },
   {

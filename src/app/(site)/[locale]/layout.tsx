@@ -40,6 +40,15 @@ export const viewport: Viewport = {
   ],
 };
 
+/** Custom brand colours → CSS variables. Only strict #rrggbb values are accepted (no CSS injection). */
+function brandColors(c: { enabled: boolean; primary: string; accent: string } | undefined): string | null {
+  const hex = /^#[0-9a-fA-F]{6}$/;
+  if (!c?.enabled || !hex.test(c.primary) || !hex.test(c.accent)) return null;
+  const P = c.primary;
+  const A = c.accent;
+  return `:root[data-brand="custom"]{--blue:${P};--blue-2:color-mix(in srgb,${P} 82%,white);--blue-wash:color-mix(in srgb,${P} 10%,white);--orange:${A};--orange-text:color-mix(in srgb,${A} 78%,black)}:root[data-brand="custom"][data-theme="dark"]{--blue:color-mix(in srgb,${P} 45%,white);--blue-2:color-mix(in srgb,${P} 30%,white);--blue-wash:color-mix(in srgb,${P} 18%,transparent);--orange:color-mix(in srgb,${A} 88%,white);--orange-text:color-mix(in srgb,${A} 60%,white)}`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const site = await getSite(locale);
@@ -66,18 +75,35 @@ export default async function SiteLayout({ children, params }: { children: React
   const [tracking, branches] = await Promise.all([getTracking(), getBranches()]);
   const primary = branches.find((b) => b.is_primary) ?? branches[0] ?? null;
   const { t } = site;
+  const theme = site.settings.theme;
+  const brandCss = brandColors(theme.custom_colors);
 
   return (
-    <html lang={locale} dir={site.dir} className={`site ${fontVars}`} suppressHydrationWarning data-numerals={site.numerals} data-preset={site.settings.theme.preset ?? "ledger"}>
+    <html
+      lang={locale}
+      dir={site.dir}
+      className={`site ${fontVars}`}
+      suppressHydrationWarning
+      data-numerals={site.numerals}
+      data-preset={theme.preset ?? "ledger"}
+      data-motion={theme.motion ?? "full"}
+      data-smooth={theme.smooth_scroll === false ? "0" : "1"}
+      data-brand={brandCss ? "custom" : undefined}
+    >
       <head>
-        <ThemeScript defaultMode={site.settings.theme.default_mode} preset={site.settings.theme.preset} />
+        <ThemeScript defaultMode={theme.default_mode} preset={theme.preset} motion={theme.motion} intro={theme.intro !== false} />
+        {brandCss && <style dangerouslySetInnerHTML={{ __html: brandCss }} />}
         <ConsentDefaults />
         <JsonLd data={organizationLd(site, primary)} />
         <JsonLd data={websiteLd(site)} />
       </head>
       <body className="min-h-dvh">
-        <div className="aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
-        <IntroCurtain />
+        {theme.background_glow !== false ? (
+          <div className="aurora" aria-hidden="true"><span className="a1" /><span className="a2" /><span className="a3" /></div>
+        ) : (
+          <div className="aurora" aria-hidden="true" />
+        )}
+        {theme.intro !== false && theme.motion !== "off" && <IntroCurtain />}
         <a href="#main" className="sr-only z-[60] rounded-md bg-ink px-4 py-2 text-paper focus:not-sr-only focus:fixed focus:start-4 focus:top-4">
           {t("a11y.skip")}
         </a>

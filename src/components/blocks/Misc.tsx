@@ -96,7 +96,7 @@ export function VideoBlock({ site, props, refCode }: BlockProps<HeadProps & { ur
     <Band>
       <SectionHead site={site} refCode={refCode} head={props} />
       <div className="relative aspect-video overflow-hidden rounded-md bg-deep">
-        <LiteVideo url={props.url} poster={props.poster || "/legacy/office/video-poster.png"} label={site.t("common.watch_video")} title={site.l(props.title) || "Video"} />
+        <LiteVideo url={props.url} poster={props.poster || site.settings.images?.video_poster || "/legacy/office/video-poster.png"} label={site.t("common.watch_video")} title={site.l(props.title) || "Video"} />
       </div>
     </Band>
   );

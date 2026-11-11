@@ -55,7 +55,11 @@ export function BlockRenderer({ site, blocks, letter = "A", extra, anchors = fal
       {visible.map((b, i) => {
         const C = registry[b.type]!;
         const refCode = `${letter}·${String(i + 1).padStart(2, "0")}`;
-        const el = <C key={b.id} site={site} props={{ ...b.props, ...(extra?.[b.type] ?? {}) }} refCode={refCode} index={i + 1} />;
+        let el = <C key={b.id} site={site} props={{ ...b.props, ...(extra?.[b.type] ?? {}) }} refCode={refCode} index={i + 1} />;
+        // Display options (Page builder → Display options): device visibility and an in-page anchor.
+        const vis = b.props._visible === "desktop" ? "max-md:hidden" : b.props._visible === "mobile" ? "md:hidden" : "";
+        const anchor = typeof b.props._anchor === "string" ? b.props._anchor.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) : "";
+        if (vis || anchor) el = <div key={b.id} id={anchor || undefined} className={`${vis} ${anchor ? "scroll-mt-28" : ""}`.trim() || undefined}>{el}</div>;
         return anchors ? [<span key={`a-${b.id}`} data-bid={b.id} aria-hidden="true" className="block h-0" />, el] : el;
       })}
     </>

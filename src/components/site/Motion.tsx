@@ -13,7 +13,7 @@ export function Motion() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion === "off";
     if (reduce) return;
     const root = document.documentElement;
 
@@ -97,7 +97,7 @@ export function Motion() {
   // Cursor spotlight on dark bands + subtle 3D tilt on cards (fine pointers only).
   // Throttled to one update per frame: pointermove fires 60–240×/s and each update reads layout.
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches || document.documentElement.dataset.motion !== "full") return;
     const SPOT = "[data-spot], .stat-card, .cert-card, .member-card, .note-tile, .svc-panel, .logo-tile, .steps-deck > li";
     let raf = 0;
     let last: PointerEvent | null = null;

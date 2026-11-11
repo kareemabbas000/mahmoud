@@ -13,6 +13,7 @@ import { discardDraft, publishPage, restoreVersion, saveDraft, saveTemplate, typ
 import { canEdit, useAdmin, useResult } from "../AdminContext";
 import { ImageInput } from "../Fields";
 import { BlockForm } from "./BlockForm";
+import { DISPLAY_FIELDS } from "@/lib/admin/blocks";
 
 export type BuilderPage = { id: string; slug: string; kind: "system" | "custom"; published: boolean; live: PageDraft; draft: PageDraft | null; draft_updated_at: string | null };
 type Version = { id: string; created_at: string; note: string | null };
@@ -280,6 +281,12 @@ export function PageBuilder({ page, versions }: { page: BuilderPage; versions: V
               {selDef ? (
                 <fieldset disabled={!editable} lang={lang} dir={L.dir}>
                   <BlockForm fields={selDef.fields} props={selBlock.props} lang={lang} dir={L.dir} onChange={(p) => setBlocks((l) => l.map((x) => (x.id === selBlock.id ? { ...x, props: p } : x)))} />
+                  <details className="mt-6 rounded-xl border border-rule p-3" open={Boolean(selBlock.props._visible && selBlock.props._visible !== "all") || Boolean(selBlock.props._anchor)}>
+                    <summary className="cursor-pointer text-sm font-semibold text-ink">{t("خيارات العرض", "Display options")}</summary>
+                    <div className="mt-3">
+                      <BlockForm fields={DISPLAY_FIELDS} props={selBlock.props} lang={lang} dir={L.dir} onChange={(p) => setBlocks((l) => l.map((x) => (x.id === selBlock.id ? { ...x, props: p } : x)))} />
+                    </div>
+                  </details>
                 </fieldset>
               ) : (
                 <p className="text-sm text-muted">{t("هذا القسم لا يحتوي إعدادات قابلة للتعديل.", "This section has no editable settings.")}</p>

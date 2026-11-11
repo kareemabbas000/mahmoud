@@ -51,7 +51,21 @@ export type SiteSettings = {
     og_image: string | null;
     verification: { google?: string; bing?: string; yandex?: string };
   };
-  theme: { default_mode: "system" | "light" | "dark"; numerals_ar: Numerals; preset: "ledger" | "gold"; hero_3d: boolean };
+  theme: {
+    default_mode: "system" | "light" | "dark";
+    numerals_ar: Numerals;
+    preset: "ledger" | "gold";
+    hero_3d: boolean;
+    /** Brand colours override the preset when set (hex). */
+    custom_colors?: { enabled: boolean; primary: string; accent: string };
+    /** full = all motion, subtle = no scroll scenes/tilt, off = static site. */
+    motion?: "full" | "subtle" | "off";
+    intro?: boolean;
+    background_glow?: boolean;
+    smooth_scroll?: boolean;
+  };
+  /** Images used by built-in parts of the design (not by a block or collection). */
+  images?: { founder_cutout: string; video_poster: string; organization: string; logo_schema: string };
   header: {
     show_announcement: boolean;
     announcement: L;
