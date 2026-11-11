@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- CSV downloads from route handlers, not page navigation */
 import { requirePage } from "@/lib/admin/auth";
 import { getAdminT } from "@/lib/admin/i18n";
 import { sessionClient } from "@/lib/supabase/clients";

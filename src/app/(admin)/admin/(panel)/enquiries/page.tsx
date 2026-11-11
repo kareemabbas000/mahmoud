@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- CSV downloads from route handlers, not page navigation */
 import Link from "next/link";
 import { requirePage } from "@/lib/admin/auth";
 import { getAdminT } from "@/lib/admin/i18n";

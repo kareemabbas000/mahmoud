@@ -7,7 +7,7 @@ import { pageMeta } from "@/lib/seo";
 import { letterFor } from "@/lib/pages";
 
 type Props = { params: Promise<{ locale: string; slug: string[] }> };
-const RESERVED = new Set(["", "insights"]);
+const RESERVED = new Set(["", "insights", "sco-preview"]);
 
 export async function generateStaticParams() {
   const [pages, langs] = await Promise.all([getPages(), getEnabledLanguages()]);
@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = await getPage(slug.join("/"));
   if (!page) return {};
   const site = await getSite(locale);
-  const seo = page.seo[locale] ?? {};
-  return pageMeta(site, { path: `/${page.slug}`, title: seo.title || site.l(page.title), description: seo.description, image: seo.og_image });
+  const seo = (page.seo[locale] ?? {}) as { title?: string; description?: string; og_image?: string; noindex?: boolean };
+  return pageMeta(site, { path: `/${page.slug}`, title: seo.title || site.l(page.title), description: seo.description, image: seo.og_image, noindex: seo.noindex });
 }
 
 export default async function BlockPage({ params }: Props) {

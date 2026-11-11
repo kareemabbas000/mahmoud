@@ -46,6 +46,17 @@ export default async function Dashboard() {
   return (
     <>
       <PageTitle title={ar ? `أهلًا ${staff.full_name ?? ""}` : `Welcome ${staff.full_name ?? ""}`} intro={ar ? "نظرة سريعة على الموقع والطلبات واكتمال الترجمات." : "An overview of the site, incoming requests and translation coverage."} />
+      <div className="mb-6 flex flex-wrap gap-2">
+        {[
+          ["/admin/posts", ar ? "✍️ اكتب مقالًا" : "✍️ Write a post"],
+          ["/admin/pages", ar ? "🧩 حرّر الصفحات" : "🧩 Edit pages"],
+          ["/admin/media", ar ? "🖼 مكتبة الوسائط" : "🖼 Media library"],
+          ["/admin/settings", ar ? "⚙️ إعدادات الموقع" : "⚙️ Site settings"],
+          ["/admin/enquiries", ar ? "📥 الطلبات" : "📥 Enquiries"],
+        ].map(([href, label]) => (
+          <Link key={href} href={href!} className="rounded-full border border-rule bg-[var(--solid)] px-4 py-2 text-sm font-medium text-ink shadow-soft transition-colors hover:border-blue hover:text-blue">{label}</Link>
+        ))}
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stat(ar ? "طلبات جديدة" : "New enquiries", newCount, "/admin/enquiries")}
         {stat(ar ? "مشتركون مؤكَّدون" : "Confirmed subscribers", subs, "/admin/newsletter")}

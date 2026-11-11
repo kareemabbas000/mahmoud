@@ -48,14 +48,15 @@ export const registry: Record<string, ComponentType<BlockProps<any>>> = {
 };
 
 /** Renders a page's block list. Working-paper references run A·01, A·02… per page (letter set by the caller). */
-export function BlockRenderer({ site, blocks, letter = "A", extra }: { site: Site; blocks: Block[]; letter?: string; extra?: Record<string, Record<string, unknown>> }) {
+export function BlockRenderer({ site, blocks, letter = "A", extra, anchors = false }: { site: Site; blocks: Block[]; letter?: string; extra?: Record<string, Record<string, unknown>>; anchors?: boolean }) {
   const visible = blocks.filter((b) => !b.hidden && registry[b.type]);
   return (
     <>
       {visible.map((b, i) => {
         const C = registry[b.type]!;
         const refCode = `${letter}·${String(i + 1).padStart(2, "0")}`;
-        return <C key={b.id} site={site} props={{ ...b.props, ...(extra?.[b.type] ?? {}) }} refCode={refCode} index={i + 1} />;
+        const el = <C key={b.id} site={site} props={{ ...b.props, ...(extra?.[b.type] ?? {}) }} refCode={refCode} index={i + 1} />;
+        return anchors ? [<span key={`a-${b.id}`} data-bid={b.id} aria-hidden="true" className="block h-0" />, el] : el;
       })}
     </>
   );

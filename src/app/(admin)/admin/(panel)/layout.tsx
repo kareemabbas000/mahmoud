@@ -79,7 +79,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         }
       />
       <div className="min-h-dvh lg:ps-72">
-        <main className="mx-auto max-w-6xl px-4 py-8 pt-16 lg:px-10 lg:pt-10">{children}</main>
+        <main className="mx-auto max-w-[100rem] px-4 py-8 pt-16 lg:px-8 lg:pt-8">{children}</main>
       </div>
     </AdminProvider>
   );

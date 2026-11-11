@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { post } = await find(locale, slug);
   if (!post) return {};
   const site = await getSite(locale);
-  const seo = post.seo?.[locale] ?? {};
+  const seo = (post.seo?.[locale] ?? {}) as { title?: string; description?: string; og_image?: string; noindex?: boolean; canonical?: string };
   const paths = Object.fromEntries(Object.entries(post.slug).filter(([l, s]) => s && post.title?.[l]).map(([l, s]) => [l, `/insights/${s}`]));
   return pageMeta(site, {
     path: `/insights/${post.slug[locale]}`,
@@ -44,7 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     type: "article",
     title: seo.title || site.l(post.title),
     description: seo.description || site.l(post.excerpt),
-    image: post.cover,
+    image: seo.og_image || post.cover,
+    noindex: seo.noindex,
+    canonical: seo.canonical,
     publishedTime: post.publish_at ?? undefined,
     modifiedTime: post.updated_at,
   });

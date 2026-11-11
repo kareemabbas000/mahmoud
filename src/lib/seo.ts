@@ -12,7 +12,7 @@ export const abs = (path: string) => (path.startsWith("http") ? path : `${env.si
  */
 export function pageMeta(
   site: Site,
-  opts: { path: string; title?: string; description?: string; image?: string | null; type?: "website" | "article"; paths?: Record<string, string>; noindex?: boolean; publishedTime?: string; modifiedTime?: string },
+  opts: { path: string; title?: string; description?: string; image?: string | null; type?: "website" | "article"; paths?: Record<string, string>; noindex?: boolean; publishedTime?: string; modifiedTime?: string; canonical?: string },
 ): Metadata {
   const pathFor = (code: string) => opts.paths?.[code] ?? opts.path;
   const languages: Record<string, string> = {};
@@ -24,7 +24,7 @@ export function pageMeta(
   return {
     ...(opts.title ? { title: opts.title } : {}),
     description,
-    alternates: { canonical: url, languages },
+    alternates: { canonical: opts.canonical && /^https?:\/\//.test(opts.canonical) ? opts.canonical : url, languages },
     openGraph: {
       type: opts.type ?? "website",
       url,

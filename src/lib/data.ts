@@ -18,7 +18,7 @@ const REVALIDATE = 3600;
 /** Each deployment gets its own cache keys, so content edited straight in the database shows after a redeploy. */
 const BUILD = process.env.VERCEL_DEPLOYMENT_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
 
-function cached<T>(tag: string, fn: () => Promise<T | null>, fallback: () => T, keyParts: string[] = []) {
+function cached<T>(tag: string, fn: () => Promise<T | null>, fallback: () => T, keyParts: string[] = [], revalidate = REVALIDATE) {
   return unstable_cache(
     async () => {
       try {
@@ -31,7 +31,7 @@ function cached<T>(tag: string, fn: () => Promise<T | null>, fallback: () => T, 
       }
     },
     ["sco", BUILD, tag, ...keyParts],
-    { tags: ["content", tag], revalidate: REVALIDATE },
+    { tags: ["content", tag], revalidate },
   )();
 }
 
@@ -145,6 +145,8 @@ export const getPosts = () =>
       return (data ?? []) as Post[];
     },
     () => [],
+    [],
+    300, // scheduled posts go live within five minutes of their publish time
   );
 
 export const getCategories = () => cached<Taxonomy[]>("taxonomy", () => rows<Taxonomy>("post_categories", "slug"), () => [], ["cat"]);
