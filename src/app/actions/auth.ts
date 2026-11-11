@@ -33,15 +33,28 @@ export async function sendMagicLink(_p: AuthState, fd: FormData): Promise<AuthSt
   return { ok: true, message: "link_sent" };
 }
 
-/** Owner bootstrap: only the configured OWNER_EMAIL may request the first sign-in link; the DB trigger grants ownership once. */
+/**
+ * Owner bootstrap: only the configured owner email may request the first sign-in link, and only while no owner exists.
+ * The address comes from OWNER_EMAIL, or else from the database's own owner setting (checked server-side with the service key).
+ * The DB trigger grants ownership once.
+ */
 export async function requestOwnerLink(_p: AuthState, fd: FormData): Promise<AuthState> {
   const sb = await sessionClient();
   if (!sb) return { error: "not_configured" };
-  const owner = serverEnv().ownerEmail;
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
-  if (!owner) return { error: "owner_env_missing" };
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "generic" };
+  const envOwner = serverEnv().ownerEmail;
+  let allowed = Boolean(envOwner) && email === envOwner;
+  if (!allowed) {
+    const admin = serviceClient();
+    if (!admin && !envOwner) return { error: "owner_env_missing" };
+    if (admin) {
+      const { data } = await admin.rpc("owner_setup_allowed", { p_email: email });
+      allowed = data === true;
+    }
+  }
   // Same response whether or not it matches, so the owner address can't be probed.
-  if (email === owner) {
+  if (allowed) {
     const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: callback("/admin/set-password") } });
     if (error) return { error: error.status === 429 ? "rate_limited" : "generic" };
   }

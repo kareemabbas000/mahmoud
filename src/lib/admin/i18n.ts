@@ -87,8 +87,9 @@ export type AdminKey = keyof typeof D;
 export type AdminLocale = "ar" | "en";
 
 export async function getAdminLocale(): Promise<AdminLocale> {
+  // The control panel defaults to English; Arabic is one click away (the public site stays Arabic-first).
   const c = (await cookies()).get("admin_locale")?.value;
-  return c === "en" ? "en" : "ar";
+  return c === "ar" ? "ar" : "en";
 }
 
 export async function getAdminT() {

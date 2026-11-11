@@ -14,8 +14,8 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
   return (
     <AuthShell
       locale={locale}
-      title={ar ? "تسجيل الدخول" : "Sign in"}
-      intro={ar ? "لوحة تحكم موقع المكتب الاستشاري المتخصص." : "Specialized Consulting Office website control panel."}
+      title={ar ? "مرحبًا بعودتك" : "Welcome back"}
+      intro={ar ? "سجّل الدخول لإدارة موقع المكتب الاستشاري المتخصص." : "Sign in to manage the Specialized Consulting Office website."}
       footer={
         <div className="grid gap-2">
           <Link href="/admin/reset" className="text-blue hover:underline">{ar ? "نسيت كلمة المرور؟" : "Forgot your password?"}</Link>
@@ -33,7 +33,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           { name: "password", label: ar ? "كلمة المرور" : "Password", type: "password", autoComplete: "current-password", dir: "ltr" },
         ]}
       />
-      <details className="mt-6 text-sm">
+      <details className="auth-alt mt-6 text-sm">
         <summary className="cursor-pointer text-muted hover:text-ink">{ar ? "أو أرسل لي رابط دخول بالبريد" : "Or email me a sign-in link"}</summary>
         <div className="mt-4">
           <AuthForm action={sendMagicLink} submit={ar ? "إرسال الرابط" : "Send link"} messages={m} fields={[{ name: "email", label: ar ? "البريد الإلكتروني" : "Email", type: "email", autoComplete: "email", dir: "ltr" }]} />

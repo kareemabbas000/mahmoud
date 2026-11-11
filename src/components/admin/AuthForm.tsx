@@ -21,13 +21,13 @@ export function AuthForm({
       {fields.map((f) => (
         <div key={f.name} className="field">
           <label htmlFor={`f-${f.name}`}>{f.label}</label>
-          <input id={`f-${f.name}`} name={f.name} type={f.type ?? "text"} autoComplete={f.autoComplete} defaultValue={f.defaultValue} required dir={f.dir} className={`input ${f.dir === "ltr" ? "input-ltr" : ""}`} />
+          <input id={`f-${f.name}`} name={f.name} type={f.type ?? "text"} autoComplete={f.autoComplete} defaultValue={f.defaultValue} required dir={f.dir} className={`auth-input ${f.dir === "ltr" ? "input-ltr" : ""}`} />
           {f.hint && <p className="field-hint">{f.hint}</p>}
         </div>
       ))}
-      {state.error && <p role="alert" className="rounded-md bg-danger/10 p-3 text-sm text-danger">{messages[state.error] ?? messages.generic}</p>}
-      {state.ok && state.message && <p role="status" className="rounded-md bg-success/10 p-3 text-sm text-success">{messages[state.message] ?? state.message}</p>}
-      <button className="btn btn-primary mt-2 w-full" disabled={pending}>{pending ? "…" : submit}</button>
+      {state.error && <p role="alert" className="rounded-xl border border-danger/20 bg-danger/5 p-3 text-sm text-danger">{messages[state.error] ?? messages.generic}</p>}
+      {state.ok && state.message && <p role="status" className="rounded-xl border border-success/20 bg-success/5 p-3 text-sm text-success">{messages[state.message] ?? state.message}</p>}
+      <button className="auth-submit" disabled={pending}>{pending ? <span className="auth-spin" aria-hidden="true" /> : null}{submit}</button>
     </form>
   );
 }

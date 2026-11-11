@@ -92,7 +92,7 @@ export function PostsList({ rows, cats }: { rows: PostRow[]; cats: { id: string;
                 <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-paper-2">
                   {p.cover ? <img src={p.cover} alt="" className="size-full object-cover" /> : <span className="text-xs text-faint">—</span>}
                 </span>
-                <Link href={`/admin/posts/${p.id}`} className="min-w-0 flex-1">
+                <Link href={`/admin/posts/${p.id}`} className="min-w-0 flex-1 basis-[13rem]">
                   <span className="block truncate font-semibold text-ink hover:text-blue">{title(p)}</span>
                   <span className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-faint">
                     <span className={`rounded-full px-2 py-0.5 font-medium ${chip[s]}`}>{label[s]}</span>

@@ -32,7 +32,7 @@ export function PagesList({ rows, templates }: { rows: PageRow[]; templates: { i
 
   const Row = ({ r }: { r: PageRow }) => (
     <li className="flex flex-wrap items-center gap-3 border-b border-rule px-4 py-3 last:border-b-0 hover:bg-paper-2/60">
-      <Link href={`/admin/pages/${r.id}`} className="min-w-0 flex-1">
+      <Link href={`/admin/pages/${r.id}`} className="min-w-0 flex-1 basis-[13rem]">
         <span className="block font-semibold text-ink hover:text-blue">{title(r)}</span>
         <span className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-faint">
           <span dir="ltr">/{locale}/{r.slug}</span>

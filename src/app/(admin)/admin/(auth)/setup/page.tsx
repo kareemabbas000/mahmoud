@@ -12,7 +12,7 @@ export default async function Setup() {
     <AuthShell
       locale={locale}
       title={ar ? "تفعيل حساب المالك" : "Activate the owner account"}
-      intro={ar ? "يعمل هذا مرة واحدة فقط وللبريد المحدد في OWNER_EMAIL. ستصلك رسالة لتعيين كلمة المرور." : "Works once, and only for the email set in OWNER_EMAIL. You'll receive an email to set your password."}
+      intro={ar ? "يعمل مرة واحدة فقط ولبريد المالك المعتمد. ستصلك رسالة بها رابط لتعيين كلمة المرور." : "Works once, and only for the approved owner email. You'll receive an email with a link to set your password."}
     >
       <AuthForm action={requestOwnerLink} submit={ar ? "أرسل رابط التفعيل" : "Send activation link"} messages={authMessages(ar)} fields={[{ name: "email", label: ar ? "بريد المالك" : "Owner email", type: "email", autoComplete: "email", dir: "ltr" }]} />
     </AuthShell>

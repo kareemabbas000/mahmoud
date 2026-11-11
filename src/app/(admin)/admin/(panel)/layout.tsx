@@ -19,56 +19,60 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   ]);
   const admin = atLeast(staff.role, "admin");
   const groups: NavGroup[] = [
-    { label: t("nav.dashboard"), items: [{ href: "/admin", label: t("nav.dashboard") }] },
+    { label: t("nav.dashboard"), items: [{ href: "/admin", icon: "chart", label: t("nav.dashboard") }] },
     {
       label: t("nav.content"),
       items: [
-        { href: "/admin/pages", label: t("nav.pages") },
-        { href: "/admin/posts", label: t("nav.posts") },
-        { href: "/admin/c/services", label: t("nav.services") },
-        { href: "/admin/c/team", label: t("nav.team") },
-        { href: "/admin/c/clients", label: t("nav.clients") },
-        { href: "/admin/c/certificates", label: t("nav.certificates") },
-        { href: "/admin/c/branches", label: t("nav.branches") },
-        { href: "/admin/c/faqs", label: t("nav.faqs") },
-        { href: "/admin/c/gallery", label: t("nav.gallery") },
-        { href: "/admin/taxonomy", label: t("nav.taxonomy") },
-        { href: "/admin/media", label: t("nav.media") },
+        { href: "/admin/pages", icon: "layers", label: t("nav.pages") },
+        { href: "/admin/posts", icon: "book", label: t("nav.posts") },
+        { href: "/admin/c/services", icon: "audit", label: t("nav.services") },
+        { href: "/admin/c/team", icon: "team", label: t("nav.team") },
+        { href: "/admin/c/clients", icon: "handshake", label: t("nav.clients") },
+        { href: "/admin/c/certificates", icon: "shield", label: t("nav.certificates") },
+        { href: "/admin/c/branches", icon: "pin", label: t("nav.branches") },
+        { href: "/admin/c/faqs", icon: "help", label: t("nav.faqs") },
+        { href: "/admin/c/gallery", icon: "image", label: t("nav.gallery") },
+        { href: "/admin/taxonomy", icon: "ledger", label: t("nav.taxonomy") },
+        { href: "/admin/media", icon: "image", label: t("nav.media") },
       ],
     },
     {
       label: t("nav.engage"),
       items: [
-        { href: "/admin/enquiries", label: t("nav.enquiries"), badge: newEnquiries ?? 0 },
-        { href: "/admin/newsletter", label: t("nav.newsletter") },
+        { href: "/admin/enquiries", icon: "mail", label: t("nav.enquiries"), badge: newEnquiries ?? 0 },
+        { href: "/admin/newsletter", icon: "mail", label: t("nav.newsletter") },
       ],
     },
     {
       label: t("nav.site"),
       items: [
-        { href: "/admin/translations", label: t("nav.translations") },
+        { href: "/admin/translations", icon: "globe", label: t("nav.translations") },
         ...(admin
           ? [
-              { href: "/admin/settings", label: t("nav.settings") },
-              { href: "/admin/menus", label: t("nav.menus") },
-              { href: "/admin/languages", label: t("nav.languages") },
-              { href: "/admin/tracking", label: t("nav.tracking") },
-              { href: "/admin/c/redirects", label: t("nav.redirects") },
+              { href: "/admin/settings", icon: "spark", label: t("nav.settings") },
+              { href: "/admin/menus", icon: "menu", label: t("nav.menus") },
+              { href: "/admin/languages", icon: "globe", label: t("nav.languages") },
+              { href: "/admin/tracking", icon: "chart", label: t("nav.tracking") },
+              { href: "/admin/c/redirects", icon: "arrow", label: t("nav.redirects") },
             ]
           : []),
       ],
     },
-    ...(admin ? [{ label: t("nav.admin"), items: [{ href: "/admin/users", label: t("nav.users") }, { href: "/admin/audit", label: t("nav.audit") }] }] : []),
+    ...(admin ? [{ label: t("nav.admin"), items: [{ href: "/admin/users", icon: "team", label: t("nav.users") }, { href: "/admin/audit", icon: "clock", label: t("nav.audit") }] }] : []),
   ];
   return (
     <AdminProvider locale={locale} role={staff.role} langs={(langs ?? []) as AdminLang[]}>
       <Sidebar
+        title={t("app.title")}
         groups={groups}
         footer={
           <div className="grid gap-3 text-sm">
-            <div>
-              <p className="truncate font-medium text-ink">{staff.full_name || staff.email}</p>
-              <p className="text-xs text-faint">{t(`role.${staff.role}` as never)}</p>
+            <div className="flex items-center gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-blue-wash font-semibold text-blue">{(staff.full_name || staff.email).slice(0, 1).toUpperCase()}</span>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-ink">{staff.full_name || staff.email}</p>
+                <p className="text-xs text-faint">{t(`role.${staff.role}` as never)}</p>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <LocaleToggle locale={locale} />
@@ -79,7 +83,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         }
       />
       <div className="min-h-dvh lg:ps-72">
-        <main className="mx-auto max-w-[100rem] px-4 py-8 pt-16 lg:px-8 lg:pt-8">{children}</main>
+        <main className="adm-main mx-auto max-w-[100rem] px-4 pb-16 pt-5 sm:px-6 lg:px-8 lg:pt-8">{children}</main>
       </div>
     </AdminProvider>
   );
