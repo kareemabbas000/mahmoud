@@ -7,6 +7,9 @@ import { sessionClient } from "@/lib/supabase/clients";
 import { getSite } from "@/lib/site";
 import type { Block } from "@/lib/types";
 
+/** New items (created in the panel) render on first visit, then stay cached until edited. */
+export const dynamicParams = true;
+
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { robots: { index: false, follow: false }, title: "Preview" };
 

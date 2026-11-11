@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
 import type { RichDoc, RichNode } from "@/lib/types";
+import { isVariantSet, variantSrcSet } from "@/lib/media";
 
 /**
  * Server renderer for ProseMirror/TipTap JSON. No editor code ships to visitors.
@@ -115,7 +116,7 @@ function render(node: RichNode, key: string, ctx: { h: number }): ReactNode {
       const size = ["wide", "full"].includes(String(node.attrs?.size)) ? String(node.attrs?.size) : "normal";
       return (
         <figure key={key} className={`is-${size}`}>
-          <img src={src} alt={String(node.attrs?.alt ?? "")} loading="lazy" decoding="async" className="h-auto w-full" />
+          <img src={src} srcSet={isVariantSet(src) ? variantSrcSet(src) : undefined} sizes={isVariantSet(src) ? "(min-width:1024px) 48rem, 100vw" : undefined} alt={String(node.attrs?.alt ?? "")} loading="lazy" decoding="async" className="h-auto w-full" />
           {cap && <figcaption>{cap}</figcaption>}
         </figure>
       );

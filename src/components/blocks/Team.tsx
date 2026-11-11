@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/SmartImage";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Band, SectionHead } from "./Section";
@@ -12,7 +12,7 @@ function Avatar({ m, name, size }: { m: TeamMember; name: string; size: number }
     <span className="avatar-ring relative inline-flex shrink-0 rounded-full p-[3px]" style={{ width: size, height: size }}>
       <span className="relative block size-full overflow-hidden rounded-full bg-paper-2">
         {m.photo ? (
-          <Image src={m.photo} alt={name} fill sizes={`${size}px`} className="object-cover object-top" />
+          <SmartImage src={m.photo} alt={name} fill sizes={`${size}px`} className="object-cover object-top" />
         ) : (
           <svg viewBox="0 0 64 64" className="avatar-ph size-full" role="img" aria-label={name}>
             <circle cx="32" cy="25" r="11" fill="#8f97ff" opacity="0.9" />
@@ -41,7 +41,7 @@ export async function Team({ site, props }: BlockProps<HeadProps & { link?: Link
               </svg>
               <div className="founder-arch absolute inset-x-[8%] bottom-0 top-[6%] overflow-hidden">
                 <div className="founder-light absolute inset-0" aria-hidden="true" />
-                <Image
+                <SmartImage
                   src="/legacy/team/mahmoud-al-sheikh-cutout.png"
                   alt={site.l(lead.name)}
                   fill

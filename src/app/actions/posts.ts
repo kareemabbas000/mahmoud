@@ -4,6 +4,8 @@ import { updateTag } from "next/cache";
 import { ForbiddenError, requireAction } from "@/lib/admin/auth";
 import type { Role } from "@/lib/types";
 import type { Result } from "./admin";
+import { T } from "@/lib/tags";
+import { minutesFor } from "@/lib/posts";
 
 async function run<T>(min: Role, fn: (ctx: Awaited<ReturnType<typeof requireAction>>) => Promise<Result<T>>): Promise<Result<T>> {
   try {
@@ -14,10 +16,18 @@ async function run<T>(min: Role, fn: (ctx: Awaited<ReturnType<typeof requireActi
     return { ok: false, error: "generic", detail: (e as Error).message };
   }
 }
-const bust = () => {
-  updateTag("posts");
-  updateTag("content");
+/**
+ * Refresh one post: its page (post:<id>), every slug it had or has (slug:<slug>) and the lists
+ * (posts:index → /insights pages, RSS, sitemap). Other post pages are never touched.
+ */
+const bust = (id: string, ...slugMaps: (Record<string, string> | null | undefined)[]) => {
+  updateTag(T.post(id));
+  updateTag(T.postsIndex);
+  const slugs = new Set(slugMaps.flatMap((m) => Object.values(m ?? {})).filter(Boolean));
+  for (const s of slugs) updateTag(T.slug(s));
 };
+const oldSlugs = async (sb: Awaited<ReturnType<typeof requireAction>>["sb"], id: string) =>
+  ((await sb.from("posts").select("slug").eq("id", id).maybeSingle()).data?.slug ?? {}) as Record<string, string>;
 
 type L<T = string> = Record<string, T>;
 export type PostInput = {
@@ -39,6 +49,14 @@ export type PostInput = {
 const LOC = /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/;
 const onlyLocales = <T,>(o: unknown): L<T> => Object.fromEntries(Object.entries((o ?? {}) as L<T>).filter(([k]) => LOC.test(k)));
 const SLUG = /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u;
+
+/** Up to 3 newest live posts sharing the category or a tag. */
+async function pickRelated(sb: Awaited<ReturnType<typeof requireAction>>["sb"], id: string, cat: string | null, tags: string[]): Promise<string[]> {
+  const ors = [cat ? `category_id.eq.${cat}` : "", tags.length ? `tag_ids.ov.{${tags.join(",")}}` : ""].filter(Boolean);
+  if (!ors.length) return [];
+  const { data } = await sb.from("posts").select("id").neq("id", id).in("status", ["published", "scheduled"]).lte("publish_at", new Date().toISOString()).or(ors.join(",")).order("publish_at", { ascending: false }).limit(3);
+  return (data ?? []).map((r) => r.id as string);
+}
 
 export async function createPost(): Promise<Result<{ id: string }>> {
   return run("editor", async ({ sb }) => {
@@ -70,6 +88,7 @@ export async function savePost(id: string, input: PostInput): Promise<Result<{ s
       const { data: clash } = await sb.from("posts").select("id").neq("id", id).eq(`slug->>${k}`, v).limit(1);
       if (clash?.length) return { ok: false, error: "validation", detail: `slug (${k}) “${v}” is already used by another post` };
     }
+    const before = await oldSlugs(sb, id);
     const body = onlyLocales<unknown>(input.body);
     const translation_status = Object.fromEntries(
       Object.keys({ ...title, ...body }).map((k) => {
@@ -92,11 +111,15 @@ export async function savePost(id: string, input: PostInput): Promise<Result<{ s
       seo: onlyLocales(input.seo),
       faqs: Object.fromEntries(Object.entries(onlyLocales<{ q: string; a: string }[]>(input.faqs)).map(([k, v]) => [k, (v ?? []).filter((f) => f.q?.trim() && f.a?.trim())])),
       translation_status,
+      // Stored so lists, cards and feeds never need to load post bodies.
+      read_minutes: Object.fromEntries(Object.entries(body).map(([k, doc]) => [k, minutesFor(doc)])),
+      // Related posts are picked at save time, so a post page never depends on the whole post list.
+      related_ids: await pickRelated(sb, id, input.category_id || null, (input.tag_ids ?? []).filter((x) => /^[0-9a-f-]{36}$/.test(x))),
     };
     const { data, error } = await sb.from("posts").update(row).eq("id", id).select("id,status,publish_at");
     if (error) return { ok: false, error: error.code === "42501" ? "forbidden" : "validation", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust();
+    bust(id, before, slug);
     return { ok: true, data: { status: data[0]!.status as string, publish_at: data[0]!.publish_at as string | null } };
   });
 }
@@ -118,21 +141,23 @@ export async function duplicatePost(id: string): Promise<Result<{ id: string }>>
 
 export async function setPostStatus(id: string, status: "draft" | "published"): Promise<Result> {
   return run("editor", async ({ sb }) => {
+    const before = await oldSlugs(sb, id);
     const patch = status === "published" ? { status, publish_at: new Date().toISOString() } : { status };
     const { data, error } = await sb.from("posts").update(patch).eq("id", id).select("id");
     if (error) return { ok: false, error: "validation", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust();
+    bust(id, before);
     return { ok: true };
   });
 }
 
 export async function deletePost(id: string): Promise<Result> {
   return run("admin", async ({ sb }) => {
+    const before = await oldSlugs(sb, id);
     const { data, error } = await sb.from("posts").delete().eq("id", id).select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust();
+    bust(id, before);
     return { ok: true };
   });
 }

@@ -35,7 +35,13 @@ export function LanguagesEditor({ initial }: { initial: LangRow[] }) {
       {admin && (
         <div className="flex flex-wrap gap-2">
           <button type="button" className="btn btn-ghost !min-h-10 text-sm" onClick={() => setRows((r) => [...r, { code: "", name: "", native_name: "", dir: "ltr", enabled: false, is_default: false, sort: r.length + 1 }])}>+ {t("إضافة لغة", "Add language")}</button>
-          <button type="button" className="btn btn-primary !min-h-10 text-sm" disabled={pending} onClick={() => start(async () => { show(await saveLanguages(rows), t("تم الحفظ — تحدّثت القوائم وخريطة الموقع وروابط hreflang", "Saved — menus, sitemap and hreflang updated")); })}>{t("حفظ", "Save")}</button>
+          <button type="button" className="btn btn-primary !min-h-10 text-sm" disabled={pending} onClick={() => start(async () => {
+            const r = await saveLanguages(rows);
+            const redeploy = r.ok && (r.data as { redeploy?: boolean } | undefined)?.redeploy;
+            show(r, redeploy
+              ? t("تم الحفظ. اللغة الجديدة أو اللغة الافتراضية تظهر على الموقع بعد إعادة النشر من Vercel (أضف VERCEL_DEPLOY_HOOK_URL ليتم ذلك تلقائيًا).", "Saved. A new language or default language goes live after a redeploy in Vercel (set VERCEL_DEPLOY_HOOK_URL to do this automatically).")
+              : t("تم الحفظ — تحدّثت القوائم وخريطة الموقع وروابط hreflang", "Saved — menus, sitemap and hreflang updated"));
+          })}>{t("حفظ", "Save")}</button>
         </div>
       )}
       <p className="text-sm text-muted">{t("اللغة المعطّلة تختفي من القوائم ومبدّل اللغة وخريطة الموقع وروابط hreflang، وتُحوَّل روابطها إلى اللغة الافتراضية. اللغة الجديدة تبدأ معطّلة حتى تكتمل ترجمتها.", "A disabled language disappears from menus, the language switcher, the sitemap and hreflang, and its URLs redirect to the default language. New languages start disabled until translated.")}</p>

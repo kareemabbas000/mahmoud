@@ -1,18 +1,18 @@
-import { getEnabledLanguages, getPosts, getSettings } from "@/lib/data";
+import { getLanguages, getPostIndex, getSettings } from "@/lib/data";
 import { abs } from "@/lib/seo";
 import { tr } from "@/lib/i18n";
 import { postIn } from "@/lib/posts";
 
-export const revalidate = 3600;
+export const dynamic = "force-static";
 const x = (s: string) => s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[c]!);
 
 export async function generateStaticParams() {
-  return (await getEnabledLanguages()).map((l) => ({ locale: l.code }));
+  return (await getLanguages()).map((l) => ({ locale: l.code }));
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const [posts, settings] = await Promise.all([getPosts(), getSettings()]);
+  const [posts, settings] = await Promise.all([getPostIndex(), getSettings()]);
   const items = posts
     .filter((p) => postIn(p, locale))
     .slice(0, 50)

@@ -4,6 +4,7 @@ import { updateTag } from "next/cache";
 import { ForbiddenError, requireAction } from "@/lib/admin/auth";
 import type { Role } from "@/lib/types";
 import type { Result } from "./admin";
+import { T } from "@/lib/tags";
 
 async function run<T>(min: Role, fn: (ctx: Awaited<ReturnType<typeof requireAction>>) => Promise<Result<T>>): Promise<Result<T>> {
   try {
@@ -14,9 +15,10 @@ async function run<T>(min: Role, fn: (ctx: Awaited<ReturnType<typeof requireActi
     return { ok: false, error: "generic", detail: (e as Error).message };
   }
 }
-const bust = () => {
-  updateTag("pages");
-  updateTag("content");
+/** Refresh only the edited page (and the slug index used by the sitemap). Never site-wide. */
+const bust = (...slugs: string[]) => {
+  for (const s of new Set(slugs)) updateTag(T.page(s));
+  updateTag(T.pagesIndex);
 };
 
 type L = Record<string, string>;
@@ -76,7 +78,7 @@ export async function publishPage(id: string, draft: PageDraft, note?: string): 
       .select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust();
+    bust(cur.slug as string);
     return { ok: true };
   });
 }
@@ -98,7 +100,7 @@ export async function setPagePublished(id: string, published: boolean): Promise<
     const { data, error } = await sb.from("pages").update({ published }).eq("id", id).select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust();
+    bust(row.slug as string);
     return { ok: true };
   });
 }
@@ -107,10 +109,11 @@ export async function renamePageSlug(id: string, slug: string): Promise<Result> 
   return run("admin", async ({ sb }) => {
     const s = slug.trim().toLowerCase().replace(/^\/+|\/+$/g, "");
     if (!SLUG.test(s) || RESERVED.has(s.split("/")[0]!)) return { ok: false, error: "validation", detail: "invalid or reserved slug" };
+    const { data: old } = await sb.from("pages").select("slug").eq("id", id).maybeSingle();
     const { data, error } = await sb.from("pages").update({ slug: s }).eq("id", id).eq("kind", "custom").select("id");
     if (error) return { ok: false, error: "validation", detail: error.code === "23505" ? "slug already exists" : error.message };
     if (!data?.length) return { ok: false, error: "blocked", detail: "System pages keep their address." };
-    bust();
+    bust(s, (old?.slug as string | undefined) ?? s);
     return { ok: true };
   });
 }
@@ -138,10 +141,11 @@ export async function saveTemplate(name: L, blocks: BlockIn[]): Promise<Result> 
 
 export async function deletePage(id: string): Promise<Result> {
   return run("admin", async ({ sb }) => {
+    const { data: row } = await sb.from("pages").select("slug").eq("id", id).maybeSingle();
     const { data, error } = await sb.from("pages").delete().eq("id", id).eq("kind", "custom").select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked", detail: "System pages can't be deleted." };
-    bust();
+    bust((row?.slug as string | undefined) ?? "");
     return { ok: true };
   });
 }

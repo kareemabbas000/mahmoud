@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase/browser";
 import { registerMedia } from "@/app/actions/admin";
 import { useAdmin, useResult } from "./AdminContext";
+import { VARIANT_WIDTHS } from "@/lib/media";
 
 export type MediaRow = { id: string; url: string; path: string; mime: string | null; width: number | null; height: number | null; alt: Record<string, string>; created_at: string };
 
@@ -16,6 +17,39 @@ const imgSize = (file: File) =>
     i.onerror = () => res({ w: null, h: null });
     i.src = URL.createObjectURL(file);
   });
+
+/**
+ * Raster photos (JPEG/PNG/WebP) are resized in the browser into a WebP set (480/960/1600 px), so the site can
+ * serve them straight from Supabase with a srcset and never pay for Vercel image transformations, and storage
+ * holds ~150 kB instead of multi-MB originals. SVG, GIF and other files are uploaded untouched.
+ */
+const RESIZABLE = new Set(["image/jpeg", "image/png", "image/webp"]);
+async function webpSet(file: File): Promise<{ w: number; blob: Blob; width: number; height: number }[] | null> {
+  if (!RESIZABLE.has(file.type) || typeof createImageBitmap !== "function") return null;
+  try {
+    const bmp = await createImageBitmap(file);
+    const out: { w: number; blob: Blob; width: number; height: number }[] = [];
+    for (const w of VARIANT_WIDTHS) {
+      const scale = Math.min(1, w / bmp.width);
+      const width = Math.max(1, Math.round(bmp.width * scale));
+      const height = Math.max(1, Math.round(bmp.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(bmp, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/webp", w === 480 ? 0.78 : 0.82));
+      if (!blob || blob.type !== "image/webp") return null; // browser without WebP encoding → upload original
+      out.push({ w, blob, width, height });
+    }
+    bmp.close();
+    return out;
+  } catch {
+    return null;
+  }
+}
 
 /** Uploads to the public `media` bucket (RLS: editor+) and registers each file in the media table. */
 export function useUploader() {
@@ -36,16 +70,39 @@ export function useUploader() {
         }
         const safe = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "") || "file";
         const d = new Date();
-        const path = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${crypto.randomUUID().slice(0, 8)}-${safe}`;
-        const up = await sb.storage.from("media").upload(path, file, { contentType: file.type, cacheControl: "31536000" });
-        if (up.error) {
-          toast("err", `${file.name}: ${up.error.message}`);
-          continue;
+        const base = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${crypto.randomUUID().slice(0, 8)}-${safe}`;
+        const set = await webpSet(file);
+        let path = base;
+        let mime = file.type;
+        let size = file.size;
+        let w: number | null;
+        let h: number | null;
+        if (set) {
+          // folder per image; the w1600 file is the one referenced everywhere
+          const folder = base.replace(/\.[a-z0-9]+$/, "");
+          const ups = await Promise.all(set.map((v) => sb.storage.from("media").upload(`${folder}/w${v.w}.webp`, v.blob, { contentType: "image/webp", cacheControl: "31536000" })));
+          const failed = ups.find((u) => u.error);
+          if (failed?.error) {
+            toast("err", `${file.name}: ${failed.error.message}`);
+            continue;
+          }
+          const main = set[set.length - 1]!;
+          path = `${folder}/w1600.webp`;
+          mime = "image/webp";
+          size = set.reduce((n, v) => n + v.blob.size, 0);
+          w = main.width;
+          h = main.height;
+        } else {
+          const up = await sb.storage.from("media").upload(path, file, { contentType: file.type, cacheControl: "31536000" });
+          if (up.error) {
+            toast("err", `${file.name}: ${up.error.message}`);
+            continue;
+          }
+          ({ w, h } = await imgSize(file));
         }
         const url = sb.storage.from("media").getPublicUrl(path).data.publicUrl;
-        const { w, h } = await imgSize(file);
-        const r = await registerMedia({ path, url, mime: file.type, size: file.size, width: w, height: h });
-        if (show(r, "") && r.ok) out.push({ id: (r.data as { id: string }).id, url, path, mime: file.type, width: w, height: h, alt: {}, created_at: d.toISOString() });
+        const r = await registerMedia({ path, url, mime, size, width: w, height: h });
+        if (show(r, "") && r.ok) out.push({ id: (r.data as { id: string }).id, url, path, mime, width: w, height: h, alt: {}, created_at: d.toISOString() });
       }
       if (out.length) toast("ok", t(`تم رفع ${out.length} ملف`, `${out.length} file(s) uploaded`));
       return out;

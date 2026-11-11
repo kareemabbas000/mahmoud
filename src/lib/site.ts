@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getDefaultLocale, getDictionary, getEnabledLanguages, getLanguages, getMenus, getServices, getSettings } from "@/lib/data";
+import { getDefaultLocale, getDictionary, getEnabledLanguages, getLanguages, getMenus, getServiceNav, getSettings } from "@/lib/data";
 import { digits, dirOf, fill, makeT, tr } from "@/lib/i18n";
 import type { L } from "@/lib/types";
 
@@ -29,7 +29,7 @@ export const getSite = cache(async (locale: string) => {
     getLanguages(),
     getDefaultLocale(),
     getMenus(),
-    getServices(),
+    getServiceNav(),
   ]);
   const tRaw = makeT(dict, locale, def);
   const t = (k: string) => digits(tRaw(k), locale, settings.theme.numerals_ar);

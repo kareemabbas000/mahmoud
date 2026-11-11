@@ -1,6 +1,6 @@
 # SCO control panel — guide
 
-The panel lives at **`/admin`** and is fully bilingual (Arabic RTL / English). Every change is saved to Supabase and goes live on the site within seconds; nothing needs a redeploy.
+The panel lives at **`/admin`** and is fully bilingual (Arabic RTL / English). Every change is saved to Supabase and goes live on the site within seconds (only the pages that use it are refreshed). Redirects and new languages are applied by an automatic redeploy (about a minute) when `VERCEL_DEPLOY_HOOK_URL` is set.
 
 ## 1. Setup checklist (Vercel → Project → Settings → Environment Variables)
 
@@ -14,7 +14,11 @@ The panel lives at **`/admin`** and is fully bilingual (Arabic RTL / English). E
 | `RESEND_API_KEY`, `MAIL_FROM` | enquiry notifications, invitations, newsletter | without it invitation links can still be copied and shared |
 | `IP_HASH_SALT` | anti-spam rate limiting | any long random string |
 | `META_CAPI_ACCESS_TOKEN` | Meta Conversions API (optional) | only if enabled in Analytics & tracking |
-| `CRON_SECRET` | optional scheduled jobs | any long random string |
+| `CRON_SECRET` | protects the daily `/api/keepalive` cron (optional) | any long random string |
+| `VERCEL_DEPLOY_HOOK_URL` | auto-redeploy after saving redirects, adding a language or changing the default language (optional) | Vercel → Settings → Git → Deploy Hooks; comma-separate one per project |
+| `REVALIDATE_SECRET` | `/api/revalidate` (optional) | if unset, the secret stored in the database is used |
+
+Cost, speed and security rules for every future change are in [`GUARDRAILS.md`](GUARDRAILS.md).
 
 In Supabase → Authentication → URL configuration, add `https://<your-domain>/admin/auth/callback` to the redirect URLs.
 
@@ -55,7 +59,7 @@ Roles are enforced twice: in the panel and inside the database (row-level securi
     - Internal and external link checks, sentence and paragraph length, heading structure.
     - Canonical URL, noindex and share image settings.
   - **Publishing**:
-    - Draft, publish now, or schedule for a date and time. Scheduled posts go live within five minutes of their time.
+    - Draft, publish now, or schedule for a date and time. Scheduled posts go live within a minute of their time (a database job publishes them).
     - Arabic and English versions with per-language completeness, a FAQ section that adds FAQ schema, cover image, category, tags and author.
     - Preview before publishing; duplicate a post.
     - Local backup: if the browser closes before you save, the panel offers to restore your work.

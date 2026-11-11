@@ -12,9 +12,11 @@ export const atLeast = (role: Role, min: Role) => RANK[role] >= RANK[min];
 export const getStaff = cache(async (): Promise<Staff | null> => {
   const sb = await sessionClient();
   if (!sb) return null;
-  const { data: auth } = await sb.auth.getUser();
-  if (!auth.user) return null;
-  const { data } = await sb.from("profiles").select("id,email,role,full_name").eq("id", auth.user.id).maybeSingle();
+  // getClaims verifies the JWT signature (locally with asymmetric keys; via the Auth server otherwise).
+  const { data: auth } = await sb.auth.getClaims();
+  const uid = auth?.claims?.sub;
+  if (!uid) return null;
+  const { data } = await sb.from("profiles").select("id,email,role,full_name").eq("id", uid).maybeSingle();
   return (data as Staff | null) ?? null;
 });
 

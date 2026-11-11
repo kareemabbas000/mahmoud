@@ -12,14 +12,20 @@ import { Motion } from "@/components/site/Motion";
 import { ScrollScenes } from "@/components/site/ScrollScenes";
 import { IntroCurtain } from "@/components/site/IntroCurtain";
 import { JsonLd } from "@/components/site/JsonLd";
-import { getBranches, getEnabledLanguages, getTracking } from "@/lib/data";
+import { getBranches, getLanguages, getTracking } from "@/lib/data";
 import { getSite } from "@/lib/site";
 import { href } from "@/lib/i18n";
 import { env } from "@/lib/env";
 import { organizationLd, websiteLd } from "@/lib/seo";
 
+/**
+ * Every known language is prebuilt; any other first segment (bots probing /wp-login.php, /.env …) gets the
+ * static 404 without running a function. Adding a brand-new language therefore needs a redeploy, which the
+ * Languages screen triggers automatically through VERCEL_DEPLOY_HOOK_URL.
+ */
+export const dynamicParams = false;
 export async function generateStaticParams() {
-  return (await getEnabledLanguages()).map((l) => ({ locale: l.code }));
+  return (await getLanguages()).map((l) => ({ locale: l.code }));
 }
 
 export const viewport: Viewport = {

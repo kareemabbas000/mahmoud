@@ -7,3 +7,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Project rules (read before any edit)
+
+- `docs/GUARDRAILS.md`: cost, speed and security rules for Vercel Hobby and Supabase Free. Every change must pass its checklist (§10).
+- `docs/CONTROL_PANEL.md`: how the panel works and its environment variables.
+- Schema changes go in `supabase/migrations/`, get applied to the project, and are checked with the advisors.
+- Finished, verified work is committed and pushed to `main` (Vercel deploys it).

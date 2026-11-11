@@ -12,6 +12,9 @@ import { pageMeta, serviceLd } from "@/lib/seo";
 import { docHeadings } from "@/lib/rich";
 import { href as h, prettyPhone } from "@/lib/i18n";
 
+/** New items (created in the panel) render on first visit, then stay cached until edited. */
+export const dynamicParams = true;
+
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export async function generateStaticParams() {

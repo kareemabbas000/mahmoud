@@ -4,12 +4,14 @@ import { Band, SectionHead } from "./Section";
 import { ServicesExplorer } from "./ServicesExplorer";
 import { href as h } from "@/lib/i18n";
 import type { BlockProps, HeadProps } from "./types";
+import { getServices } from "@/lib/data";
 
 type P = HeadProps & { layout?: "grid" | "list" };
 
 /** Services as a ledger index: reference, title, summary, and a tick that draws on hover. */
-export function Services({ site, props, refCode }: BlockProps<P>) {
-  const { services, locale } = site;
+export async function Services({ site, props, refCode }: BlockProps<P>) {
+  const { locale } = site;
+  const services = await getServices();
   const detailed = props.layout === "list";
   if (!detailed) {
     return (

@@ -95,23 +95,30 @@ export function Motion() {
   }, [pathname]);
 
   // Cursor spotlight on dark bands + subtle 3D tilt on cards (fine pointers only).
+  // Throttled to one update per frame: pointermove fires 60–240×/s and each update reads layout.
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches || !matchMedia("(pointer: fine)").matches) return;
-    const onMove = (e: PointerEvent) => {
+    const SPOT = "[data-spot], .stat-card, .cert-card, .member-card, .note-tile, .svc-panel, .logo-tile, .steps-deck > li";
+    let raf = 0;
+    let last: PointerEvent | null = null;
+    let tilted: HTMLElement | null = null;
+    const frame = () => {
+      raf = 0;
+      const e = last;
+      if (!e) return;
       const t = e.target as Element | null;
-      const spot = t?.closest<HTMLElement>("[data-spot], .stat-card, .cert-card, .member-card, .note-tile, .svc-panel, .logo-tile, .steps-deck > li");
+      const spot = t?.closest<HTMLElement>(SPOT);
       if (spot) {
         const r = spot.getBoundingClientRect();
         spot.style.setProperty("--mx", `${e.clientX - r.left}px`);
         spot.style.setProperty("--my", `${e.clientY - r.top}px`);
       }
-      const tilt = t?.closest<HTMLElement>("[data-tilt]");
-      document.querySelectorAll<HTMLElement>("[data-tilt][data-tilting]").forEach((el) => {
-        if (el !== tilt) {
-          el.style.transform = "";
-          el.removeAttribute("data-tilting");
-        }
-      });
+      const tilt = t?.closest<HTMLElement>("[data-tilt]") ?? null;
+      if (tilted && tilted !== tilt) {
+        tilted.style.transform = "";
+        tilted.removeAttribute("data-tilting");
+      }
+      tilted = tilt;
       if (tilt) {
         const r = tilt.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width - 0.5;
@@ -120,8 +127,16 @@ export function Motion() {
         tilt.setAttribute("data-tilting", "");
       }
     };
+    const onMove = (e: PointerEvent) => {
+      last = e;
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+      if (tilted) tilted.style.transform = "";
+    };
   }, [pathname]);
 
   return null;

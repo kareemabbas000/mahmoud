@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { RichText } from "@/components/site/RichText";
@@ -11,6 +11,9 @@ import { getEnabledLanguages, getTeam } from "@/lib/data";
 import { ensureLocale, getSite } from "@/lib/site";
 import { abs, pageMeta } from "@/lib/seo";
 import { getPage } from "@/lib/data";
+
+/** New items (created in the panel) render on first visit, then stay cached until edited. */
+export const dynamicParams = true;
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -64,7 +67,7 @@ export default async function MemberPage({ params }: Props) {
           </div>
           {cutout && (
             <div className="relative self-end lg:col-span-5">
-              <Image src={cutout} alt={name} width={796} height={1341} priority sizes="(min-width:1024px) 40vw, 90vw" className="mx-auto h-auto max-h-[36rem] w-auto object-contain object-bottom" />
+              <SmartImage src={cutout} alt={name} width={796} height={1341} priority sizes="(min-width:1024px) 40vw, 90vw" className="mx-auto h-auto max-h-[36rem] w-auto object-contain object-bottom" />
             </div>
           )}
         </div>

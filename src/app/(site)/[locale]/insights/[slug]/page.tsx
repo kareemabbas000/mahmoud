@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/SmartImage";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
@@ -7,33 +7,43 @@ import { RichText } from "@/components/site/RichText";
 import { JsonLd } from "@/components/site/JsonLd";
 import { Icon } from "@/components/ui/Icon";
 import { Cta } from "@/components/blocks/Cta";
-import { getAuthors, getCategories, getPage, getPosts, getTags } from "@/lib/data";
+import { getAuthors, getCategories, getPage, getPost, getPostCards, getPostIndex, getPostRefBySlug, getTags } from "@/lib/data";
 import { ensureLocale, getSite } from "@/lib/site";
 import { abs, blogPostingLd, pageMeta } from "@/lib/seo";
 import { docHeadings } from "@/lib/rich";
 import { formatDate, href as h, num } from "@/lib/i18n";
 import { postIn, readMinutes } from "@/lib/posts";
 
+/** New items (created in the panel) render on first visit, then stay cached until edited. */
+export const dynamicParams = true;
+
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
+/** Prebuild only the newest posts; older ones render on first visit, then stay cached. */
 export async function generateStaticParams() {
-  const posts = await getPosts();
+  const posts = (await getPostIndex()).slice(0, 40);
   return posts.flatMap((p) => Object.entries(p.slug ?? {}).filter(([, s]) => s).map(([locale, slug]) => ({ locale, slug })));
 }
 
 async function find(locale: string, slug: string) {
-  const posts = await getPosts();
-  const decoded = decodeURIComponent(slug);
-  const p = posts.find((x) => x.slug?.[locale] === decoded);
-  if (p) return { post: p, posts };
-  const other = posts.find((x) => Object.values(x.slug ?? {}).includes(decoded));
-  if (other && postIn(other, locale)) permanentRedirect(`/${locale}/insights/${other.slug[locale]}`);
-  return { post: null, posts };
+  let decoded = slug;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    return null;
+  }
+  const ref = await getPostRefBySlug(decoded);
+  if (!ref) return null;
+  if (ref.slug?.[locale] !== decoded) {
+    if (postIn(ref, locale)) permanentRedirect(`/${locale}/insights/${ref.slug[locale]}`);
+    return null;
+  }
+  return getPost(ref.id);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  const { post } = await find(locale, slug);
+  const post = await find(locale, slug);
   if (!post) return {};
   const site = await getSite(locale);
   const seo = (post.seo?.[locale] ?? {}) as { title?: string; description?: string; og_image?: string; noindex?: boolean; canonical?: string };
@@ -55,9 +65,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PostPage({ params }: Props) {
   const { locale, slug } = await params;
   await ensureLocale(locale, "/insights");
-  const { post, posts } = await find(locale, slug);
+  const post = await find(locale, slug);
   if (!post) notFound();
-  const [site, authors, cats, tags, home] = await Promise.all([getSite(locale), getAuthors(), getCategories(), getTags(), getPage("")]);
+  const [site, authors, cats, tags, home, relatedCards] = await Promise.all([getSite(locale), getAuthors(), getCategories(), getTags(), getPage(""), getPostCards((post.related_ids ?? []).slice(0, 3))]);
   const author = authors.find((a) => a.id === post.author_id);
   const cat = cats.find((c) => c.id === post.category_id);
   const postTags = tags.filter((t) => post.tag_ids?.includes(t.id));
@@ -65,7 +75,7 @@ export default async function PostPage({ params }: Props) {
   const toc = docHeadings(doc).filter((x) => x.level === 2);
   const url = `/${locale}/insights/${post.slug[locale]}`;
   const faqs = post.faqs?.[locale] ?? [];
-  const related = posts.filter((p) => p.id !== post.id && postIn(p, locale) && (p.category_id === post.category_id || p.tag_ids?.some((t) => post.tag_ids?.includes(t)))).slice(0, 3);
+  const related = relatedCards.filter((p) => postIn(p, locale));
   const cta = home?.blocks.find((b) => b.type === "cta");
   const shareUrl = encodeURIComponent(abs(url));
   return (
@@ -94,7 +104,7 @@ export default async function PostPage({ params }: Props) {
         {post.cover && (
           <div className="container-x max-w-5xl pt-10">
             <div className="relative aspect-[16/8] overflow-hidden rounded-md">
-              <Image src={post.cover} alt={site.l(post.cover_alt)} fill priority sizes="(min-width:1024px) 64rem, 100vw" className="object-cover" />
+              <SmartImage src={post.cover} alt={site.l(post.cover_alt)} fill priority sizes="(min-width:1024px) 64rem, 100vw" className="object-cover" />
             </div>
           </div>
         )}

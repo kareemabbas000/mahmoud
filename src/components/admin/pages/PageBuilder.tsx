@@ -105,17 +105,19 @@ export function PageBuilder({ page, versions }: { page: BuilderPage; versions: V
       const r = await saveDraft(page.id, draft);
       if (r.ok) {
         setSavedJson(snapshot);
-        setHasDraft(true);
         setState("saved");
         setSavedAt((r.data as { at: string }).at);
-        setFrameKey((k) => k + 1);
+        // First draft switches the preview source (full load); later saves only soft-refresh it.
+        if (hasDraft) frame.current?.contentWindow?.postMessage({ type: "refresh" }, location.origin);
+        else setFrameKey((k) => k + 1);
+        setHasDraft(true);
       } else {
         setState("error");
         show(r);
       }
     }, 1100);
     return () => clearTimeout(h);
-  }, [draft, dirty, editable, page.id, show]);
+  }, [draft, dirty, editable, page.id, show, hasDraft]);
 
   /* keyboard: undo / redo / save */
   useEffect(() => {

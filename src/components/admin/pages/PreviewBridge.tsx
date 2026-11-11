@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 /**
  * Runs inside the preview iframe. Keeps the scroll position across autosave reloads,
@@ -8,6 +9,7 @@ import { useEffect } from "react";
  * back to the builder (links are disabled while editing).
  */
 export function PreviewBridge({ builder, draft, locale }: { builder: boolean; draft: boolean; locale: string }) {
+  const router = useRouter();
   useEffect(() => {
     if (!builder) return;
     const key = `sco-pv-${location.pathname}`;
@@ -34,6 +36,8 @@ export function PreviewBridge({ builder, draft, locale }: { builder: boolean; dr
       if (e.origin !== location.origin) return;
       const d = e.data as { type?: string; id?: string };
       if (d?.type === "scrollTo" && d.id) flash(d.id);
+      // Soft refresh after an autosave: re-fetches only the server payload, keeps JS, state and scroll.
+      if (d?.type === "refresh") router.refresh();
     };
     const onClick = (e: MouseEvent) => {
       const a = (e.target as Element).closest("a,button,summary,input,textarea,select,label");
@@ -52,7 +56,7 @@ export function PreviewBridge({ builder, draft, locale }: { builder: boolean; dr
       window.removeEventListener("message", onMsg);
       document.removeEventListener("click", onClick, true);
     };
-  }, [builder]);
+  }, [builder, router]);
 
   return (
     <div className="pointer-events-none fixed start-3 top-3 z-[95] rounded-full bg-ink/90 px-3 py-1.5 text-xs font-semibold text-paper shadow-soft">

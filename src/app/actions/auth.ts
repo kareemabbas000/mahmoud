@@ -6,6 +6,13 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { sessionClient, serviceClient } from "@/lib/supabase/clients";
 import { env, serverEnv } from "@/lib/env";
+import { clientMeta, rateLimit } from "@/lib/server/security";
+
+/** Brute-force guard for every auth form: per IP, on top of Supabase's own limits. */
+async function throttled(kind: string, max: number, windowSec: number) {
+  const { ipHash } = await clientMeta();
+  return !(await rateLimit(`auth:${kind}:${ipHash}`, max, windowSec));
+}
 
 export type AuthState = { ok?: boolean; error?: string; message?: string };
 const callback = (next: string) => `${env.siteUrl}/admin/auth/callback?next=${encodeURIComponent(next)}`;
@@ -15,6 +22,7 @@ export async function setAdminLocale(locale: "ar" | "en") {
 }
 
 export async function signIn(_p: AuthState, fd: FormData): Promise<AuthState> {
+  if (await throttled("signin", 10, 600)) return { error: "rate_limited" };
   const sb = await sessionClient();
   if (!sb) return { error: "not_configured" };
   const email = String(fd.get("email") ?? "").trim();
@@ -25,6 +33,7 @@ export async function signIn(_p: AuthState, fd: FormData): Promise<AuthState> {
 }
 
 export async function sendMagicLink(_p: AuthState, fd: FormData): Promise<AuthState> {
+  if (await throttled("magic", 5, 900)) return { error: "rate_limited" };
   const sb = await sessionClient();
   if (!sb) return { error: "not_configured" };
   const email = String(fd.get("email") ?? "").trim();
@@ -39,6 +48,7 @@ export async function sendMagicLink(_p: AuthState, fd: FormData): Promise<AuthSt
  * The DB trigger grants ownership once.
  */
 export async function requestOwnerLink(_p: AuthState, fd: FormData): Promise<AuthState> {
+  if (await throttled("owner", 5, 900)) return { error: "rate_limited" };
   const sb = await sessionClient();
   if (!sb) return { error: "not_configured" };
   const email = String(fd.get("email") ?? "").trim().toLowerCase();
@@ -62,6 +72,7 @@ export async function requestOwnerLink(_p: AuthState, fd: FormData): Promise<Aut
 }
 
 export async function requestReset(_p: AuthState, fd: FormData): Promise<AuthState> {
+  if (await throttled("reset", 5, 900)) return { error: "rate_limited" };
   const sb = await sessionClient();
   if (!sb) return { error: "not_configured" };
   const email = String(fd.get("email") ?? "").trim();
@@ -85,6 +96,7 @@ export async function setPassword(_p: AuthState, fd: FormData): Promise<AuthStat
 const acceptSchema = z.object({ token: z.string().regex(/^[a-f0-9]{64}$/), full_name: z.string().trim().min(2).max(120), password: z.string().min(10).max(200) });
 
 export async function acceptInvitation(_p: AuthState, fd: FormData): Promise<AuthState> {
+  if (await throttled("accept", 10, 900)) return { error: "rate_limited" };
   const parsed = acceptSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { error: parsed.error.issues.some((i) => i.path[0] === "password") ? "weak_password" : "generic" };
   const admin = serviceClient();

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SmartImage } from "@/components/ui/SmartImage";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Band, Emph } from "./Section";
@@ -43,7 +43,7 @@ export function TextMedia({ site, props }: BlockProps<P>) {
                 <LiteVideo url={props.video_url} poster={props.image} label={site.t("common.watch_video")} title={site.l(props.image_alt) || site.t("common.watch_video")} />
               ) : (
                 <div className="absolute -inset-y-[12%] inset-x-0" data-parallax="0.08">
-                  <Image src={props.image} alt={site.l(props.image_alt)} fill sizes="(min-width:1024px) 45vw, 100vw" className="object-cover" />
+                  <SmartImage src={props.image} alt={site.l(props.image_alt)} fill sizes="(min-width:1024px) 45vw, 100vw" className="object-cover" />
                 </div>
               )}
             </div>
@@ -54,7 +54,7 @@ export function TextMedia({ site, props }: BlockProps<P>) {
                 className={`collage-card absolute z-[2] overflow-hidden rounded-xl border-[3px] border-white shadow-[0_24px_50px_-20px_rgb(11_16_51/0.55)] sm:rounded-md sm:border-4 ${i === 0 ? "-bottom-16 start-3 w-[32%] rotate-[-5deg] sm:-bottom-14 sm:-start-8 sm:w-[38%] sm:rotate-[-4deg]" : "-top-9 end-3 w-[30%] rotate-[5deg] sm:-top-12 sm:-end-6"}`}
               >
                 <div className="relative aspect-[4/5]">
-                  <Image src={c.src} alt={site.l(c.alt)} fill sizes="(min-width:640px) 20vw, 36vw" className="object-cover" />
+                  <SmartImage src={c.src} alt={site.l(c.alt)} fill sizes="(min-width:640px) 20vw, 36vw" className="object-cover" />
                 </div>
               </div>
             ))}

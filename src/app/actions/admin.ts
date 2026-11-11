@@ -4,6 +4,9 @@ import { updateTag } from "next/cache";
 import { getCollection, type Field } from "@/lib/admin/collections";
 import { ForbiddenError, requireAction } from "@/lib/admin/auth";
 import type { Role } from "@/lib/types";
+import { T } from "@/lib/tags";
+import { triggerDeploy } from "@/lib/server/deploy";
+import { variantPaths } from "@/lib/media";
 
 export type Result<T = unknown> = { ok: true; data?: T } | { ok: false; error: "forbidden" | "blocked" | "validation" | "generic"; detail?: string };
 
@@ -19,10 +22,17 @@ async function run<T>(min: Role, fn: (ctx: Awaited<ReturnType<typeof requireActi
   }
 }
 
-/** Expire public caches so edits are live immediately (read-your-own-writes). */
+/**
+ * Expire exactly the public caches an edit touched (read-your-own-writes). Never add a catch-all tag here:
+ * see docs/GUARDRAILS.md §3 — a site-wide bust re-renders every page, including thousands of posts.
+ */
 function bust(...tags: string[]) {
-  for (const t of new Set([...tags, "content"])) updateTag(t);
+  for (const t of new Set(tags)) updateTag(t);
 }
+
+/** Service fields that appear in the header/footer navigation (cached separately under services:nav). */
+const NAV_FIELDS = ["slug", "sort", "icon", "name", "summary", "published"] as const;
+const sameJson = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -84,17 +94,29 @@ function clean(fields: Field[], input: Record<string, unknown>): { ok: true; row
   return { ok: true, row };
 }
 
+/** Tags for a collection edit. Services also refresh navigation when nav fields changed. */
+function tagsFor(key: string, tag: string, navChanged = true): string[] {
+  if (key === "services") return navChanged ? [T.services, T.servicesNav] : [T.services];
+  return [tag];
+}
+
 export async function saveItem(key: string, id: string | null, input: Record<string, unknown>): Promise<Result<{ id: string }>> {
   const c = getCollection(key);
   if (!c) return { ok: false, error: "generic" };
   return run(c.min, async ({ sb }) => {
     const cleaned = clean(c.fields, input);
     if (!cleaned.ok) return { ok: false, error: "validation", detail: cleaned.detail };
+    let navChanged = !id;
+    if (id && c.key === "services") {
+      const { data: before } = await sb.from(c.table).select(NAV_FIELDS.join(",")).eq("id", id).maybeSingle();
+      navChanged = !before || NAV_FIELDS.some((k) => k in cleaned.row && !sameJson((before as unknown as Record<string, unknown>)[k], cleaned.row[k]));
+    }
     const q = id ? sb.from(c.table).update(cleaned.row).eq("id", id).select("id") : sb.from(c.table).insert({ ...c.defaults, ...cleaned.row }).select("id");
     const { data, error } = await q;
     if (error) return { ok: false, error: error.code === "42501" ? "forbidden" : "validation", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust(c.tag);
+    bust(...tagsFor(c.key, c.tag, navChanged));
+    if (c.key === "redirects") await triggerDeploy("redirects");
     return { ok: true, data: { id: data[0]!.id as string } };
   });
 }
@@ -106,7 +128,8 @@ export async function deleteItem(key: string, id: string): Promise<Result> {
     const { data, error } = await sb.from(c.table).delete().eq("id", id).select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust(c.tag);
+    bust(...tagsFor(c.key, c.tag));
+    if (c.key === "redirects") await triggerDeploy("redirects");
     return { ok: true };
   });
 }
@@ -120,7 +143,7 @@ export async function reorderItems(key: string, ids: string[]): Promise<Result> 
       if (error) return { ok: false, error: "generic", detail: error.message };
       if (!data?.length) return { ok: false, error: "blocked" };
     }
-    bust(c.tag);
+    bust(...tagsFor(c.key, c.tag));
     return { ok: true };
   });
 }
@@ -132,7 +155,8 @@ export async function togglePublished(key: string, id: string, value: boolean): 
     const { data, error } = await sb.from(c.table).update({ published: value }).eq("id", id).select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust(c.tag);
+    bust(...tagsFor(c.key, c.tag));
+    if (c.key === "redirects") await triggerDeploy("redirects");
     return { ok: true };
   });
 }
@@ -143,7 +167,7 @@ export async function saveSetting(key: "site" | "tracking" | "services_also_offe
     const { data, error } = await sb.from("settings").upsert({ key, value }).select("key");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust(key === "tracking" ? "tracking" : key === "site" ? "settings" : "services_also");
+    bust(key === "tracking" ? T.tracking : key === "site" ? T.settings : T.servicesAlso);
     return { ok: true };
   });
 }
@@ -157,12 +181,20 @@ export async function saveLanguages(rows: LangRow[]): Promise<Result> {
     if (defaults.length !== 1) return { ok: false, error: "validation", detail: "Exactly one default language is required." };
     if (!defaults[0]!.enabled) return { ok: false, error: "validation", detail: "The default language must be enabled." };
     for (const r of rows) if (!/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(r.code)) return { ok: false, error: "validation", detail: `Invalid code ${r.code}` };
+    const { data: before } = await sb.from("languages").select("code,is_default");
     // Clear the default flag first so the partial unique index never conflicts mid-update.
     await sb.from("languages").update({ is_default: false }).neq("code", defaults[0]!.code);
     const { data, error } = await sb.from("languages").upsert(rows.map((r, i) => ({ ...r, sort: i + 1 }))).select("code");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if ((data?.length ?? 0) !== rows.length) return { ok: false, error: "blocked" };
-    bust("languages");
+    bust(T.languages);
+    // New language codes and a new default language are baked into the build (static params + "/" redirect).
+    const prev = new Set((before ?? []).map((r) => r.code as string));
+    const prevDefault = (before ?? []).find((r) => r.is_default)?.code;
+    if (rows.some((r) => !prev.has(r.code)) || prevDefault !== defaults[0]!.code) {
+      const deployed = await triggerDeploy("languages");
+      if (!deployed) return { ok: true, data: { redeploy: true } };
+    }
     return { ok: true };
   });
 }
@@ -174,7 +206,7 @@ export async function saveString(key: string, values: Record<string, string>): P
     const { data, error } = await sb.from("ui_strings").upsert({ key, values }).select("key");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust("ui");
+    bust(T.ui);
     return { ok: true };
   });
 }
@@ -185,7 +217,7 @@ export async function saveMenu(location: "header" | "footer", items: unknown): P
     const { data, error } = await sb.from("menus").upsert({ location, items }).select("location");
     if (error) return { ok: false, error: "generic", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust("menus");
+    bust(T.menus);
     return { ok: true };
   });
 }
@@ -213,7 +245,7 @@ export async function deleteMedia(id: string): Promise<Result> {
   return run("editor", async ({ sb }) => {
     const { data: row } = await sb.from("media").select("path,bucket").eq("id", id).maybeSingle();
     if (!row) return { ok: false, error: "blocked" };
-    const rm = await sb.storage.from(row.bucket as string).remove([row.path as string]);
+    const rm = await sb.storage.from(row.bucket as string).remove(variantPaths(row.path as string));
     if (rm.error) return { ok: false, error: "generic", detail: rm.error.message };
     const { data, error } = await sb.from("media").delete().eq("id", id).select("id");
     if (error) return { ok: false, error: "generic", detail: error.message };
