@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Supabase"
+      "mcp__Supabase",
+      "mcp__github",
+      "Bash",
+      "Edit",
+      "Write",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch"
     ]
   }
 }
