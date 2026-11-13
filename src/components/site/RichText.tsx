@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
 import type { RichDoc, RichNode } from "@/lib/types";
-import { isVariantSet, variantSrcSet } from "@/lib/media";
+import { isVariantSet, variantSrcSet, variantUrl } from "@/lib/media";
+import { RtGallery } from "./RtGallery";
 
 /**
  * Server renderer for ProseMirror/TipTap JSON. No editor code ships to visitors.
@@ -84,7 +85,7 @@ function render(node: RichNode, key: string, ctx: { h: number }): ReactNode {
       return <blockquote key={key}>{kids()}</blockquote>;
     case "callout":
       return (
-        <div key={key} className="callout" role="note" data-tone={["info", "success", "warning", "danger"].includes(String(node.attrs?.tone)) ? String(node.attrs?.tone) : "info"}>
+        <div key={key} className="callout" role="note" data-tone={["info", "success", "warning", "danger", "summary"].includes(String(node.attrs?.tone)) ? String(node.attrs?.tone) : "info"}>
           {kids()}
         </div>
       );
@@ -139,6 +140,9 @@ function render(node: RichNode, key: string, ctx: { h: number }): ReactNode {
       const src = String(node.attrs?.src ?? "");
       const yt = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([\w-]{11})/.exec(src);
       const vm = /vimeo\.com\/(\d+)/.exec(src);
+      // Google Maps: only the official embed URL (Share → Embed a map) is accepted.
+      const map = /^https:\/\/www\.google\.com\/maps\/embed\?pb=[\w!.%*-]+$/.test(src) ? src : null;
+      if (map) return <div key={key} className="rt-video rt-map"><iframe src={map} title={String(node.attrs?.title || "Map")} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /></div>;
       const url = yt ? `https://www.youtube-nocookie.com/embed/${yt[1]}` : vm ? `https://player.vimeo.com/video/${vm[1]}` : null;
       if (!url) return null;
       return (
@@ -158,6 +162,51 @@ function render(node: RichNode, key: string, ctx: { h: number }): ReactNode {
           </a>
         </p>
       );
+    }
+    case "pullquote": {
+      const text = String(node.attrs?.text ?? "");
+      if (!text) return null;
+      return (
+        <figure key={key} className="rt-pull">
+          <blockquote>{text}</blockquote>
+          {node.attrs?.cite ? <figcaption>{String(node.attrs.cite)}</figcaption> : null}
+        </figure>
+      );
+    }
+    case "stat":
+      return (
+        <figure key={key} className="rt-stat">
+          <b dir="auto">{String(node.attrs?.value ?? "")}</b>
+          <figcaption>
+            {String(node.attrs?.label ?? "")}
+            {node.attrs?.note ? <small>{String(node.attrs.note)}</small> : null}
+          </figcaption>
+        </figure>
+      );
+    case "file": {
+      const raw = String(node.attrs?.href ?? "");
+      const href = /^(https:\/\/|\/)/.test(raw) ? raw : null;
+      if (!href) return null;
+      const ext = (/\.([a-z0-9]{2,4})(\?|$)/i.exec(href)?.[1] ?? "file").toUpperCase();
+      return (
+        <a key={key} href={href} className="rt-file" download target="_blank" rel="noopener">
+          <span className="rt-file-ic" aria-hidden="true">{ext}</span>
+          <span className="rt-file-txt">
+            <b>{String(node.attrs?.label || ext)}</b>
+            {node.attrs?.note ? <small>{String(node.attrs.note)}</small> : null}
+          </span>
+          <span className="rt-file-dl" aria-hidden="true">↓</span>
+        </a>
+      );
+    }
+    case "gallery": {
+      const imgs = (Array.isArray(node.attrs?.images) ? node.attrs.images : []) as { src?: string; alt?: string }[];
+      const list = imgs
+        .filter((g) => typeof g?.src === "string" && /^(https:\/\/|\/)/.test(g.src))
+        .map((g) => ({ src: g.src!, thumb: isVariantSet(g.src) ? variantUrl(g.src!, 960) : g.src!, srcSet: isVariantSet(g.src) ? variantSrcSet(g.src!) : undefined, alt: String(g.alt ?? "") }));
+      if (!list.length) return null;
+      const cols = Math.min(4, Math.max(2, Number(node.attrs?.cols) || 3));
+      return <RtGallery key={key} images={list} cols={cols} caption={node.attrs?.caption ? String(node.attrs.caption) : undefined} />;
     }
     default:
       return <div key={key}>{kids()}</div>;

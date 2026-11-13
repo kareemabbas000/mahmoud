@@ -1,3 +1,4 @@
+import type { ThemeKey } from "./themes";
 /** Localized value: one entry per language code (languages are data, so keys are open). */
 export type L<T = string> = Record<string, T>;
 
@@ -54,7 +55,7 @@ export type SiteSettings = {
   theme: {
     default_mode: "system" | "light" | "dark";
     numerals_ar: Numerals;
-    preset: "ledger" | "gold";
+    preset: ThemeKey;
     hero_3d: boolean;
     /** Brand colours override the preset when set (hex). */
     custom_colors?: { enabled: boolean; primary: string; accent: string };
@@ -220,8 +221,9 @@ export type Post = {
   category_id: string | null;
   tag_ids: string[];
   author_id: string | null;
-  seo: L<{ title?: string; description?: string; focus_keyword?: string }>;
+  seo: L<{ title?: string; description?: string; focus_keyword?: string; keywords?: string; og_title?: string; og_description?: string; og_image?: string; noindex?: boolean; canonical?: string }>;
   faqs: L<{ q: string; a: string }[]>;
+  layout?: "classic" | "feature" | "minimal";
   source_hash: string | null;
   translation_status: L<"current" | "outdated" | "missing">;
   updated_at?: string;

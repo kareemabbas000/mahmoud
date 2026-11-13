@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { JsonLd } from "@/components/site/JsonLd";
+import { abs } from "@/lib/seo";
+import { env } from "@/lib/env";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 import { NewsletterForm } from "@/components/site/forms/NewsletterForm";
-import { InsightsFilter } from "./InsightsFilter";
-import { getCategories, getPage, getPostIndex } from "@/lib/data";
+import { getCategories, getPage, getPostIndex, type Taxonomy } from "@/lib/data";
 import type { Site } from "@/lib/site";
 import { formatDate, href as h, num } from "@/lib/i18n";
 import { cardIn, PAGE_SIZE, readMinutes } from "@/lib/posts";
@@ -13,17 +16,48 @@ export async function localePosts(locale: string) {
   return (await getPostIndex()).filter((p) => cardIn(p, locale));
 }
 
-/** One page of the insights list. Page 1 lives at /insights, page n at /insights/page/n. */
-export async function InsightsList({ site, pageNo }: { site: Site; pageNo: number }) {
+/**
+ * One page of the insights list. Page 1 lives at /insights, page n at /insights/page/n.
+ * With `category`, the same list scoped to one category at /insights/category/<slug>(/page/n).
+ * Category chips are real links (crawlable, shareable), not client-side filters.
+ */
+export async function InsightsList({ site, pageNo, category }: { site: Site; pageNo: number; category?: Taxonomy }) {
   const { locale } = site;
-  const [page, all, cats] = await Promise.all([getPage("insights"), localePosts(locale), getCategories()]);
+  const [page, everything, cats] = await Promise.all([getPage("insights"), localePosts(locale), getCategories()]);
+  const all = category ? everything.filter((p) => p.category_id === category.id) : everything;
   const pages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
   const list = all.slice((pageNo - 1) * PAGE_SIZE, pageNo * PAGE_SIZE);
-  const usedCats = cats.filter((c) => list.some((p) => p.category_id === c.id));
-  const pageHref = (n: number) => h(n <= 1 ? "/insights" : `/insights/page/${n}`, locale);
+  const usedCats = cats.filter((c) => everything.some((p) => p.category_id === c.id));
+  const base = category ? `/insights/category/${category.slug}` : "/insights";
+  const pageHref = (n: number) => h(n <= 1 ? base : `${base}/page/${n}`, locale);
+  const crumbs = [{ name: site.t("nav.home"), url: `/${locale}` }, { name: page ? site.l(page.title) : site.t("insights.back"), url: `/${locale}/insights` }, ...(category ? [{ name: site.l(category.name), url: `/${locale}${base}` }] : [])];
   return (
     <>
-      {page && <BlockRenderer site={site} blocks={page.blocks} letter="I" extra={{ pageHeader: { crumbs: [{ name: site.t("nav.home"), url: `/${locale}` }, { name: site.l(page.title), url: `/${locale}/insights` }] } }} />}
+      {category ? (
+        <section className="border-b border-rule bg-paper">
+          <div className="container-x max-w-4xl pb-12 pt-10">
+            <Breadcrumbs label={site.t("a11y.breadcrumb")} items={crumbs} />
+            <p className="eyebrow mt-12">{site.t("insights.in_category")}</p>
+            <h1 className="display d-1 mt-3">{site.l(category.name)}</h1>
+            <p className="mt-4 text-muted">{num(all.length, locale, site.numerals)} · {site.t("insights.back")}</p>
+          </div>
+        </section>
+      ) : (
+        page && <BlockRenderer site={site} blocks={page.blocks} letter="I" extra={{ pageHeader: { crumbs } }} />
+      )}
+      {list.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": category ? "CollectionPage" : "Blog",
+            "@id": abs(`/${locale}${base}${pageNo > 1 ? `/page/${pageNo}` : ""}`),
+            name: category ? site.l(category.name) : page ? site.l(page.title) : "Insights",
+            inLanguage: locale,
+            publisher: { "@id": `${env.siteUrl}/#organization` },
+            [category ? "hasPart" : "blogPost"]: list.map((p) => ({ "@type": "BlogPosting", headline: site.l(p.title), url: abs(`/${locale}/insights/${p.slug[locale]}`), datePublished: p.publish_at, ...(p.cover ? { image: abs(p.cover) } : {}) })),
+          }}
+        />
+      )}
       <section className="bg-paper">
         <div className="container-x py-16 md:py-24">
           {list.length === 0 ? (
@@ -37,7 +71,18 @@ export async function InsightsList({ site, pageNo }: { site: Site; pageNo: numbe
             </div>
           ) : (
             <>
-              {usedCats.length > 0 && <InsightsFilter all={site.t("insights.all")} cats={usedCats.map((c) => ({ id: c.id, name: site.l(c.name) }))} />}
+              {usedCats.length > 0 && (
+                <nav className="mb-12 flex flex-wrap gap-2" aria-label={site.t("insights.category")}>
+                  {[{ id: "", slug: "", name: site.t("insights.all") }, ...usedCats.map((c) => ({ id: c.id, slug: c.slug, name: site.l(c.name) }))].map((c) => {
+                    const on = (category?.id ?? "") === c.id;
+                    return (
+                      <Link key={c.id || "all"} href={h(c.slug ? `/insights/category/${c.slug}` : "/insights", locale)} aria-current={on ? "page" : undefined} className={`rounded-full border px-4 py-2 text-sm transition-colors ${on ? "border-ink bg-ink text-paper" : "border-rule text-muted hover:text-ink"}`}>
+                        {c.name}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              )}
               <ul className="grid gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
                 {list.map((p, i) => (
                   <li key={p.id} data-cat={p.category_id ?? ""} className={`post-card group ${i === 0 && pageNo === 1 ? "md:col-span-2 lg:col-span-2" : ""}`} data-reveal>

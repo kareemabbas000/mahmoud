@@ -43,16 +43,16 @@ export function CareersForm({ locale, labels }: { locale: string; labels: Labels
       )}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="cr-name" label={labels.name} error={err("name")}>
-          <input id="cr-name" name="name" required autoComplete="name" className="input" {...inv("name")} />
+          <input id="cr-name" name="name" defaultValue={state.values?.name} required autoComplete="name" className="input" {...inv("name")} />
         </Field>
         <Field id="cr-job" label={labels.job} error={err("job_title")}>
-          <input id="cr-job" name="job_title" required className="input" {...inv("job_title")} />
+          <input id="cr-job" name="job_title" defaultValue={state.values?.job_title} required className="input" {...inv("job_title")} />
         </Field>
         <Field id="cr-phone" label={labels.phone} error={err("phone")}>
-          <input id="cr-phone" name="phone" type="tel" inputMode="tel" required autoComplete="tel" dir="ltr" className="input input-ltr" {...inv("phone")} />
+          <input id="cr-phone" name="phone" defaultValue={state.values?.phone} type="tel" inputMode="tel" required autoComplete="tel" dir="ltr" className="input input-ltr" {...inv("phone")} />
         </Field>
         <Field id="cr-email" label={labels.email} error={err("email")}>
-          <input id="cr-email" name="email" type="email" required autoComplete="email" dir="ltr" className="input input-ltr" {...inv("email")} />
+          <input id="cr-email" name="email" defaultValue={state.values?.email} type="email" required autoComplete="email" dir="ltr" className="input input-ltr" {...inv("email")} />
         </Field>
       </div>
       <Field id="cr-cv" label={labels.cv} error={err("cv")}>
@@ -67,7 +67,7 @@ export function CareersForm({ locale, labels }: { locale: string; labels: Labels
         />
       </Field>
       <Field id="cr-msg" label={labels.message}>
-        <textarea id="cr-msg" name="message" rows={4} className="input" />
+        <textarea id="cr-msg" name="message" defaultValue={state.values?.message} rows={4} className="input" />
       </Field>
       <div className="field">
         <label className="flex items-start gap-3 text-sm font-normal text-muted">

@@ -78,18 +78,30 @@ export function emptyDoc(): RichDoc {
 /** Plain text of a rich doc (for excerpts, SEO scoring, search). */
 export function docText(doc: RichDoc | null | undefined): string {
   if (!doc) return "";
-  const walk = (n: RichNode): string =>
-    n.text ?? (n.content ?? []).map(walk).join(n.type === "doc" ? "\n" : " ");
+  const ATTR_TEXT = ["text", "cite", "value", "label", "note", "summary", "caption"];
+  const walk = (n: RichNode): string => {
+    if (n.text !== undefined) return n.text;
+    const own = ["pullquote", "stat", "toggle", "gallery"].includes(n.type) ? ATTR_TEXT.map((k) => (typeof n.attrs?.[k] === "string" ? (n.attrs[k] as string) : "")).filter(Boolean).join(" ") : "";
+    return [own, ...(n.content ?? []).map(walk)].filter(Boolean).join(n.type === "doc" ? "\n" : " ");
+  };
   return walk(doc as RichNode).replace(/\s+\n/g, "\n").trim();
 }
 
 /** Headings inside a doc, for a table of contents. */
 export function docHeadings(doc: RichDoc | null | undefined): { level: number; text: string; id: string }[] {
   if (!doc) return [];
-  return doc.content
-    .filter((n) => n.type === "heading")
-    .map((n, i) => {
-      const text = (n.content ?? []).map((c) => c.text ?? "").join("");
-      return { level: Number(n.attrs?.level ?? 2), text, id: `h-${i + 1}` };
-    });
+  // Numbered in document order across ALL headings (including ones inside boxes), exactly like the
+  // renderer in components/site/RichText.tsx, so table-of-contents links always land on the right heading.
+  const out: { level: number; text: string; id: string }[] = [];
+  let n = 0;
+  const walk = (node: RichNode, top: boolean) => {
+    if (node.type === "heading") {
+      n += 1;
+      if (top) out.push({ level: Number(node.attrs?.level ?? 2), text: (node.content ?? []).map((c) => c.text ?? "").join(""), id: `h-${n}` });
+      return;
+    }
+    (node.content ?? []).forEach((c) => walk(c, false));
+  };
+  doc.content.forEach((c) => walk(c, true));
+  return out;
 }

@@ -56,16 +56,16 @@ export function ContactForm({
       )}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field id="cf-name" label={labels.name} error={err("name")}>
-          <input id="cf-name" name="name" required autoComplete="name" className="input" {...inv("name")} />
+          <input id="cf-name" name="name" defaultValue={state.values?.name} required autoComplete="name" className="input" {...inv("name")} />
         </Field>
         <Field id="cf-phone" label={labels.phone} error={err("phone")} hint={labels.phoneHint}>
-          <input id="cf-phone" name="phone" type="tel" inputMode="tel" required autoComplete="tel" dir="ltr" className="input input-ltr" {...inv("phone")} aria-describedby={state.fields?.phone ? "cf-phone-error" : "cf-phone-hint"} />
+          <input id="cf-phone" name="phone" defaultValue={state.values?.phone} type="tel" inputMode="tel" required autoComplete="tel" dir="ltr" className="input input-ltr" {...inv("phone")} aria-describedby={state.fields?.phone ? "cf-phone-error" : "cf-phone-hint"} />
         </Field>
         <Field id="cf-email" label={labels.email} error={err("email")}>
-          <input id="cf-email" name="email" type="email" autoComplete="email" dir="ltr" className="input input-ltr" {...inv("email")} />
+          <input id="cf-email" name="email" defaultValue={state.values?.email} type="email" autoComplete="email" dir="ltr" className="input input-ltr" {...inv("email")} />
         </Field>
         <Field id="cf-company" label={labels.company}>
-          <input id="cf-company" name="company" autoComplete="organization" className="input" />
+          <input id="cf-company" name="company" defaultValue={state.values?.company} autoComplete="organization" className="input" />
         </Field>
       </div>
       <fieldset className="grid gap-3">
@@ -73,14 +73,14 @@ export function ContactForm({
         <div className="flex flex-wrap gap-2">
           {[{ slug: "", name: labels.general }, ...services].map((sv) => (
             <label key={sv.slug || "general"} className="svc-chip">
-              <input type="radio" name="service" value={sv.slug} defaultChecked={sv.slug === defaultService} className="sr-only" />
+              <input type="radio" name="service" value={sv.slug} defaultChecked={sv.slug === (state.values?.service ?? defaultService)} className="sr-only" />
               <span>{sv.name}</span>
             </label>
           ))}
         </div>
       </fieldset>
       <Field id="cf-message" label={labels.message} error={err("message")}>
-        <textarea id="cf-message" name="message" required rows={5} className="input" {...inv("message")} />
+        <textarea id="cf-message" name="message" defaultValue={state.values?.message} required rows={5} className="input" {...inv("message")} />
       </Field>
       <div className="field">
         <label className="flex items-start gap-3 text-sm font-normal text-muted">

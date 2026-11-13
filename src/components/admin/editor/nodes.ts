@@ -76,3 +76,70 @@ export const RichImage = Image.extend({
     };
   },
 });
+
+/** Pull quote with attribution (edited through the block menu). */
+export const PullQuote = Node.create({
+  name: "pullquote",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes: () => ({ text: { default: "" }, cite: { default: "" } }),
+  parseHTML: () => [{ tag: "figure[data-pullquote]" }],
+  renderHTML: ({ HTMLAttributes }) => [
+    "figure",
+    mergeAttributes({ "data-pullquote": "", class: "ed-pull" }),
+    ["blockquote", {}, String(HTMLAttributes.text || "…")],
+    ...(HTMLAttributes.cite ? [["figcaption", {}, `— ${HTMLAttributes.cite}`] as const] : []),
+  ],
+});
+
+/** A highlighted figure: big number, label and an optional source note. */
+export const Stat = Node.create({
+  name: "stat",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes: () => ({ value: { default: "" }, label: { default: "" }, note: { default: "" } }),
+  parseHTML: () => [{ tag: "div[data-stat]" }],
+  renderHTML: ({ HTMLAttributes }) => [
+    "div",
+    mergeAttributes({ "data-stat": "", class: "ed-stat" }),
+    ["b", {}, String(HTMLAttributes.value || "0")],
+    ["span", {}, String(HTMLAttributes.label || "")],
+  ],
+});
+
+/** Downloadable file (PDF, form, guide) shown as a card with a download button. */
+export const FileBlock = Node.create({
+  name: "file",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes: () => ({ href: { default: "" }, label: { default: "" }, note: { default: "" } }),
+  parseHTML: () => [{ tag: "div[data-file]" }],
+  renderHTML: ({ HTMLAttributes }) => [
+    "div",
+    mergeAttributes({ "data-file": "", class: "ed-file" }),
+    ["span", { class: "ed-file-ic" }, "⬇"],
+    ["span", {}, String(HTMLAttributes.label || HTMLAttributes.href || "File")],
+  ],
+});
+
+/** Image gallery: 2–4 columns, each image with alt text; opens a lightbox on the site. */
+export type GalleryImage = { src: string; alt: string };
+export const Gallery = Node.create({
+  name: "gallery",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes: () => ({ images: { default: [] as GalleryImage[] }, cols: { default: 3 }, caption: { default: "" } }),
+  parseHTML: () => [{ tag: "div[data-gallery]" }],
+  renderHTML: ({ HTMLAttributes }) => {
+    const imgs = (Array.isArray(HTMLAttributes.images) ? HTMLAttributes.images : []) as GalleryImage[];
+    return [
+      "div",
+      mergeAttributes({ "data-gallery": "", class: "ed-gallery", style: `--cols:${Number(HTMLAttributes.cols) || 3}` }),
+      ...(imgs.length ? imgs.map((g) => ["img", { src: g.src, alt: g.alt }] as const) : [["span", {}, "…"] as const]),
+    ];
+  },
+});

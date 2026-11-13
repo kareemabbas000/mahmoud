@@ -1,6 +1,6 @@
 # Guardrails: cost, speed and security
 
-**Read this before changing anything.** These rules keep the site free to run on **Vercel Hobby** and **Supabase Free**, with thousands of posts and heavy traffic, while staying fast and secure. Every rule has a reason. If a change has to break one, write down why in the commit message and update this file.
+**Read this before changing anything.** Start with [`ARCHITECTURE.md`](ARCHITECTURE.md) for the system map and [`SEO.md`](SEO.md) for search. These rules keep the site free to run on **Vercel Hobby** and **Supabase Free**, with thousands of posts and heavy traffic, while staying fast and secure. Every rule has a reason. If a change has to break one, write down why in the commit message and update this file.
 
 ---
 
@@ -94,6 +94,20 @@ All public data goes through `src/lib/data.ts`. All cache tags are defined in `s
 - Rich-text images get the same `srcset` (`RichText.tsx`).
 - Don't add AVIF, more widths or more qualities: each combination is a separate billed transformation.
 - Deleting a media item removes all three files (`variantPaths`).
+
+**Media caching map (who serves each file, and what it costs):**
+
+| Media | Served by | Cache | Free-plan cost |
+|---|---|---|---|
+| Uploaded photos (WebP sets) | Supabase Storage CDN, direct | `cacheControl: 31536000` set at upload; paths never change (a replacement is a new file) | Supabase cached egress (5 GB) + uncached egress only on CDN miss. **0 Vercel.** |
+| Uploaded PDFs/files | Supabase Storage CDN | 1 year | Same as above |
+| Thumbnails in the panel (library, picker, fields, post list) | the `w480` variant, never the full image | 1 year | A fraction of the egress of the full image |
+| In-article galleries | `w960` thumbnails + `srcset`; the lightbox loads `w1600` only when opened | 1 year | Same as above |
+| `/legacy/*` bundled photos | Vercel CDN + image optimiser (WebP) | `immutable`, 1 year; optimiser cache 31 days | ~150 transformations, then cache reads |
+| `/og/*.jpg` share cards | Vercel CDN, static | 7 days + stale-while-revalidate | Fast Data Transfer only |
+| Fonts | `next/font`, self-hosted | immutable | Fast Data Transfer only |
+
+Rules: never proxy Supabase images through a Vercel route or `next/image`; never overwrite a file at the same path (the 1-year cache would serve the old one, so use **Replace everywhere**); always render thumbnails from `w480`/`w960`, never `w1600`.
 
 ---
 

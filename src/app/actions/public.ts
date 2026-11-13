@@ -10,7 +10,11 @@ import { getServices, getSettings } from "@/lib/data";
 import { env } from "@/lib/env";
 import { prettyPhone } from "@/lib/i18n";
 
-export type FormState = { ok: boolean; error?: "generic" | "rate" | "validation"; fields?: Record<string, string>; eventId?: string };
+/** `values` echoes what the visitor typed back to the form when something fails (React 19 resets forms after an action). */
+export type FormState = { ok: boolean; error?: "generic" | "rate" | "validation"; fields?: Record<string, string>; eventId?: string; values?: Record<string, string> };
+
+const KEEP = ["name", "phone", "email", "company", "service", "message", "job_title"] as const;
+const echo = (fd: FormData) => Object.fromEntries(KEEP.map((k) => [k, String(fd.get(k) ?? "").slice(0, 5000)]));
 
 const phoneRe = /^\+?[\d\s()-]{7,20}$/;
 const MIN_FILL_MS = 2500;
@@ -49,15 +53,15 @@ function fieldErrors(err: z.ZodError): Record<string, string> {
 export async function submitEnquiry(_prev: FormState, fd: FormData): Promise<FormState> {
   if (botCheck(fd)) return { ok: true }; // silently accept bots
   const parsed = enquirySchema.safeParse(Object.fromEntries(fd));
-  if (!parsed.success) return { ok: false, error: "validation", fields: fieldErrors(parsed.error) };
+  if (!parsed.success) return { ok: false, error: "validation", fields: fieldErrors(parsed.error), values: echo(fd) };
   const d = parsed.data;
   const meta = await clientMeta();
-  if (!(await rateLimit(`enquiry:${meta.ipHash}`, 5, 600))) return { ok: false, error: "rate" };
+  if (!(await rateLimit(`enquiry:${meta.ipHash}`, 5, 600))) return { ok: false, error: "rate", values: echo(fd) };
 
   const sb = serviceClient();
   if (!sb) {
     console.error("[enquiry] SUPABASE_SERVICE_ROLE_KEY not set — cannot store enquiry");
-    return { ok: false, error: "generic" };
+    return { ok: false, error: "generic", values: echo(fd) };
   }
   const { data: row, error } = await sb
     .from("enquiries")
@@ -78,7 +82,7 @@ export async function submitEnquiry(_prev: FormState, fd: FormData): Promise<For
     .single();
   if (error || !row) {
     console.error("[enquiry] insert failed", error?.message);
-    return { ok: false, error: "generic" };
+    return { ok: false, error: "generic", values: echo(fd) };
   }
 
   const eventId = d.event_id || row.id;
@@ -135,7 +139,7 @@ export async function submitCareer(_prev: FormState, fd: FormData): Promise<Form
   if (!parsed.success || !fileOk) {
     const fields = parsed.success ? {} : fieldErrors(parsed.error);
     if (!fileOk) fields.cv = "file";
-    return { ok: false, error: "validation", fields };
+    return { ok: false, error: "validation", fields, values: echo(fd) };
   }
   const d = parsed.data;
   const meta = await clientMeta();

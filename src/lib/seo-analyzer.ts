@@ -37,6 +37,8 @@ export type AnalyzeInput = {
   coverAlt: string;
   siteHost?: string;
   otherFocus?: string[];
+  /** Secondary keyphrases (synonyms, related searches). */
+  keywords?: string[];
 };
 
 export const norm = (s: string) =>
@@ -83,6 +85,10 @@ function walk(doc: RichDoc | null | undefined): Walk {
       for (const m of n.marks ?? []) if (m.type === "link" && m.attrs?.href) w.links.push(String(m.attrs.href));
     }
     if (n.type === "cta" && n.attrs?.href) w.links.push(String(n.attrs.href));
+    if (n.type === "file" && n.attrs?.href) w.links.push(String(n.attrs.href));
+    if (n.type === "gallery" && Array.isArray(n.attrs?.images)) for (const g of n.attrs.images as { alt?: string }[]) w.images.push({ alt: String(g?.alt ?? "") });
+    // Text held in block attributes (pull quote, figure) counts towards length and keyphrase use.
+    for (const k of ["text", "cite", "value", "label", "note"] as const) if (["pullquote", "stat"].includes(n.type) && n.attrs?.[k]) w.text.push(String(n.attrs[k]));
     (n.content ?? []).forEach(visit);
   };
   (doc?.content ?? []).forEach(visit);
@@ -142,6 +148,17 @@ export function analyze(i: AnalyzeInput): Analysis {
         : { id: "density", group: "seo", level: occ ? "ok" : "bad", label: [`الكلمة المفتاحية قليلة في النص (${occ} مرة)`, `Keyphrase rarely used (${occ}×)`], tip: ["استهدف 0.5–2.5٪ من النص.", "Aim for 0.5–2.5% of the text."] });
     if (i.otherFocus?.some((k) => norm(k) === norm(focus)))
       add({ id: "kw-unique", group: "seo", level: "bad", label: ["الكلمة المفتاحية مستخدمة في مقال آخر", "Keyphrase already used in another post"], tip: ["مقالان على نفس الكلمة يتنافسان في نتائج البحث.", "Two posts on the same keyphrase compete with each other."] });
+    const extra = (i.keywords ?? []).filter((k) => k && norm(k) !== norm(focus)).slice(0, 8);
+    if (extra.length) {
+      const missing = extra.filter((k) => !has(body, k) && !has(i.title, k));
+      add(missing.length === 0
+        ? { id: "kw-extra", group: "seo", level: "good", label: [`الكلمات الثانوية مستخدمة (${extra.length})`, `Secondary keyphrases used (${extra.length})`] }
+        : { id: "kw-extra", group: "seo", level: "ok", label: [`كلمات ثانوية غير مستخدمة: ${missing.join("، ")}`, `Secondary keyphrases not used yet: ${missing.join(", ")}`], tip: ["استخدم كل كلمة ثانوية مرة على الأقل في النص أو العناوين.", "Use each one at least once in the text or a heading."] });
+    }
+    const start = norm(i.seoTitle || i.title).startsWith(norm(focus));
+    add(start
+      ? { id: "kw-start", group: "seo", level: "good", label: ["العنوان يبدأ بالكلمة المفتاحية", "The title starts with the keyphrase"] }
+      : { id: "kw-start", group: "seo", level: "ok", label: ["العنوان لا يبدأ بالكلمة المفتاحية", "The title doesn't start with the keyphrase"], tip: ["الكلمات في بداية العنوان لها وزن أكبر وتظهر أولًا في النتائج.", "Words at the start of the title weigh more and are seen first in results."] });
     if (w.images.length && !w.images.some((im) => has(im.alt, focus)) && !has(i.coverAlt, focus))
       add({ id: "kw-alt", group: "seo", level: "ok", label: ["لا يوجد نص بديل لصورة يتضمن الكلمة المفتاحية", "No image alt text uses the keyphrase"], tip: ["صِف صورة واحدة على الأقل بعبارة تتضمنها.", "Describe at least one image with it."] });
   }

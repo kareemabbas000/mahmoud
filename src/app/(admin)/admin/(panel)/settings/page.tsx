@@ -4,6 +4,7 @@ import { sessionClient } from "@/lib/supabase/clients";
 import { PageTitle, Forbidden } from "@/components/admin/PageTitle";
 import { SettingsEditor, type Section } from "@/components/admin/settings/SettingsEditor";
 import { settings as seed } from "@/content/seed/site";
+import { THEMES } from "@/lib/themes";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,7 @@ const sections: Section[] = [
     key: "theme", label: ["المظهر", "Appearance"],
     fields: [
       { path: "theme.default_mode", type: "select", label: ["الوضع الافتراضي", "Default mode"], options: [{ value: "light", label: ["فاتح", "Light"] }, { value: "dark", label: ["داكن", "Dark"] }, { value: "system", label: ["حسب جهاز الزائر", "Follow the visitor's device"] }] },
-      { path: "theme.preset", type: "select", label: ["لوحة الألوان", "Colour preset"], options: [{ value: "ledger", label: ["الأزرق والبرتقالي", "Blue & orange"] }, { value: "gold", label: ["الذهبي", "Gold"] }] },
+      { path: "theme.preset", type: "select", label: ["لوحة الألوان", "Colour preset"], options: THEMES.map((th) => ({ value: th.key, label: [th.name[0], th.name[1]] as [string, string] })), help: ["قوالب التصميم المسجّلة في src/lib/themes.ts.", "Design themes registered in src/lib/themes.ts."] },
       { path: "theme.numerals_ar", type: "select", label: ["الأرقام في النسخة العربية", "Numerals in Arabic"], options: [{ value: "latn", label: ["123", "123"] }, { value: "arab", label: ["١٢٣", "١٢٣"] }] },
       { path: "theme.hero_3d", type: "boolean", label: ["المشهد ثلاثي الأبعاد في الواجهة", "3D scene in the hero"] },
       { path: "theme.motion", type: "select", label: ["الحركة والتأثيرات", "Motion & effects"], options: [{ value: "full", label: ["كاملة", "Full"] }, { value: "subtle", label: ["هادئة", "Subtle"] }, { value: "off", label: ["بدون حركة", "Off"] }], help: ["«هادئة» تُبقي ظهور الأقسام بنعومة وتُلغي مشاهد التمرير والإمالة. «بدون حركة» موقع ثابت تمامًا.", "“Subtle” keeps gentle reveals but drops scroll scenes and tilt. “Off” makes the site fully static."] },

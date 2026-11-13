@@ -12,7 +12,14 @@ export const abs = (path: string) => (path.startsWith("http") ? path : `${env.si
  */
 export function pageMeta(
   site: Site,
-  opts: { path: string; title?: string; description?: string; image?: string | null; type?: "website" | "article"; paths?: Record<string, string>; noindex?: boolean; publishedTime?: string; modifiedTime?: string; canonical?: string },
+  opts: {
+    path: string; title?: string; description?: string; image?: string | null; imageAlt?: string; type?: "website" | "article"; paths?: Record<string, string>; noindex?: boolean;
+    publishedTime?: string; modifiedTime?: string; canonical?: string;
+    /** Social overrides (posts): fall back to title/description. */
+    ogTitle?: string; ogDescription?: string;
+    /** Article extras for Open Graph. */
+    section?: string; tags?: string[]; authors?: string[];
+  },
 ): Metadata {
   const pathFor = (code: string) => opts.paths?.[code] ?? opts.path;
   const languages: Record<string, string> = {};
@@ -20,7 +27,11 @@ export function pageMeta(
   languages["x-default"] = abs(`/${site.defaultLocale}${pathFor(site.defaultLocale)}`);
   const url = abs(`/${site.locale}${pathFor(site.locale)}`);
   const description = opts.description || site.l(site.settings.seo.default_description);
-  const image = opts.image || site.settings.seo.og_image || `/og/${site.locale === "ar" ? "ar" : "en"}.png`;
+  // Default branded cards are ~60 kB JPEGs: WhatsApp skips previews over ~300 kB.
+  const image = opts.image || site.settings.seo.og_image || `/og/${site.locale === "ar" ? "ar" : "en"}.jpg`;
+  const ogTitle = opts.ogTitle || opts.title || site.l(site.settings.seo.default_title);
+  const ogDesc = opts.ogDescription || description;
+  const imageAlt = opts.imageAlt || ogTitle;
   return {
     ...(opts.title ? { title: opts.title } : {}),
     description,
@@ -29,15 +40,19 @@ export function pageMeta(
       type: opts.type ?? "website",
       url,
       siteName: `${site.settings.brand.short_name} – ${site.l(site.settings.brand.name)}`,
-      title: opts.title ?? site.l(site.settings.seo.default_title),
-      description,
+      title: ogTitle,
+      description: ogDesc,
       locale: site.locale === "ar" ? "ar_EG" : site.locale === "en" ? "en_US" : site.locale,
       alternateLocale: site.langs.filter((l) => l.code !== site.locale).map((l) => (l.code === "ar" ? "ar_EG" : l.code === "en" ? "en_US" : l.code)),
-      images: [{ url: abs(image), width: 1200, height: 630 }],
+      // Size is declared only for the default 1200×630 cards; for covers the platforms read the real size.
+      images: [{ url: abs(image), ...(opts.image || site.settings.seo.og_image ? {} : { width: 1200, height: 630, type: "image/jpeg" }), alt: imageAlt }],
+      ...(opts.section ? { section: opts.section } : {}),
+      ...(opts.tags?.length ? { tags: opts.tags } : {}),
+      ...(opts.authors?.length ? { authors: opts.authors } : {}),
       ...(opts.publishedTime ? { publishedTime: opts.publishedTime } : {}),
       ...(opts.modifiedTime ? { modifiedTime: opts.modifiedTime } : {}),
     },
-    twitter: { card: "summary_large_image", title: opts.title, description, images: [abs(image)] },
+    twitter: { card: "summary_large_image", title: ogTitle, description: ogDesc, images: [{ url: abs(image), alt: imageAlt }] },
     ...(opts.noindex ? { robots: { index: false, follow: true } } : {}),
   };
 }
@@ -126,19 +141,37 @@ export function serviceLd(site: Site, s: Service) {
   };
 }
 
-export function blogPostingLd(site: Site, p: Post, url: string, authorName?: string) {
+/** Article structured data: everything Google's Article rich results and AI answer engines read. */
+export function blogPostingLd(
+  site: Site,
+  p: Post,
+  url: string,
+  extra: { author?: { name: Record<string, string>; team_slug: string | null; photo: string | null }; category?: string; tags?: string[]; words?: number } = {},
+) {
+  const a = extra.author;
+  const seo = p.seo?.[site.locale] ?? {};
+  const keywords = [seo.focus_keyword, ...(seo.keywords ?? "").split(/[,،]/)].map((k) => (k ?? "").trim()).filter(Boolean);
+  const image = seo.og_image || p.cover;
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    headline: site.l(p.title),
-    description: site.l(p.excerpt),
+    "@id": `${abs(url)}#article`,
+    headline: site.l(p.title).slice(0, 110),
+    description: seo.description || site.l(p.excerpt),
     inLanguage: site.locale,
-    mainEntityOfPage: abs(url),
+    mainEntityOfPage: { "@type": "WebPage", "@id": abs(url) },
     url: abs(url),
     datePublished: p.publish_at,
     dateModified: p.updated_at ?? p.publish_at,
-    ...(p.cover ? { image: abs(p.cover) } : {}),
-    author: authorName ? { "@type": "Person", name: authorName } : { "@id": `${env.siteUrl}/#organization` },
+    ...(image ? { image: [{ "@type": "ImageObject", url: abs(image), width: 1200, height: 630 }] } : { image: [abs(`/og/${site.locale === "ar" ? "ar" : "en"}.jpg`)] }),
+    author: a
+      ? { "@type": "Person", name: site.l(a.name), ...(a.team_slug ? { url: abs(`/${site.locale}/team/${a.team_slug}`) } : {}), ...(a.photo ? { image: abs(a.photo) } : {}), worksFor: { "@id": `${env.siteUrl}/#organization` } }
+      : { "@id": `${env.siteUrl}/#organization` },
     publisher: { "@id": `${env.siteUrl}/#organization` },
+    isPartOf: { "@id": `${env.siteUrl}/#website` },
+    ...(extra.category ? { articleSection: extra.category } : {}),
+    ...(keywords.length || extra.tags?.length ? { keywords: [...new Set([...keywords, ...(extra.tags ?? [])])].join(", ") } : {}),
+    ...(extra.words ? { wordCount: extra.words } : {}),
+    isAccessibleForFree: true,
   };
 }

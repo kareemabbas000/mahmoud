@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { browserClient } from "@/lib/supabase/browser";
 import { registerMedia } from "@/app/actions/admin";
 import { useAdmin, useResult } from "./AdminContext";
-import { VARIANT_WIDTHS } from "@/lib/media";
+import { VARIANT_WIDTHS, isVariantSet, variantUrl } from "@/lib/media";
 
 export type MediaRow = { id: string; url: string; path: string; mime: string | null; width: number | null; height: number | null; alt: Record<string, string>; created_at: string };
 
@@ -111,7 +111,12 @@ export function useUploader() {
   );
 }
 
-export function MediaPicker({ open, onClose, onPick, accept = "image/*" }: { open: boolean; onClose: () => void; onPick: (m: { url: string; width: number | null; height: number | null; alt: Record<string, string> }) => void; accept?: string }) {
+/** Thumbnails load the 480px WebP, never the full image (saves Supabase egress and makes the grid instant). */
+const thumbOf = (url: string) => (isVariantSet(url) ? variantUrl(url, 480) : url);
+
+/** `multiple`: clicks add to a selection and the dialog stays open until "Done" (used for galleries). */
+export function MediaPicker({ open, onClose, onPick, accept = "image/*", multiple = false }: { open: boolean; onClose: () => void; onPick: (m: { url: string; width: number | null; height: number | null; alt: Record<string, string> }) => void; accept?: string; multiple?: boolean }) {
+  const [picked, setPicked] = useState<string[]>([]);
   const { t } = useAdmin();
   const [items, setItems] = useState<MediaRow[]>([]);
   const [q, setQ] = useState("");
@@ -123,6 +128,7 @@ export function MediaPicker({ open, onClose, onPick, accept = "image/*" }: { ope
     if (open) dlg.current?.showModal();
     else dlg.current?.close();
     if (!open) return;
+    setPicked([]);
     const sb = browserClient();
     sb?.from("media").select("id,url,path,mime,width,height,alt,created_at").order("created_at", { ascending: false }).limit(200).then(({ data }) => setItems((data ?? []) as MediaRow[]));
   }, [open]);
@@ -137,22 +143,23 @@ export function MediaPicker({ open, onClose, onPick, accept = "image/*" }: { ope
             {t("رفع", "Upload")}
             <input type="file" multiple accept={accept} className="sr-only" onChange={async (e) => { if (e.target.files?.length) { const added = await upload(e.target.files); setItems((x) => [...added, ...x]); } e.target.value = ""; }} />
           </label>
-          <button type="button" className="btn btn-ghost !min-h-9 !px-4 text-sm" onClick={onClose}>{t("إغلاق", "Close")}</button>
+          <button type="button" className={`btn ${multiple && picked.length ? "btn-primary" : "btn-ghost"} !min-h-9 !px-4 text-sm`} onClick={onClose}>{multiple && picked.length ? t(`تم (${picked.length})`, `Done (${picked.length})`) : t("إغلاق", "Close")}</button>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 border-b border-rule p-4">
         <input className="input !min-h-10 max-w-xs" placeholder={t("بحث", "Search")} value={q} onChange={(e) => setQ(e.target.value)} />
         <div className="flex flex-1 gap-2">
           <input className="input input-ltr !min-h-10" dir="ltr" placeholder={t("أو الصق رابطًا / مسارًا مثل /legacy/...", "Or paste a URL / path like /legacy/...")} value={url} onChange={(e) => setUrl(e.target.value)} />
-          <button type="button" className="btn btn-ghost !min-h-10 text-sm" disabled={!url} onClick={() => { onPick({ url, width: null, height: null, alt: {} }); onClose(); }}>{t("استخدام", "Use")}</button>
+          <button type="button" className="btn btn-ghost !min-h-10 text-sm" disabled={!url} onClick={() => { onPick({ url, width: null, height: null, alt: {} }); if (multiple) { setPicked((x) => [...x, url]); setUrl(""); } else onClose(); }}>{t("استخدام", "Use")}</button>
         </div>
       </div>
       <ul className="grid max-h-[60vh] grid-cols-3 gap-3 overflow-y-auto p-4 sm:grid-cols-5">
         {list.length === 0 && <li className="col-span-full p-8 text-center text-sm text-muted">{t("لا توجد ملفات بعد. ارفع أول صورة.", "No files yet. Upload your first image.")}</li>}
         {list.map((m) => (
           <li key={m.id}>
-            <button type="button" className="group block w-full overflow-hidden rounded-md border border-rule bg-paper-2 focus-visible:outline-2" onClick={() => { onPick({ url: m.url, width: m.width, height: m.height, alt: m.alt ?? {} }); onClose(); }}>
-              {m.mime?.startsWith("image/") ? <img src={m.url} alt={m.alt?.ar ?? m.alt?.en ?? ""} loading="lazy" className="aspect-square w-full object-cover transition-transform group-hover:scale-105" /> : <span className="flex aspect-square items-center justify-center text-xs text-muted">{m.path.split(".").pop()?.toUpperCase()}</span>}
+            <button type="button" aria-pressed={multiple ? picked.includes(m.url) : undefined} className={`group relative block w-full overflow-hidden rounded-md border-2 bg-paper-2 focus-visible:outline-2 ${picked.includes(m.url) ? "border-blue" : "border-rule"}`} onClick={() => { if (multiple && picked.includes(m.url)) return; onPick({ url: m.url, width: m.width, height: m.height, alt: m.alt ?? {} }); if (multiple) setPicked((x) => [...x, m.url]); else onClose(); }}>
+              {picked.includes(m.url) && <span className="absolute end-1 top-1 z-[1] grid size-6 place-items-center rounded-full bg-blue text-xs font-bold text-white">{picked.indexOf(m.url) + 1}</span>}
+              {m.mime?.startsWith("image/") ? <img src={thumbOf(m.url)} alt={m.alt?.ar ?? m.alt?.en ?? ""} loading="lazy" className="aspect-square w-full object-cover transition-transform group-hover:scale-105" /> : <span className="flex aspect-square items-center justify-center text-xs text-muted">{m.path.split(".").pop()?.toUpperCase()}</span>}
             </button>
           </li>
         ))}

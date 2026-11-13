@@ -262,3 +262,19 @@ export const getPostCards = (ids: string[]) =>
         () => [],
       )
     : Promise.resolve([]);
+
+/** Posts an editor marked "hide from search engines" (any language). Kept out of the sitemap and llms.txt. */
+export const getHiddenPostIds = () =>
+  cached<string[]>(
+    [T.postsIndex],
+    ["posts-hidden"],
+    async () => {
+      const sb = publicClient();
+      if (!sb) return [];
+      const langs = (await getLanguages()).map((l) => l.code).filter((c) => /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(c));
+      const { data, error } = await sb.from("posts").select("id").or(langs.map((l) => `seo->${l}->>noindex.eq.true`).join(","));
+      if (error) throw new Error(`posts: ${error.message}`);
+      return (data ?? []).map((r) => r.id as string);
+    },
+    () => [],
+  );

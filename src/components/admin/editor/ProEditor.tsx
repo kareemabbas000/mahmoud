@@ -14,7 +14,7 @@ import Superscript from "@tiptap/extension-superscript";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import Typography from "@tiptap/extension-typography";
 import { CharacterCount, Placeholder, Focus } from "@tiptap/extensions";
-import { Callout, Cta, Embed, RichImage, Toggle } from "./nodes";
+import { Callout, Cta, Embed, FileBlock, Gallery, PullQuote, RichImage, Stat, Toggle, type GalleryImage } from "./nodes";
 import { EdIcon } from "./icons";
 import { MediaPicker, useUploader } from "../MediaPicker";
 import { useAdmin } from "../AdminContext";
@@ -117,7 +117,8 @@ function MiniDialog({ state, close }: { state: DialogState; close: () => void })
 }
 
 /* ───────────────────────── block catalogue (toolbar · slash menu · + button) ───────────────────────── */
-type Ctx = { ed: Editor; media: () => void; dialog: (d: DialogState) => void; t: (a: string, e: string) => string };
+type MediaMode = "image" | "gallery" | "gallery-add" | "file";
+type Ctx = { ed: Editor; media: (mode?: MediaMode) => void; dialog: (d: DialogState) => void; t: (a: string, e: string) => string };
 type BlockCmd = { id: string; icon: string; label: [string, string]; hint: [string, string]; keys: string; run: (c: Ctx) => void };
 
 const BLOCKS: BlockCmd[] = [
@@ -138,14 +139,27 @@ const BLOCKS: BlockCmd[] = [
     run: ({ ed, dialog, t }) =>
       dialog({ title: t("قسم قابل للطي", "Toggle section"), submit: t("إدراج", "Insert"), fields: [{ key: "summary", label: t("العنوان الظاهر", "Visible title"), placeholder: t("مثال: ما المستندات المطلوبة؟", "e.g. Which documents are needed?") }], onSubmit: (v) => v.summary && ed.chain().focus().insertContent({ type: "toggle", attrs: { summary: v.summary }, content: [{ type: "paragraph" }] }).run() }),
   },
+  { id: "summary", icon: "callout", label: ["أهم النقاط (ملخص)", "Key takeaways"], hint: ["صندوق ملخص في بداية المقال أو نهايته", "A summary box at the start or end"], keys: "summary takeaways tldr key points ملخص نقاط", run: ({ ed, t }) => ed.chain().focus().insertContent({ type: "callout", attrs: { tone: "summary" }, content: [{ type: "heading", attrs: { level: 4 }, content: [{ type: "text", text: t("أهم النقاط", "Key takeaways") }] }, { type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph" }] }] }] }).run() },
+  {
+    id: "pullquote", icon: "quote", label: ["اقتباس بارز مع القائل", "Pull quote with source"], hint: ["جملة كبيرة لافتة", "A large standout line"], keys: "pull quote cite citation اقتباس بارز",
+    run: ({ ed, dialog, t }) =>
+      dialog({ title: t("اقتباس بارز", "Pull quote"), submit: t("إدراج", "Insert"), fields: [{ key: "text", label: t("نص الاقتباس", "Quote") }, { key: "cite", label: t("القائل أو المصدر (اختياري)", "Who said it / source (optional)") }], onSubmit: (v) => v.text && ed.chain().focus().insertContent({ type: "pullquote", attrs: v }).run() }),
+  },
+  {
+    id: "stat", icon: "sparkle", label: ["رقم بارز", "Highlighted figure"], hint: ["رقم كبير مع وصف ومصدر", "A big number with a label and source"], keys: "stat number figure percent رقم إحصائية",
+    run: ({ ed, dialog, t }) =>
+      dialog({ title: t("رقم بارز", "Highlighted figure"), submit: t("إدراج", "Insert"), fields: [{ key: "value", label: t("الرقم", "Figure"), placeholder: "14%" }, { key: "label", label: t("الوصف", "Label"), placeholder: t("نسبة ضريبة القيمة المضافة في مصر", "VAT rate in Egypt") }, { key: "note", label: t("المصدر (اختياري)", "Source (optional)") }], onSubmit: (v) => v.value && ed.chain().focus().insertContent({ type: "stat", attrs: v }).run() }),
+  },
+  { id: "gallery", icon: "image", label: ["معرض صور", "Image gallery"], hint: ["عدة صور في شبكة مع عرض مكبّر", "Several images in a grid with a lightbox"], keys: "gallery images grid photos معرض صور", run: ({ media }) => media("gallery") },
+  { id: "file", icon: "link", label: ["ملف للتحميل", "File download"], hint: ["PDF أو نموذج يحمّله القارئ", "A PDF or form readers can download"], keys: "file pdf download attachment ملف تحميل", run: ({ media }) => media("file") },
   { id: "code", icon: "codeblock", label: ["كتلة كود", "Code block"], hint: ["نص برمجي أو صيغة", "Code or formula"], keys: "code block كود", run: ({ ed }) => ed.chain().focus().toggleCodeBlock().run() },
   { id: "hr", icon: "divider", label: ["فاصل", "Divider"], hint: ["خط فاصل بين الأقسام", "Section break"], keys: "hr divider line فاصل", run: ({ ed }) => ed.chain().focus().setHorizontalRule().run() },
   { id: "image", icon: "image", label: ["صورة", "Image"], hint: ["من المكتبة أو رفع جديد", "From the library or upload"], keys: "image photo picture صورة", run: ({ media }) => media() },
   { id: "table", icon: "table", label: ["جدول", "Table"], hint: ["جدول 3×3 مع رأس", "3×3 with header row"], keys: "table grid جدول", run: ({ ed }) => ed.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
   {
-    id: "video", icon: "video", label: ["فيديو يوتيوب", "YouTube video"], hint: ["تضمين بمشغل خفيف", "Embed with a light player"], keys: "video youtube embed فيديو",
+    id: "video", icon: "video", label: ["فيديو أو خريطة", "Video or map"], hint: ["يوتيوب أو فيميو أو خريطة جوجل", "YouTube, Vimeo or a Google map"], keys: "video youtube vimeo map embed فيديو خريطة",
     run: ({ ed, dialog, t }) =>
-      dialog({ title: t("فيديو يوتيوب", "YouTube video"), submit: t("إدراج", "Insert"), fields: [{ key: "src", label: t("رابط الفيديو", "Video URL"), placeholder: "https://www.youtube.com/watch?v=…", type: "url" }, { key: "title", label: t("عنوان الفيديو (لإمكانية الوصول)", "Video title (accessibility)") }], onSubmit: (v) => v.src && ed.chain().focus().insertContent({ type: "embed", attrs: { src: v.src, title: v.title } }).run() }),
+      dialog({ title: t("فيديو أو خريطة", "Video or map"), submit: t("إدراج", "Insert"), fields: [{ key: "src", label: t("رابط يوتيوب أو فيميو، أو رابط تضمين خريطة جوجل (مشاركة ← تضمين خريطة)", "YouTube or Vimeo link, or a Google Maps embed link (Share → Embed a map)"), placeholder: "https://www.youtube.com/watch?v=…", type: "url" }, { key: "title", label: t("عنوان الفيديو (لإمكانية الوصول)", "Video title (accessibility)") }], onSubmit: (v) => v.src && ed.chain().focus().insertContent({ type: "embed", attrs: { src: v.src, title: v.title } }).run() }),
   },
   {
     id: "cta", icon: "button", label: ["زر دعوة لإجراء", "Call-to-action button"], hint: ["زر يقود إلى صفحة", "A button linking to a page"], keys: "button cta link زر",
@@ -352,7 +366,8 @@ export function ProEditor({
   minHeight?: string;
 }) {
   const { t } = useAdmin();
-  const [media, setMedia] = useState(false);
+  const [media, setMedia] = useState<MediaMode | null>(null);
+  const [picks, setPicks] = useState<GalleryImage[]>([]);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [full, setFull] = useState(false);
   const [outline, setOutline] = useState(false);
@@ -389,6 +404,10 @@ export function ProEditor({
       Toggle,
       Embed,
       Cta,
+      PullQuote,
+      Stat,
+      FileBlock,
+      Gallery,
     ],
     content: value && value.content?.length ? value : "",
     editorProps: {
@@ -436,7 +455,7 @@ export function ProEditor({
     },
   });
 
-  const ctx: Ctx | null = ed ? { ed, media: () => setMedia(true), dialog: setDialog, t } : null;
+  const ctx: Ctx | null = ed ? { ed, media: (m = "image") => { setPicks([]); setMedia(m); }, dialog: setDialog, t } : null;
 
   // Ctrl+K from the keymap above
   useEffect(() => {
@@ -500,6 +519,35 @@ export function ProEditor({
 
   const isImage = () => ed.state.selection instanceof NodeSelection && ed.state.selection.node.type.name === "image";
   const imgAttrs = ed.getAttributes("image");
+  const ATOMS = ["cta", "embed", "pullquote", "stat", "file", "gallery"];
+  const atom = () => (ed.state.selection instanceof NodeSelection && ATOMS.includes(ed.state.selection.node.type.name) ? ed.state.selection.node.type.name : null);
+  /** One edit dialog per embedded block type, pre-filled with its current values. */
+  const editAtom = () => {
+    const type = atom();
+    if (!type) return;
+    const a = ed.getAttributes(type) as Record<string, unknown>;
+    const v = (k: string) => String(a[k] ?? "");
+    const save = (vals: Record<string, string>) => ed.chain().focus().updateAttributes(type, vals).run();
+    const title = t("تعديل العنصر", "Edit block");
+    const submit = t("حفظ", "Save");
+    if (type === "cta") return setDialog({ title, submit, onSubmit: save, fields: [{ key: "label", label: t("نص الزر", "Button text"), value: v("label") }, { key: "href", label: t("الرابط", "Link"), value: v("href") }, { key: "variant", label: t("الشكل", "Style"), type: "select", value: v("variant"), options: [{ value: "primary", label: t("أزرق", "Blue") }, { value: "accent", label: t("برتقالي", "Orange") }, { value: "ghost", label: t("إطار", "Outline") }] }] });
+    if (type === "embed") return setDialog({ title, submit, onSubmit: save, fields: [{ key: "src", label: t("الرابط", "Link"), value: v("src"), type: "url" }, { key: "title", label: t("العنوان (لإمكانية الوصول)", "Title (accessibility)"), value: v("title") }] });
+    if (type === "pullquote") return setDialog({ title, submit, onSubmit: save, fields: [{ key: "text", label: t("نص الاقتباس", "Quote"), value: v("text") }, { key: "cite", label: t("القائل أو المصدر", "Source"), value: v("cite") }] });
+    if (type === "stat") return setDialog({ title, submit, onSubmit: save, fields: [{ key: "value", label: t("الرقم", "Figure"), value: v("value") }, { key: "label", label: t("الوصف", "Label"), value: v("label") }, { key: "note", label: t("المصدر", "Source"), value: v("note") }] });
+    if (type === "file") return setDialog({ title, submit, onSubmit: save, fields: [{ key: "label", label: t("اسم الملف كما يظهر", "File name shown"), value: v("label") }, { key: "note", label: t("وصف قصير (اختياري)", "Short description (optional)"), value: v("note") }, { key: "href", label: t("رابط الملف", "File link"), value: v("href"), type: "url" }] });
+    if (type === "gallery") {
+      const imgs = (a.images as GalleryImage[]) ?? [];
+      return setDialog({
+        title, submit,
+        fields: [
+          { key: "cols", label: t("عدد الأعمدة", "Columns"), type: "select", value: String(a.cols ?? 3), options: ["2", "3", "4"].map((c) => ({ value: c, label: c })) },
+          { key: "caption", label: t("تعليق المعرض (اختياري)", "Gallery caption (optional)"), value: v("caption") },
+          ...imgs.map((g, i) => ({ key: `alt${i}`, label: `${t("النص البديل للصورة", "Alt text, image")} ${i + 1}`, value: g.alt })),
+        ],
+        onSubmit: (vals) => ed.chain().focus().updateAttributes("gallery", { cols: Number(vals.cols) || 3, caption: vals.caption ?? "", images: imgs.map((g, i) => ({ ...g, alt: vals[`alt${i}`] ?? g.alt })) }).run(),
+      });
+    }
+  };
 
   return (
     <div className={`ed-shell ${full ? "is-full" : ""}`}>
@@ -573,6 +621,13 @@ export function ProEditor({
         <Btn on={() => ed.chain().focus().deleteSelection().run()} label={t("حذف الصورة", "Delete image")}><EdIcon name="trash" size={16} /></Btn>
       </BubbleMenu>
 
+      {/* embedded blocks (button, video, quote, figure, file, gallery): edit or delete */}
+      <BubbleMenu editor={ed} pluginKey="atomMenu" shouldShow={() => Boolean(atom())} options={{ placement: "top" }} className="ed-bubble">
+        <Btn wide on={() => editAtom()} label={t("تعديل", "Edit")}><span className="text-xs font-semibold">{t("تعديل", "Edit")}</span></Btn>
+        {atom() === "gallery" && <Btn wide on={() => { setPicks([]); setMedia("gallery-add"); }} label={t("إضافة صور", "Add images")}><span className="text-xs font-semibold">+ {t("صور", "Images")}</span></Btn>}
+        <Btn on={() => ed.chain().focus().deleteSelection().run()} label={t("حذف", "Delete")}><EdIcon name="trash" size={16} /></Btn>
+      </BubbleMenu>
+
       {/* table menu */}
       <BubbleMenu editor={ed} pluginKey="tableMenu" shouldShow={({ editor: e }) => e.isActive("table") && !isImage()} options={{ placement: "bottom" }} className="ed-bubble">
         <Btn on={() => ed.chain().focus().addRowBefore().run()} label={t("صف قبل", "Row above")}><EdIcon name="rowBefore" size={16} /></Btn>
@@ -595,10 +650,20 @@ export function ProEditor({
       </div>
 
       <MediaPicker
-        open={media}
-        onClose={() => setMedia(false)}
+        open={media !== null}
+        multiple={media === "gallery" || media === "gallery-add"}
+        accept={media === "file" ? "application/pdf,image/*" : "image/*"}
+        onClose={() => {
+          const imgs = picks;
+          if (media === "gallery" && imgs.length) ed.chain().focus().insertContent({ type: "gallery", attrs: { images: imgs, cols: Math.min(3, Math.max(2, imgs.length)) } }).run();
+          if (media === "gallery-add" && imgs.length) ed.chain().focus().updateAttributes("gallery", { images: [...((ed.getAttributes("gallery").images as GalleryImage[]) ?? []), ...imgs] }).run();
+          setPicks([]);
+          setMedia(null);
+        }}
         onPick={(m) => {
-          ed.chain().focus().setImage({ src: m.url, alt: m.alt?.[lang] ?? "" }).run();
+          if (media === "gallery" || media === "gallery-add") setPicks((x) => [...x, { src: m.url, alt: m.alt?.[lang] ?? "" }]);
+          else if (media === "file") ed.chain().focus().insertContent({ type: "file", attrs: { href: m.url, label: decodeURIComponent(m.url.split("/").pop() ?? "").replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " ") } }).run();
+          else ed.chain().focus().setImage({ src: m.url, alt: m.alt?.[lang] ?? "" }).run();
         }}
       />
       <MiniDialog state={dialog} close={() => setDialog(null)} />

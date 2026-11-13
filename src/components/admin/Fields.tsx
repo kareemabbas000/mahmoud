@@ -10,6 +10,7 @@ import { LangTabs } from "./LangTabs";
 import { MediaPicker } from "./MediaPicker";
 import { useAdmin } from "./AdminContext";
 import type { RichDoc } from "@/lib/types";
+import { isVariantSet, variantUrl } from "@/lib/media";
 
 const RichEditor = dynamic(() => import("./RichEditor").then((m) => m.RichEditor), { ssr: false, loading: () => <div className="min-h-48 animate-pulse rounded-md bg-paper-2" /> });
 
@@ -21,7 +22,7 @@ export function ImageInput({ value, onChange }: { value: string | null | undefin
   return (
     <div className="flex items-center gap-3">
       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-rule bg-paper-2">
-        {value ? <img src={value} alt="" className="size-full object-contain" /> : <Icon name="plus" className="text-faint" />}
+        {value ? <img src={isVariantSet(value) ? variantUrl(value, 480) : value} alt="" className="size-full object-contain" /> : <Icon name="plus" className="text-faint" />}
       </div>
       <div className="grid min-w-0 flex-1 gap-2">
         <input className="input input-ltr !min-h-10 text-sm" dir="ltr" value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} placeholder="/legacy/... or https://..." />

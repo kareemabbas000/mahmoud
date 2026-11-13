@@ -7,11 +7,18 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { ProEditor } from "../editor/ProEditor";
 import { ImageInput } from "../Fields";
 import { canEdit, useAdmin, useResult } from "../AdminContext";
-import { deletePost, duplicatePost, savePost, type PostInput } from "@/app/actions/posts";
+import { deletePost, duplicatePost, listPostVersions, savePost, type PostInput, type PostVersion } from "@/app/actions/posts";
 import { analyze, serpWidth, slugify, type Check } from "@/lib/seo-analyzer";
 import type { RichDoc } from "@/lib/types";
 
 type L<T = string> = Record<string, T>;
+/** Front-end reading layouts (rendered by app/(site)/[locale]/insights/[slug]/page.tsx). */
+const LAYOUTS: { key: "classic" | "feature" | "minimal"; label: [string, string]; hint: [string, string] }[] = [
+  { key: "classic", label: ["كلاسيكي", "Classic"], hint: ["فهرس جانبي وغلاف تحت العنوان", "Side contents, cover under the title"] },
+  { key: "feature", label: ["مميّز", "Feature"], hint: ["غلاف كامل العرض خلف العنوان", "Full-width cover behind the title"] },
+  { key: "minimal", label: ["بسيط", "Minimal"], hint: ["عمود قراءة واحد هادئ", "One calm reading column"] },
+];
+
 export type EditablePost = PostInput & { id: string; updated_at: string; translation_status: L };
 type Tax = { id: string; slug: string; name: L };
 
@@ -74,7 +81,9 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
   const [p, setP] = useState<EditablePost>(() => ({ ...initial, seo: initial.seo ?? {}, faqs: initial.faqs ?? {}, body: initial.body ?? {}, tag_ids: initial.tag_ids ?? [] }));
   const [saved, setSaved] = useState(JSON.stringify(initial));
   const [savedAt, setSavedAt] = useState<string>(initial.updated_at);
-  const [tab, setTab] = useState<"publish" | "seo" | "settings" | "faq">("seo");
+  const [tab, setTab] = useState<"publish" | "seo" | "settings" | "faq" | "history">("seo");
+  const [autoAt, setAutoAt] = useState<string | null>(null);
+  const [versions, setVersions] = useState<PostVersion[] | null>(null);
   const [mode, setMode] = useState<"draft" | "now" | "schedule">(initial.status === "draft" ? "draft" : initial.publish_at && new Date(initial.publish_at) > new Date() ? "schedule" : "now");
   const [when, setWhen] = useState(toLocalInput(initial.publish_at));
   const [slugTouched, setSlugTouched] = useState<L<boolean>>(() => Object.fromEntries(Object.entries(initial.slug ?? {}).map(([k, v]) => [k, Boolean(v)])));
@@ -111,8 +120,32 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
     return () => window.removeEventListener("beforeunload", w);
   }, [dirty]);
 
-  const set = useCallback(<K extends keyof EditablePost>(k: K, v: EditablePost[K]) => setP((x) => ({ ...x, [k]: v })), []);
-  const setL = useCallback(<K extends "title" | "excerpt" | "slug" | "cover_alt">(k: K, v: string) => setP((x) => ({ ...x, [k]: { ...(x[k] as L), [lang]: v } })), [lang]);
+  /* Drafts save to the server by themselves after 12 s without typing (published posts never autosave:
+     changes to a live post only go out when you press Update). */
+  useEffect(() => {
+    if (!dirty || !editable || mode !== "draft" || p.status !== "draft") return;
+    const h = setTimeout(async () => {
+      const snapshot = JSON.stringify(p);
+      const r = await savePost(p.id, { ...p, status: "draft" }, { autosave: true });
+      if (r.ok) {
+        setSaved(snapshot);
+        const now = new Date().toISOString();
+        setSavedAt(now);
+        setAutoAt(now);
+        try { localStorage.removeItem(storeKey); } catch {}
+      }
+    }, 12000);
+    return () => clearTimeout(h);
+  }, [p, dirty, editable, mode, storeKey]);
+
+  /* Revision history loads when its tab opens. */
+  useEffect(() => {
+    if (tab !== "history" || versions) return;
+    void listPostVersions(p.id).then((r) => setVersions(r.ok ? (r.data as { versions: PostVersion[] }).versions : []));
+  }, [tab, versions, p.id]);
+
+  const set = useCallback(<K extends keyof EditablePost>(k: K, v: EditablePost[K]) => setP((x) => ({ ...x, [k]: v })), [setP]);
+  const setL = useCallback(<K extends "title" | "excerpt" | "slug" | "cover_alt">(k: K, v: string) => setP((x) => ({ ...x, [k]: { ...(x[k] as L), [lang]: v } })), [lang, setP]);
   const seo = useMemo(() => p.seo?.[lang] ?? {}, [p.seo, lang]);
   const setSeo = (patch: Partial<typeof seo>) => setP((x) => ({ ...x, seo: { ...x.seo, [lang]: { ...(x.seo?.[lang] ?? {}), ...patch } } }));
 
@@ -129,6 +162,7 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
         description: seo.description ?? "",
         slug: p.slug?.[lang] ?? "",
         focus: seo.focus_keyword ?? "",
+        keywords: (seo.keywords ?? "").split(/[,،]/).map((x) => x.trim()).filter(Boolean),
         excerpt: p.excerpt?.[lang] ?? "",
         doc: p.body?.[lang] as RichDoc | undefined,
         cover: p.cover,
@@ -161,7 +195,7 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
         }
       });
     },
-    [editable, mode, when, p, show, t, storeKey, router],
+    [editable, mode, when, p, show, t, storeKey, router, setP],
   );
 
   /* Ctrl/Cmd+S saves */
@@ -262,9 +296,9 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
         {/* side panel */}
         <aside className="pe-side">
           <div className="pe-tabs" role="tablist">
-            {(["seo", "publish", "settings", "faq"] as const).map((k) => (
+            {(["seo", "publish", "settings", "faq", "history"] as const).map((k) => (
               <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={tab === k ? "is-on" : ""}>
-                {{ seo: "SEO", publish: t("النشر", "Publish"), settings: t("الإعدادات", "Settings"), faq: t("الأسئلة", "FAQ") }[k]}
+                {{ seo: "SEO", publish: t("النشر", "Publish"), settings: t("الإعدادات", "Settings"), faq: t("الأسئلة", "FAQ"), history: t("السجل", "History") }[k]}
                 {k === "seo" && <span className="pe-score" style={{ background: a.seo >= 75 ? "#0f7a4a" : a.seo >= 50 ? "#e08a00" : "#b42318" }}>{a.seo}</span>}
               </button>
             ))}
@@ -280,6 +314,10 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
                 <span className="text-xs font-semibold text-ink">🎯 {t("الكلمة المفتاحية الرئيسية", "Focus keyphrase")}</span>
                 <input className="ed-input" value={seo.focus_keyword ?? ""} onChange={(e) => setSeo({ focus_keyword: e.target.value })} placeholder={t("مثال: ضريبة المرتبات", "e.g. payroll tax")} />
                 {seo.focus_keyword && <span className="text-xs text-muted">{t("تكرارها في النص", "Used in the text")}: <b className="tnum">{a.stats.occurrences}</b> · {t("الكثافة", "density")} <b className="tnum">{a.stats.density.toFixed(1)}%</b></span>}
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-xs font-semibold text-ink">{t("كلمات مفتاحية ثانوية (اختياري)", "Secondary keyphrases (optional)")}</span>
+                <input className="ed-input" value={seo.keywords ?? ""} onChange={(e) => setSeo({ keywords: e.target.value })} placeholder={t("مرادفات أو صيغ أخرى، مفصولة بفواصل", "Synonyms or related phrases, comma-separated")} />
               </label>
               <label className="grid gap-1">
                 <span className="flex justify-between text-xs"><b className="text-ink">{t("عنوان SEO", "SEO title")}</b><span className="tnum text-muted">{seoTitle.length} / 60 · {serpWidth(seoTitle)}px</span></span>
@@ -312,8 +350,8 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
               <div>
                 <span className="mb-2 block text-xs font-semibold text-ink">{t("معاينة المشاركة (واتساب · لينكدإن · فيسبوك)", "Share preview (WhatsApp · LinkedIn · Facebook)")}</span>
                 <div className="og-card" dir={L.dir}>
-                  <div className="og-img">{p.cover || seo.og_image ? <img src={seo.og_image || p.cover!} alt="" /> : <img src={`/og/${lang === "ar" ? "ar" : "en"}.png`} alt="" />}</div>
-                  <div className="og-meta"><small dir="ltr">{siteHost || "sco-eg.com"}</small><b>{seoTitle || t("عنوان المقال", "Post title")}</b><span>{desc}</span></div>
+                  <div className="og-img">{p.cover || seo.og_image ? <img src={seo.og_image || p.cover!} alt="" /> : <img src={`/og/${lang === "ar" ? "ar" : "en"}.jpg`} alt="" />}</div>
+                  <div className="og-meta"><small dir="ltr">{siteHost || "sco-eg.com"}</small><b>{seo.og_title || seoTitle || t("عنوان المقال", "Post title")}</b><span>{seo.og_description || desc}</span></div>
                 </div>
               </div>
 
@@ -331,6 +369,8 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
               <details className="rounded-xl border border-rule p-3">
                 <summary className="cursor-pointer text-xs font-semibold text-ink">{t("إعدادات متقدمة", "Advanced")}</summary>
                 <div className="mt-3 grid gap-3 text-sm">
+                  <label className="grid gap-1"><span className="text-xs text-muted">{t("عنوان المشاركة على الشبكات (اختياري)", "Social share title (optional)")}</span><input className="ed-input" value={seo.og_title ?? ""} onChange={(e) => setSeo({ og_title: e.target.value })} placeholder={seoTitle} maxLength={90} /></label>
+                  <label className="grid gap-1"><span className="text-xs text-muted">{t("وصف المشاركة على الشبكات (اختياري)", "Social share description (optional)")}</span><textarea className="ed-input min-h-16" value={seo.og_description ?? ""} onChange={(e) => setSeo({ og_description: e.target.value })} placeholder={desc} maxLength={200} /></label>
                   <label className="grid gap-1"><span className="text-xs text-muted">{t("صورة المشاركة (إن اختلفت عن الغلاف)", "Share image (if different from the cover)")}</span><ImageInput value={seo.og_image ?? null} onChange={(v) => setSeo({ og_image: v ?? undefined })} /></label>
                   <label className="grid gap-1"><span className="text-xs text-muted">{t("رابط أساسي Canonical (اتركه فارغًا عادةً)", "Canonical URL (usually leave empty)")}</span><input dir="ltr" className="ed-input" value={seo.canonical ?? ""} onChange={(e) => setSeo({ canonical: e.target.value })} placeholder="https://" /></label>
                   <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="size-4 accent-[var(--blue)]" checked={Boolean(seo.noindex)} onChange={(e) => setSeo({ noindex: e.target.checked })} />{t("إخفاء من محركات البحث (noindex)", "Hide from search engines (noindex)")}</label>
@@ -396,6 +436,18 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
           {tab === "settings" && (
             <div className="grid gap-4 text-sm" lang={lang} dir={L.dir}>
               <div className="grid gap-1.5">
+                <span className="text-xs font-semibold text-ink">{t("قالب عرض المقال", "Article layout")}</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {LAYOUTS.map((lo) => (
+                    <button key={lo.key} type="button" aria-pressed={(p.layout ?? "classic") === lo.key} onClick={() => set("layout", lo.key)} className={`grid gap-1.5 rounded-xl border-2 p-2 text-start ${(p.layout ?? "classic") === lo.key ? "border-blue bg-blue-wash" : "border-rule hover:border-rule-strong"}`}>
+                      <span className="pe-layout" data-l={lo.key} aria-hidden="true"><i /><i /><i /></span>
+                      <b className="text-xs text-ink">{t(...lo.label)}</b>
+                      <span className="text-[0.68rem] leading-snug text-muted">{t(...lo.hint)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid gap-1.5">
                 <span className="text-xs font-semibold text-ink">{t("صورة الغلاف", "Cover image")}</span>
                 <ImageInput value={p.cover} onChange={(v) => set("cover", v)} />
                 <input className="ed-input" value={p.cover_alt?.[lang] ?? ""} onChange={(e) => setL("cover_alt", e.target.value)} placeholder={t("وصف الصورة (نص بديل)", "Describe the image (alt text)")} />
@@ -430,6 +482,41 @@ export function PostEditor({ initial, cats, tags, authors, otherFocus, siteHost,
                 </select>
               </label>
               <Link href="/admin/taxonomy" className="text-xs text-blue hover:underline">{t("إدارة التصنيفات والوسوم والكُتّاب ←", "Manage categories, tags and authors →")}</Link>
+            </div>
+          )}
+
+          {tab === "history" && (
+            <div className="grid gap-3 text-sm">
+              <p className="text-xs text-muted">{t("تُحفظ نسخة من المحتوى السابق عند كل حفظ يغيّره (آخر 20 نسخة). الاستعادة تضع النسخة في المحرر فقط؛ راجعها ثم احفظ.", "The previous content is kept each time a save changes it (last 20). Restoring puts that version in the editor only — review it, then save.")}</p>
+              {autoAt && <p className="text-xs text-[#0f7a4a]">✓ {t("حُفظت المسودة تلقائيًا", "Draft autosaved")} · {time(autoAt)}</p>}
+              {versions === null && <p className="text-xs text-muted">{t("جارٍ التحميل…", "Loading…")}</p>}
+              {versions?.length === 0 && <p className="rounded-xl border border-dashed border-rule p-4 text-center text-xs text-muted">{t("لا توجد نسخ سابقة بعد.", "No earlier versions yet.")}</p>}
+              <ul className="grid gap-2">
+                {versions?.map((v) => {
+                  const snap = v.snapshot as Partial<EditablePost>;
+                  const title = (snap.title as L | undefined)?.[lang] || (snap.title as L | undefined)?.[def] || t("بدون عنوان", "Untitled");
+                  return (
+                    <li key={v.id} className="flex items-center gap-3 rounded-xl border border-rule p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-ink">{title}</p>
+                        <p className="text-xs text-muted">{time(v.created_at)}{v.author ? ` · ${v.author}` : ""}</p>
+                      </div>
+                      {editable && (
+                        <button
+                          type="button"
+                          className="btn btn-ghost !min-h-8 !px-3 text-xs"
+                          onClick={() => {
+                            if (!confirm(t("وضع هذه النسخة في المحرر؟ لن يتغير الموقع حتى تحفظ.", "Put this version in the editor? Nothing changes on the site until you save."))) return;
+                            setP((x) => ({ ...x, ...(snap as Partial<EditablePost>), id: x.id, status: x.status, publish_at: x.publish_at, updated_at: x.updated_at }));
+                          }}
+                        >
+                          {t("استعادة", "Restore")}
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           )}
 

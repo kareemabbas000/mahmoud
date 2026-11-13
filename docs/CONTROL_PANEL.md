@@ -16,6 +16,7 @@ The panel lives at **`/admin`** and is fully bilingual (Arabic RTL / English). E
 | `META_CAPI_ACCESS_TOKEN` | Meta Conversions API (optional) | only if enabled in Analytics & tracking |
 | `CRON_SECRET` | protects the daily `/api/keepalive` cron (optional) | any long random string |
 | `VERCEL_DEPLOY_HOOK_URL` | auto-redeploy after saving redirects, adding a language or changing the default language (optional) | Vercel → Settings → Git → Deploy Hooks; comma-separate one per project |
+| `SITE_INDEXING` | set to `off` on every Vercel project that is **not** the public site (e.g. `sco-test`) | stops search engines indexing the copy as duplicate content |
 | `REVALIDATE_SECRET` | `/api/revalidate` (optional) | if unset, the secret stored in the database is used |
 
 Cost, speed and security rules for every future change are in [`GUARDRAILS.md`](GUARDRAILS.md).
@@ -47,6 +48,14 @@ Roles are enforced twice: in the panel and inside the database (row-level securi
   - **New page** creates a custom page from a starter (blank, content page, service landing page) or from a saved template.
   - **Display options** (every section): show it on all devices, desktop only or mobile only, and give it an anchor (e.g. `pricing`) so menus and buttons can link to `#pricing`.
 - **Insights (blog)**:
+  - **Blocks** (press **/** or the + button):
+    - paragraph, H2–H4, lists, checklist, quote, **pull quote with source**, four callouts plus a **Key takeaways** box, collapsible section, code, divider, table;
+    - image, **image gallery** (2–4 columns, lightbox), **file download** (PDF or form), **highlighted figure** (big number + source), YouTube/Vimeo video or **Google map**, call-to-action button.
+    - Click an embedded block to **Edit** or delete it; galleries can take more images.
+  - **Article layout** (Settings tab): Classic (side contents), Feature (full-width cover behind the title) or Minimal (one calm column).
+  - **History** tab: the last 20 versions, each restorable into the editor. **Drafts save themselves** after 12 seconds without typing.
+  - **SEO extras**: secondary keyphrases, and a social share title and description.
+  - **On the site**: reading progress bar, contents that fold on phones, share row (native share on phones, LinkedIn, X, Facebook, WhatsApp, email, copy link), author box, related posts, and category pages at `/insights/category/<slug>`.
   - **Editor**:
     - Headings H2–H4, bold, italic, underline, strikethrough, superscript, subscript, inline code.
     - Text colour, highlight colours, alignment.

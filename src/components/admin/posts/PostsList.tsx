@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { createPost, deletePost, duplicatePost, setPostStatus } from "@/app/actions/posts";
 import { canEdit, useAdmin, useResult } from "../AdminContext";
+import { isVariantSet, variantUrl } from "@/lib/media";
 
 export type PostRow = {
   id: string;
@@ -90,7 +91,7 @@ export function PostsList({ rows, cats }: { rows: PostRow[]; cats: { id: string;
             return (
               <li key={p.id} className="flex flex-wrap items-center gap-4 border-b border-rule px-4 py-3 last:border-b-0 hover:bg-paper-2/60">
                 <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-paper-2">
-                  {p.cover ? <img src={p.cover} alt="" className="size-full object-cover" /> : <span className="text-xs text-faint">—</span>}
+                  {p.cover ? <img src={isVariantSet(p.cover) ? variantUrl(p.cover, 480) : p.cover} alt="" loading="lazy" className="size-full object-cover" /> : <span className="text-xs text-faint">—</span>}
                 </span>
                 <Link href={`/admin/posts/${p.id}`} className="min-w-0 flex-1 basis-[13rem]">
                   <span className="block truncate font-semibold text-ink hover:text-blue">{title(p)}</span>

@@ -16,6 +16,8 @@ import { getBranches, getLanguages, getTracking } from "@/lib/data";
 import { getSite } from "@/lib/site";
 import { href } from "@/lib/i18n";
 import { env } from "@/lib/env";
+import { indexingAllowed } from "@/lib/indexing";
+import { DEFAULT_THEME, isTheme } from "@/lib/themes";
 import { organizationLd, websiteLd } from "@/lib/seo";
 
 /**
@@ -66,6 +68,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       other: seo.verification.bing ? { "msvalidate.01": seo.verification.bing } : undefined,
     },
     alternates: { types: { "application/rss+xml": `/${locale}/insights/rss.xml` } },
+    // Test/preview deployments ask search engines to stay away (SITE_INDEXING=off), so they never compete with the real site.
+    ...(indexingAllowed() ? {} : { robots: { index: false, follow: false } }),
   };
 }
 
@@ -76,6 +80,7 @@ export default async function SiteLayout({ children, params }: { children: React
   const primary = branches.find((b) => b.is_primary) ?? branches[0] ?? null;
   const { t } = site;
   const theme = site.settings.theme;
+  const supabaseOrigin = env.supabaseUrl ? new URL(env.supabaseUrl).origin : null;
   const brandCss = brandColors(theme.custom_colors);
 
   return (
@@ -85,12 +90,13 @@ export default async function SiteLayout({ children, params }: { children: React
       className={`site ${fontVars}`}
       suppressHydrationWarning
       data-numerals={site.numerals}
-      data-preset={theme.preset ?? "ledger"}
+      data-preset={isTheme(theme.preset) ? theme.preset : DEFAULT_THEME}
       data-motion={theme.motion ?? "full"}
       data-smooth={theme.smooth_scroll === false ? "0" : "1"}
       data-brand={brandCss ? "custom" : undefined}
     >
       <head>
+        {supabaseOrigin && <link rel="preconnect" href={supabaseOrigin} crossOrigin="" />}
         <ThemeScript defaultMode={theme.default_mode} preset={theme.preset} motion={theme.motion} intro={theme.intro !== false} />
         {brandCss && <style dangerouslySetInnerHTML={{ __html: brandCss }} />}
         <ConsentDefaults />

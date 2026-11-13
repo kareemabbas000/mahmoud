@@ -42,7 +42,8 @@ export type PostInput = {
   category_id: string | null;
   tag_ids: string[];
   author_id: string | null;
-  seo: L<{ title?: string; description?: string; focus_keyword?: string; og_image?: string; noindex?: boolean; canonical?: string }>;
+  seo: L<{ title?: string; description?: string; focus_keyword?: string; keywords?: string; og_title?: string; og_description?: string; og_image?: string; noindex?: boolean; canonical?: string }>;
+  layout?: "classic" | "feature" | "minimal";
   faqs: L<{ q: string; a: string }[]>;
 };
 
@@ -67,7 +68,14 @@ export async function createPost(): Promise<Result<{ id: string }>> {
   });
 }
 
-export async function savePost(id: string, input: PostInput): Promise<Result<{ status: string; publish_at: string | null }>> {
+/** Content kept in a revision snapshot. */
+const SNAP = "title,excerpt,body,seo,faqs,cover,cover_alt,slug,layout,category_id,tag_ids,author_id";
+
+/**
+ * Save a post. `autosave` (drafts only, from the editor's idle timer) skips the revision snapshot so the
+ * 20-revision history holds meaningful versions, not every pause in typing.
+ */
+export async function savePost(id: string, input: PostInput, opts: { autosave?: boolean } = {}): Promise<Result<{ status: string; publish_at: string | null }>> {
   return run("editor", async ({ sb }) => {
     const slug = Object.fromEntries(Object.entries(onlyLocales<string>(input.slug)).map(([k, v]) => [k, String(v ?? "").trim().toLowerCase()]).filter(([, v]) => v));
     for (const [k, v] of Object.entries(slug)) if (!SLUG.test(String(v))) return { ok: false, error: "validation", detail: `slug (${k}): letters, numbers and single hyphens only` };
@@ -88,7 +96,9 @@ export async function savePost(id: string, input: PostInput): Promise<Result<{ s
       const { data: clash } = await sb.from("posts").select("id").neq("id", id).eq(`slug->>${k}`, v).limit(1);
       if (clash?.length) return { ok: false, error: "validation", detail: `slug (${k}) “${v}” is already used by another post` };
     }
-    const before = await oldSlugs(sb, id);
+    const { data: prev } = await sb.from("posts").select(`${SNAP},status`).eq("id", id).maybeSingle();
+    const before = ((prev as { slug?: Record<string, string> } | null)?.slug ?? {}) as Record<string, string>;
+    if (opts.autosave && status !== "draft") return { ok: false, error: "validation", detail: "autosave is for drafts only" };
     const body = onlyLocales<unknown>(input.body);
     const translation_status = Object.fromEntries(
       Object.keys({ ...title, ...body }).map((k) => {
@@ -111,15 +121,24 @@ export async function savePost(id: string, input: PostInput): Promise<Result<{ s
       seo: onlyLocales(input.seo),
       faqs: Object.fromEntries(Object.entries(onlyLocales<{ q: string; a: string }[]>(input.faqs)).map(([k, v]) => [k, (v ?? []).filter((f) => f.q?.trim() && f.a?.trim())])),
       translation_status,
+      layout: ["classic", "feature", "minimal"].includes(String(input.layout)) ? input.layout : "classic",
       // Stored so lists, cards and feeds never need to load post bodies.
       read_minutes: Object.fromEntries(Object.entries(body).map(([k, doc]) => [k, minutesFor(doc)])),
       // Related posts are picked at save time, so a post page never depends on the whole post list.
       related_ids: await pickRelated(sb, id, input.category_id || null, (input.tag_ids ?? []).filter((x) => /^[0-9a-f-]{36}$/.test(x))),
     };
+    // Revision: keep the previous content when this save changes it.
+    if (!opts.autosave && prev) {
+      const p = prev as Record<string, unknown>;
+      const changed = ["title", "excerpt", "body", "seo", "faqs", "cover", "slug", "layout"].some((k) => JSON.stringify(p[k] ?? null) !== JSON.stringify((row as Record<string, unknown>)[k] ?? null));
+      const hasContent = Object.values((p.title ?? {}) as Record<string, string>).some(Boolean) || JSON.stringify(p.body ?? {}).length > 40;
+      if (changed && hasContent) await sb.from("post_versions").insert({ post_id: id, snapshot: p });
+    }
     const { data, error } = await sb.from("posts").update(row).eq("id", id).select("id,status,publish_at");
     if (error) return { ok: false, error: error.code === "42501" ? "forbidden" : "validation", detail: error.message };
     if (!data?.length) return { ok: false, error: "blocked" };
-    bust(id, before, slug);
+    // Drafts aren't public: nothing on the site changes, so no cache needs refreshing.
+    if (status !== "draft" || (prev as { status?: string } | null)?.status !== "draft") bust(id, before, slug);
     return { ok: true, data: { status: data[0]!.status as string, publish_at: data[0]!.publish_at as string | null } };
   });
 }
@@ -159,5 +178,20 @@ export async function deletePost(id: string): Promise<Result> {
     if (!data?.length) return { ok: false, error: "blocked" };
     bust(id, before);
     return { ok: true };
+  });
+}
+
+
+export type PostVersion = { id: string; created_at: string; created_by: string | null; author: string | null; snapshot: Record<string, unknown> };
+
+/** Revision history of a post, newest first (max 20). */
+export async function listPostVersions(id: string): Promise<Result<{ versions: PostVersion[] }>> {
+  return run("viewer", async ({ sb }) => {
+    const { data, error } = await sb.from("post_versions").select("id,created_at,created_by,snapshot").eq("post_id", id).order("created_at", { ascending: false }).limit(20);
+    if (error) return { ok: false, error: "generic", detail: error.message };
+    const ids = [...new Set((data ?? []).map((v) => v.created_by).filter(Boolean))] as string[];
+    const { data: people } = ids.length ? await sb.from("profiles").select("id,full_name,email").in("id", ids) : { data: [] };
+    const name = (uid: string | null) => (people ?? []).find((x) => x.id === uid) as { full_name?: string; email?: string } | undefined;
+    return { ok: true, data: { versions: (data ?? []).map((v) => ({ ...(v as Omit<PostVersion, "author">), author: name(v.created_by)?.full_name || name(v.created_by)?.email || null })) } };
   });
 }
