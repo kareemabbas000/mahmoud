@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { after } from "next/server";
-import { serviceClient } from "@/lib/supabase/clients";
+import { publicClient, serviceClient } from "@/lib/supabase/clients";
 import { clientMeta, rateLimit, token } from "@/lib/server/security";
 import { esc, mailLayout, sendMail } from "@/lib/server/mail";
 import { metaEvent } from "@/lib/server/capi";
@@ -58,32 +58,46 @@ export async function submitEnquiry(_prev: FormState, fd: FormData): Promise<For
   const meta = await clientMeta();
   if (!(await rateLimit(`enquiry:${meta.ipHash}`, 5, 600))) return { ok: false, error: "rate", values: echo(fd) };
 
+  // Preferred path: the service key (set on the Vercel project). If it's missing, fall back to the narrow
+  // public.submit_enquiry() function with the public key, so the form never silently stops working.
+  let rowId: string | null = null;
   const sb = serviceClient();
-  if (!sb) {
-    console.error("[enquiry] SUPABASE_SERVICE_ROLE_KEY not set — cannot store enquiry");
-    return { ok: false, error: "generic", values: echo(fd) };
+  if (sb) {
+    const { data: row, error } = await sb
+      .from("enquiries")
+      .insert({
+        kind: d.kind,
+        name: d.name,
+        phone: d.phone,
+        email: d.email || null,
+        company: d.company || null,
+        service: d.service || null,
+        message: d.message,
+        locale: d.locale,
+        source_url: d.page || meta.referer,
+        ip_hash: meta.ipHash,
+        user_agent: meta.ua,
+      })
+      .select("id")
+      .single();
+    if (error) console.error("[enquiry] insert failed", error.message);
+    rowId = (row?.id as string | undefined) ?? null;
+  } else {
+    const pub = publicClient();
+    if (pub) {
+      const { data, error } = await pub.rpc("submit_enquiry", {
+        p_kind: d.kind, p_name: d.name, p_phone: d.phone, p_email: d.email || "", p_company: d.company || "", p_service: d.service || "",
+        p_message: d.message, p_locale: d.locale, p_source: d.page || meta.referer, p_ip_hash: meta.ipHash, p_ua: meta.ua,
+      });
+      if (error) {
+        console.error("[enquiry] submit_enquiry failed", error.message);
+        if (/rate limited/.test(error.message)) return { ok: false, error: "rate", values: echo(fd) };
+      }
+      rowId = (data as string | null) ?? null;
+    } else console.error("[enquiry] Supabase is not configured — cannot store enquiry");
   }
-  const { data: row, error } = await sb
-    .from("enquiries")
-    .insert({
-      kind: d.kind,
-      name: d.name,
-      phone: d.phone,
-      email: d.email || null,
-      company: d.company || null,
-      service: d.service || null,
-      message: d.message,
-      locale: d.locale,
-      source_url: d.page || meta.referer,
-      ip_hash: meta.ipHash,
-      user_agent: meta.ua,
-    })
-    .select("id")
-    .single();
-  if (error || !row) {
-    console.error("[enquiry] insert failed", error?.message);
-    return { ok: false, error: "generic", values: echo(fd) };
-  }
+  if (!rowId) return { ok: false, error: "generic", values: echo(fd) };
+  const row = { id: rowId };
 
   const eventId = d.event_id || row.id;
   after(async () => {

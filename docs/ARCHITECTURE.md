@@ -94,7 +94,7 @@ docs/                           this folder
 
 **Visitor submits the contact form.**
 1. `submitEnquiry` (server action) runs the honeypot and minimum-fill-time checks, then Zod validation, then a per-IP rate limit (DB-backed).
-2. It inserts into `enquiries` with the **service key**.
+2. It inserts into `enquiries` with the **service key**. If the key isn't configured on that Vercel project, it falls back to `public.submit_enquiry()` with the public key: a validated, insert-only function rate-limited per visitor (5 per 10 min) and site-wide (60 per hour). The form never silently stops working.
 3. After the response is sent, it emails `settings.contact.notify_email` (Resend) and sends the Meta CAPI event if enabled.
 4. Staff see the enquiry in **Inbox → Enquiries** (new-count badge), with statuses, replies and CSV export.
 
